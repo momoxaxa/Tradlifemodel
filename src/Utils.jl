@@ -15,17 +15,6 @@ function if_months(iss_date::Date, valn_date::Date=valn_date)
     return (year(valn_date) - year(iss_date)) * 12 + month(valn_date) - month(iss_date) + 1
 end
 
-# Load assumptions into Dictionary of DataFrames
-function get_excel_sheet(input_file_path::String, prod_code::String)::Dict{String, DataFrame}
-    excel_data = Dict()
-    xf = XLSX.readxlsx("$(input_file_path)input_$(prod_code).xlsx")
-    for sheet in XLSX.sheetnames(xf)
-        excel_data[sheet] = DataFrame(XLSX.readtable("$(input_file_path)input_$(prod_code).xlsx", sheet))
-    end
-    
-    return excel_data
-end
-
 # Read assumptions from Excel - Indicators
 function read_excel_ind(exceldata::DataFrame, datatype::String, excelheader::String="Value")   
     exceldata[exceldata.Type .== datatype, excelheader][1]

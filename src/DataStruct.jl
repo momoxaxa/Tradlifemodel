@@ -35,16 +35,16 @@ struct ModelPoint
     end
 end
 
-# Define struct for assumptions set
+# Define struct for Input Fields and Product Features and Assumptions Sets ##
 
-mutable struct Assumption
-    mult::Float64
+mutable struct InputFields
+    mult::Union{Float64, Missing}
     table::Union{String, Missing}
     table_column::Union{String, Missing}
     PAD::Union{Float64, Missing}
 
-    function Assumption(
-        mult::Float64, 
+    function InputFields(
+        mult::Union{Float64, Missing},
         table::Union{String, Missing},
         table_column::Union{String, Missing}, 
         PAD::Union{Float64, Missing}
@@ -54,34 +54,82 @@ mutable struct Assumption
     end
 end
 
-mutable struct AssumptionSet
-    mortality::Assumption
-    lapse::Assumption
-    expense::Assumption
-    disc_rate::Assumption
-    invt_return::Assumption
-    prem_tax::Assumption
-    tax::Assumption
-    projtype::String
+mutable struct ProductFeatureSet
+    death_ben::InputFields
+    surr_ben::InputFields
+    commission::InputFields
 
-    function AssumptionSet(df::DataFrame, projtype::String)
-        df_asmp = filter("Projection Type" => x -> x == projtype, df)
-        assumptions = Dict(
-            "mortality" => Assumption(1.0, "", "", 0.0),
-            "lapse" => Assumption(1.0, "", "", 0.0),
-            "expense" => Assumption(1.0, "", "", 0.0),
-            "disc_rate" => Assumption(1.0, "", "", 0.0),
-            "invt_return" => Assumption(1.0, "", "", 0.0),
-            "prem_tax" => Assumption(1.0, "", "", 0.0),
-            "tax" => Assumption(1.0, "", "", 0.0)
+    function ProductFeatureSet(df::DataFrame, projtype::String, prodcode::String)
+        df_prodfeatures = filter("Projection Type" => x -> x == projtype, df)[:, Cols(Between("Projection Type", "Data Type"), Symbol(prodcode))]
+
+        prodfeatures = Dict(
+            "death_ben" => InputFields(1.0, "", "", 0.0),
+            "surr_ben" => InputFields(1.0, "", "", 0.0),
+            "commission" => InputFields(1.0, "", "", 0.0)
         )
 
-        for row in eachrow(df_asmp)
-            variable = row."Projection Variable"
-            assumption = Assumption(row.Mult, row.Table, row."Table Column", row.PAD)
-            assumptions[variable] = assumption
+        fields_default = Dict(
+            "Mult" => 1.0,
+            "Table" => "",
+            "Table Column" => "",
+            "PAD" => 0.0
+        )
+        
+        for prodfeature in collect(unique(df_prodfeatures[:,"Projection Variable"]))
+            df_prodfeatures_2 = filter("Projection Variable" => x -> x == prodfeature, df_prodfeatures)
+            fields = copy(fields_default)
+            for field in collect(df_prodfeatures_2[:,"Data Type"])
+                fields[field] = filter(row -> row."Data Type" == field, df_prodfeatures_2)[1,4] ##
+            end
+            prodfeatures[prodfeature] = InputFields(fields["Mult"], fields["Table"], fields["Table Column"], fields["PAD"])
         end
 
+        new(
+            prodfeatures["death_ben"],
+            prodfeatures["surr_ben"],
+            prodfeatures["commission"]
+        )
+    end
+end
+
+mutable struct AssumptionSet
+    mortality::InputFields
+    lapse::InputFields
+    expense::InputFields
+    disc_rate::InputFields
+    invt_return::InputFields
+    prem_tax::InputFields
+    tax::InputFields
+    projtype::String
+
+    function AssumptionSet(df::DataFrame, projtype::String, prodcode::String)
+        df_asmp = filter("Projection Type" => x -> x == projtype, df)[:, Cols(Between("Projection Type", "Data Type"), Symbol(prodcode))]
+        assumptions = Dict(
+            "mortality" => InputFields(1.0, "", "", 0.0),
+            "lapse" => InputFields(1.0, "", "", 0.0),
+            "expense" => InputFields(1.0, "", "", 0.0),
+            "disc_rate" => InputFields(1.0, "", "", 0.0),
+            "invt_return" => InputFields(1.0, "", "", 0.0),
+            "prem_tax" => InputFields(1.0, "", "", 0.0),
+            "tax" => InputFields(1.0, "", "", 0.0)
+        )
+
+        fields_default = Dict(
+            "Mult" => 1.0,
+            "Table" => "",
+            "Table Column" => "",
+            "PAD" => 0.0
+        )
+
+        for assumption in collect(unique(df_asmp[:,"Projection Variable"]))
+            df_asmp_2 = filter("Projection Variable" => x -> x == assumption, df_asmp)
+            fields = copy(fields_default)
+            for field in collect(df_asmp_2[:,"Data Type"])
+                fields[field] = filter(row -> row."Data Type" == field, df_asmp_2)[1,4] ##
+            end
+            assumptions[assumption] = InputFields(fields["Mult"], fields["Table"], fields["Table Column"], fields["PAD"])
+        end
+        
         new(
             assumptions["mortality"],
             assumptions["lapse"],

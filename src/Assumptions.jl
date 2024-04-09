@@ -1,18 +1,18 @@
 """
 
-read_mortality!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_lapse!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_expense!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_disc_rate!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_invt_return!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_other_assumptions!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet)
+read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
+read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
+read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
+read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
+read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
+read_other_assumptions!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet)
 
 """
 
 # Read mortality assumptions
 
-function read_mortality!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
-    df = assumption_dict["mortality"]
+function read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
+    df = input_tables_dict[curr_asmpset.mortality.table]
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjMort
@@ -39,8 +39,8 @@ end
 
 # Read lapse assumptions
 
-function read_lapse!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
-    df = assumption_dict["lapse"]
+function read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
+    df = input_tables_dict[curr_asmpset.lapse.table]
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjLapse
@@ -68,19 +68,12 @@ end
 
 # Read expense assumptions
 
-function read_expense!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-
-    assumption_mapping = Dict(
-        "acq_exp_per_pol" => "expense",
-        "acq_exp_perc_prem" => "expense",
-        "maint_exp_per_pol" => "expense",
-        "maint_exp_perc_prem" => "expense"
-    )
+function read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)
 
     assumptions_array = zeros(Float64, proj_len)
+    df = input_tables_dict[curr_asmpset.expense.table]
 
-    for assumption in keys(assumption_mapping)
-        df = assumption_dict[assumption_mapping[assumption]]
+    for assumption in ["acq_exp_per_pol", "acq_exp_perc_prem", "maint_exp_per_pol", "maint_exp_perc_prem"]    
 
         if curr_asmpset.projtype == "Base Projection"
             adj = runset.BaseProjExpense
@@ -111,8 +104,8 @@ end
 
 # Read discount rate assumptions
 
-function read_disc_rate!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
-    df = assumption_dict["disc_rate"]
+function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
+    df = input_tables_dict[curr_asmpset.disc_rate.table]
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjDiscRate
@@ -138,8 +131,8 @@ end
 
 # Read investment return assumptions
 
-function read_invt_return!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
-    df = assumption_dict["disc_rate"]
+function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
+    df = input_tables_dict[curr_asmpset.disc_rate.table]
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjInvtRet
@@ -154,27 +147,28 @@ function read_invt_return!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, 
     end
 end
 
-# Read other assumptions
+# Read premium tax assumptions
 
-function read_other_assumptions!(curr_asmpt::AssumptionsTable, assumption_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet)
-
-    assumption_mapping = Dict(
-        "prem_tax_rate" => "prem_tax",
-        "tax_rate" => "tax"
-    )
+function read_prem_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet)
     
+    assumption = curr_asmpset.prem_tax.table_column
     assumptions_array = zeros(Float64, proj_len)
+    df = input_tables_dict[curr_asmpset.prem_tax.table]
+    mult = curr_asmpset.prem_tax.mult
+    assumptions_array = read_excel_PY(df, assumption, pol_year, duration) * mult
+    setfield!(curr_asmpt, Symbol(assumption), assumptions_array)
 
-    for assumption in keys(assumption_mapping)
-        df = assumption_dict[assumption_mapping[assumption]]
-        
-        if assumption == "prem_tax_rate"
-            mult = curr_asmpset.prem_tax.mult
-        elseif assumption == "tax_rate"
-            mult = curr_asmpset.tax.mult
-        end
+end
 
-        assumptions_array = read_excel_PY(df, assumption, pol_year, duration) * mult
-        setfield!(curr_asmpt, Symbol(assumption), assumptions_array)
-    end
+# Read tax assumptions
+
+function read_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet)
+
+    assumption = curr_asmpset.tax.table_column
+    assumptions_array = zeros(Float64, proj_len)
+    df = input_tables_dict[curr_asmpset.tax.table]
+    mult = curr_asmpset.tax.mult
+    assumptions_array = read_excel_PY(df, assumption, pol_year, duration) * mult
+    setfield!(curr_asmpt, Symbol(assumption), assumptions_array)
+
 end

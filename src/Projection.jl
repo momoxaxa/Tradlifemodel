@@ -1,25 +1,25 @@
 """
-project_per_policy_with_product_features!(ppt::PerPolicyCFTable, assumption_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator)
+project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator, product_features_set)
 project_per_policy_with_assumptions!(ppt::PerPolicyCFTable, asmpt:: AssumptionsTable)
 project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, curr_dur)
 project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
 project_present_value_bef_resv_capreq!(pvcft::PVCFTable, disc_rate::Array, ift::InForceCFTable)
 project_present_value_outgo_net_income!(pvcft::PVCFTable)
 
-project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, excel_data::Dict, mp::ModelPoint, valn_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, valn_method::String="Gross Premium Valuation")
+project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, valn_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, valn_method::String="Gross Premium Valuation")
 
-project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, excel_data::Dict, mp::ModelPoint, capreq_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, capreq_method::String="Risk Based Capital")
+project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, capreq_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, capreq_method::String="Risk Based Capital")
 
 project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::AssumptionsTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
 project_present_value_inc_resv_capreq!(pvcft::PVCFTable, disc_rate::Array, ift::InForceCFTable)
 
-inner_proj(curr_asmpset::AssumptionSet, base_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, asmpt::AssumptionsTable, excel_data::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String)
+inner_proj(curr_asmpset::AssumptionSet, base_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String)
 
 run_product(prod_code::String)
 
 """
 
-function project_per_policy_with_product_features!(ppt::PerPolicyCFTable, assumption_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator)
+function project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator, product_features_set)
     
     # Premium Per Policy
 
@@ -31,15 +31,15 @@ function project_per_policy_with_product_features!(ppt::PerPolicyCFTable, assump
 
     # Death Benefit Per Policy
 
-    ppt.death_ben_pp = death_benefit(assumption_dict, mp.init_sum_assured, pol_year, duration)
+    ppt.death_ben_pp = death_benefit(input_tables_dict, mp.init_sum_assured, pol_year, duration, product_features_set)
 
     # Surrender Benefit Per Policy
 
-    ppt.surr_ben_pp = surr_benefit(assumption_dict, mp.init_sum_assured, pol_year, duration)
+    ppt.surr_ben_pp = surr_benefit(input_tables_dict, mp.init_sum_assured, pol_year, duration, product_features_set)
 
     # Commission Per Policy
 
-    ppt.comm_pp = comm_rate(assumption_dict, pol_year, duration) .* ppt.premium_pp
+    ppt.comm_pp = comm_rate(input_tables_dict, pol_year, duration, product_features_set) .* ppt.premium_pp
 
 end
 
@@ -116,7 +116,7 @@ function project_present_value_outgo_net_income!(pvcft::PVCFTable)
 
 end
 
-function project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, excel_data::Dict, mp::ModelPoint, valn_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, valn_method::String="Gross Premium Valuation")
+function project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, valn_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, valn_method::String="Gross Premium Valuation")
 
     # Calculate Reserve Per Policy
     if valn_method == "Gross Premium Valuation"
@@ -124,8 +124,8 @@ function project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTabl
         valn_asmpset_lapse_down = deepcopy(valn_asmpset)
         valn_asmpset_lapse_down.lapse.PAD = -1.0 * valn_asmpset.lapse.PAD
     
-        resv_pp_lapse_up = inner_proj(valn_asmpset_lapse_up, polt, ppt, excel_data, mp, s, prod_code, "valn_lapse_up", runset)
-        resv_pp_lapse_down = inner_proj(valn_asmpset_lapse_down, polt, ppt, excel_data, mp, s, prod_code, "valn_lapse_down", runset)
+        resv_pp_lapse_up = inner_proj(valn_asmpset_lapse_up, polt, ppt, input_tables_dict, mp, s, prod_code, "valn_lapse_up", runset)
+        resv_pp_lapse_down = inner_proj(valn_asmpset_lapse_down, polt, ppt, input_tables_dict, mp, s, prod_code, "valn_lapse_down", runset)
 
         ppt.resv_pp[1:mp.pol_proj_len] = max.(resv_pp_lapse_up[1:mp.pol_proj_len], resv_pp_lapse_down[1:mp.pol_proj_len])
 
@@ -133,7 +133,7 @@ function project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTabl
 
 end
 
-function project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, excel_data::Dict, mp::ModelPoint, capreq_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, capreq_method::String="Risk Based Capital")
+function project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, capreq_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, capreq_method::String="Risk Based Capital")
 
     # Calculate Capital Requirement Per Policy
 
@@ -142,8 +142,8 @@ function project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable
         capreq_asmpset_lapse_down = deepcopy(capreq_asmpset)
         capreq_asmpset_lapse_down.lapse.PAD = -1.0 * capreq_asmpset.lapse.PAD
 
-        capreq_pp_lapse_up = inner_proj(capreq_asmpset_lapse_up, polt, ppt, excel_data, mp, s, prod_code, "capreq_lapse_up", runset)
-        capreq_pp_lapse_down = inner_proj(capreq_asmpset_lapse_down, polt, ppt, excel_data, mp, s, prod_code, "capreq_lapse_down", runset)
+        capreq_pp_lapse_up = inner_proj(capreq_asmpset_lapse_up, polt, ppt, input_tables_dict, mp, s, prod_code, "capreq_lapse_up", runset)
+        capreq_pp_lapse_down = inner_proj(capreq_asmpset_lapse_down, polt, ppt, input_tables_dict, mp, s, prod_code, "capreq_lapse_down", runset)
 
         capreq_lapse_up = max.(capreq_pp_lapse_up .- ppt.resv_pp, 0)
         capreq_lapse_down = max.(capreq_pp_lapse_down .- ppt.resv_pp, 0)
@@ -209,7 +209,7 @@ function project_present_value_inc_resv_capreq!(pvcft::PVCFTable, ift::InForceCF
 
 end
 
-function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, excel_data::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String, runset::RunSet)
+function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String, runset::RunSet)
 
     curr_run = runset.RunNumber
     
@@ -219,13 +219,12 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
     ift_inner = InForceCFTable()
     pvcft_inner = PVCFTable()
 
-    read_mortality!(asmpt_inner, excel_data, mp.sex, polt.att_age, curr_asmpset, runset)
-    read_lapse!(asmpt_inner, excel_data, polt.pol_year, polt.duration, curr_asmpset, runset)
-    read_expense!(asmpt_inner, excel_data, polt.pol_year, polt.duration, curr_asmpset, runset)
-    read_disc_rate!(asmpt_inner, excel_data, polt.pol_year, polt.duration,curr_asmpset, runset)
-    read_invt_return!(asmpt_inner, excel_data, polt.pol_year, polt.duration, curr_asmpset, runset)
-    read_other_assumptions!(asmpt_inner, excel_data, polt.pol_year, polt.duration, curr_asmpset)
-
+    read_mortality!(asmpt_inner, input_tables_dict, mp.sex, polt.att_age, curr_asmpset, runset)
+    read_lapse!(asmpt_inner, input_tables_dict, polt.pol_year, polt.duration, curr_asmpset, runset)
+    read_expense!(asmpt_inner, input_tables_dict, polt.pol_year, polt.duration, curr_asmpset, runset)
+    read_disc_rate!(asmpt_inner, input_tables_dict, polt.pol_year, polt.duration,curr_asmpset, runset)
+    read_invt_return!(asmpt_inner, input_tables_dict, polt.pol_year, polt.duration, curr_asmpset, runset)
+    read_prem_tax!(asmpt_inner, input_tables_dict, polt.pol_year, polt.duration, curr_asmpset)
 
     project_per_policy_with_assumptions!(ppt_inner, asmpt_inner)
     project_survivalship!(svt_inner, asmpt_inner, mp.pol_term, mp.curr_dur)
@@ -245,15 +244,28 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
 end
 
 function run_product(prod_code::String, runset::RunSet)
+    
+    # Set current run number for print directory
+
     curr_run = runset.RunNumber
+    
+    # Read all model points for the product into DataFrame
+
     model_point_df = CSV.read("$(modelpoints_file_path)mp_$prod_code.csv", DataFrame,  dateformat="dd/mm/YYYY")
-    excel_data = get_excel_sheet(input_file_path, prod_code)
-    assumption_set_df = DataFrame(XLSX.readtable("$(input_file_path)input_$(prod_code).xlsx", "assumptions"))
-    base_asmpset = AssumptionSet(assumption_set_df, "Base Projection")
-    valn_asmpset = AssumptionSet(assumption_set_df, "Valuation")
-    capreq_asmpset = AssumptionSet(assumption_set_df, "Capital Requirement")
+    
+    # Read assumptions into assumption sets for Base Projection, Valuation and Capital Requiremnet Inner Projections
+    
+    product_features_set = ProductFeatureSet(assumption_set_df, "Product Feature", prod_code)
+    base_asmpset = AssumptionSet(assumption_set_df, "Base Projection", prod_code)
+    valn_asmpset = AssumptionSet(assumption_set_df, "Valuation", prod_code)
+    capreq_asmpset = AssumptionSet(assumption_set_df, "Capital Requirement", prod_code)
+    
+    # initialize for printing results
+
     firstmpresult = DataFrame()
     resultbyproduct = DataFrame()
+
+    # Display current product and size of the model points
     
     println("$(prod_code): $(size(model_point_df))")
 
@@ -277,16 +289,17 @@ function run_product(prod_code::String, runset::RunSet)
 
         # Read Assumptions for Base Projection into Assumption Table
 
-        read_mortality!(asmpt, excel_data, mp.sex, polt.att_age, base_asmpset, runset)
-        read_lapse!(asmpt, excel_data, polt.pol_year, polt.duration, base_asmpset, runset)
-        read_expense!(asmpt, excel_data, polt.pol_year, polt.duration, base_asmpset, runset)
-        read_disc_rate!(asmpt, excel_data, polt.pol_year, polt.duration, base_asmpset, runset)
-        read_invt_return!(asmpt, excel_data, polt.pol_year, polt.duration, base_asmpset, runset)
-        read_other_assumptions!(asmpt, excel_data, polt.pol_year, polt.duration, base_asmpset)
+        read_mortality!(asmpt, input_tables_dict, mp.sex, polt.att_age, base_asmpset, runset)
+        read_lapse!(asmpt, input_tables_dict, polt.pol_year, polt.duration, base_asmpset, runset)
+        read_expense!(asmpt, input_tables_dict, polt.pol_year, polt.duration, base_asmpset, runset)
+        read_disc_rate!(asmpt, input_tables_dict, polt.pol_year, polt.duration, base_asmpset, runset)
+        read_invt_return!(asmpt, input_tables_dict, polt.pol_year, polt.duration, base_asmpset, runset)
+        read_prem_tax!(asmpt, input_tables_dict, polt.pol_year, polt.duration, base_asmpset)
+        read_tax!(asmpt, input_tables_dict, polt.pol_year, polt.duration, base_asmpset)
              
         # Read Product Features into Per Policy Table
 
-        project_per_policy_with_product_features!(ppt, excel_data, mp, polt.pol_year, polt.duration, polt.modal_cf_indicator)
+        project_per_policy_with_product_features!(ppt, input_tables_dict, mp, polt.pol_year, polt.duration, polt.modal_cf_indicator, product_features_set)
         
         # Read Assumptions into Per Policy Table
 
@@ -310,11 +323,11 @@ function run_product(prod_code::String, runset::RunSet)
 
         # Run Projection for Reserve Per Policy using Valuation Assumptions Set
         
-        project_per_policy_reserve!(ppt, polt, excel_data, mp, valn_asmpset, s, prod_code, runset)
+        project_per_policy_reserve!(ppt, polt, input_tables_dict, mp, valn_asmpset, s, prod_code, runset)
         
         # Run Projection for Capital Requirement Per Policy using Capital Requiremnt Assumptions Set
 
-        project_per_policy_capreq!(ppt, polt, excel_data, mp, capreq_asmpset, s, prod_code, runset)
+        project_per_policy_capreq!(ppt, polt, input_tables_dict, mp, capreq_asmpset, s, prod_code, runset)
 
         # Project In force Cash Flow and calculate Present Value for increase in Reserves and Capital Requirements
 
