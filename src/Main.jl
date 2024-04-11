@@ -1,6 +1,10 @@
 using Distributed
+using XLSX
 
-addprocs(4)
+include("Settings.jl")
+
+# Multiprocessing
+addprocs(num_workers)
 
 @everywhere begin
     using CSV, DataFrames

@@ -1,8 +1,8 @@
 """
 
-death_benefit(input_tables_dict::Dict, init_sum_assured::Float64, pol_year::Array, duration::Array)
-surr_benefit(input_tables_dict::Dict, init_sum_assured::Float64, pol_year::Array, duration::Array)
-comm_rate(assumption_dict::Dict, pol_year::Array, duration::Array)
+death_benefit(input_tables_dict::Dict, init_sum_assured::Float64, pol_year::Array, duration::Array, product_features_set::ProductFeatureSet)
+surr_benefit(input_tables_dict::Dict, init_sum_assured::Float64, pol_year::Array, duration::Array, product_features_set::ProductFeatureSet)
+comm_rate(input_tables_dict::Dict, pol_year::Array, duration::Array, product_features_set::ProductFeatureSet)
 
 """
 

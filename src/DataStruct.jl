@@ -17,7 +17,7 @@ struct ModelPoint
     function ModelPoint(df::DataFrame, k::Integer)
         curr_dur = if_months(df[k, "Issue_Date"], valn_date) + 1
         curr_pol_yr = ceil(curr_dur/12)
-        pol_proj_len = df[k, "Pol_Term"] * 12 - curr_dur + 1 ##check
+        pol_proj_len = df[k, "Pol_Term"] * 12 - curr_dur + 1
         new(
             df[k,"Pol_ID"],
             df[k,"Prod_ID"],
@@ -35,7 +35,7 @@ struct ModelPoint
     end
 end
 
-# Define struct for Input Fields and Product Features and Assumptions Sets ##
+# Define struct for Input Fields
 
 mutable struct InputFields
     mult::Union{Float64, Missing}
@@ -53,6 +53,8 @@ mutable struct InputFields
         new(mult, table, table_column, PAD)
     end
 end
+
+# Define struct for Product Feature Sets
 
 mutable struct ProductFeatureSet
     death_ben::InputFields
@@ -79,7 +81,7 @@ mutable struct ProductFeatureSet
             df_prodfeatures_2 = filter("Projection Variable" => x -> x == prodfeature, df_prodfeatures)
             fields = copy(fields_default)
             for field in collect(df_prodfeatures_2[:,"Data Type"])
-                fields[field] = filter(row -> row."Data Type" == field, df_prodfeatures_2)[1,4] ##
+                fields[field] = filter(row -> row."Data Type" == field, df_prodfeatures_2)[1,4]
             end
             prodfeatures[prodfeature] = InputFields(fields["Mult"], fields["Table"], fields["Table Column"], fields["PAD"])
         end
@@ -91,6 +93,8 @@ mutable struct ProductFeatureSet
         )
     end
 end
+
+# Define struct Assumption Sets
 
 mutable struct AssumptionSet
     mortality::InputFields
@@ -125,7 +129,7 @@ mutable struct AssumptionSet
             df_asmp_2 = filter("Projection Variable" => x -> x == assumption, df_asmp)
             fields = copy(fields_default)
             for field in collect(df_asmp_2[:,"Data Type"])
-                fields[field] = filter(row -> row."Data Type" == field, df_asmp_2)[1,4] ##
+                fields[field] = filter(row -> row."Data Type" == field, df_asmp_2)[1,4]
             end
             assumptions[assumption] = InputFields(fields["Mult"], fields["Table"], fields["Table Column"], fields["PAD"])
         end

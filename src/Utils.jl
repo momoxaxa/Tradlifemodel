@@ -1,8 +1,7 @@
 """
 
 if_months(iss_date::Date, valn_date::Date=valn_date)
-get_excel_sheet(input_file_path::String, prod_code::String)::Dict{String, DataFrame}
-read_excel_ind(exceldata::DataFrame, datatype::String, excelheader::String="Value")
+read_excel_ind(exceldata::DataFrame, datatype::String, excelheader::String="Value")  
 read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Array, duration::Array, distributionoption::String="None")
 read_excel_AA(exceldata::DataFrame, sex::String, att_age::Array)
 get_prem_freq(prem_mode::String)

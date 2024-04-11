@@ -1,4 +1,3 @@
-# using Dates, 
 using XLSX, DataFrames
 
 # File paths
@@ -29,6 +28,10 @@ proj_len = proj_yr * 12
 # Capital Requirement Gross Up Factor
 
 capreq_grossup_factor = filter(row ->row."Option" == "Capital Requirement Gross Up Factor", general_settings_df)[1, "Value"]
+
+# Multiprocessing
+
+num_workers = filter(row ->row."Option" == "Number of Workers for Multiprocessing", general_settings_df)[1, "Value"]
 
 # Print Options
 

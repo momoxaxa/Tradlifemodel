@@ -1,21 +1,25 @@
 """
 project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator, product_features_set)
 project_per_policy_with_assumptions!(ppt::PerPolicyCFTable, asmpt:: AssumptionsTable)
+
 project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, curr_dur)
+
 project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
-project_present_value_bef_resv_capreq!(pvcft::PVCFTable, disc_rate::Array, ift::InForceCFTable)
+project_present_value_bef_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth::Array)
+
 project_present_value_outgo_net_income!(pvcft::PVCFTable)
+project_present_value_profit!(pvcft::PVCFTable)
 
 project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, valn_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, valn_method::String="Gross Premium Valuation")
 
 project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, capreq_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, capreq_method::String="Risk Based Capital")
 
 project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::AssumptionsTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
-project_present_value_inc_resv_capreq!(pvcft::PVCFTable, disc_rate::Array, ift::InForceCFTable)
+project_present_value_inc_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth::Array)
 
-inner_proj(curr_asmpset::AssumptionSet, base_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String)
+inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String, runset::RunSet)
 
-run_product(prod_code::String)
+run_product(prod_code::String, runset::RunSet)
 
 """
 
@@ -119,6 +123,7 @@ end
 function project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, valn_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, valn_method::String="Gross Premium Valuation")
 
     # Calculate Reserve Per Policy
+
     if valn_method == "Gross Premium Valuation"
         valn_asmpset_lapse_up = deepcopy(valn_asmpset)
         valn_asmpset_lapse_down = deepcopy(valn_asmpset)
@@ -253,9 +258,12 @@ function run_product(prod_code::String, runset::RunSet)
 
     model_point_df = CSV.read("$(modelpoints_file_path)mp_$prod_code.csv", DataFrame,  dateformat="dd/mm/YYYY")
     
-    # Read assumptions into assumption sets for Base Projection, Valuation and Capital Requiremnet Inner Projections
+    # Read product features into product features set
     
     product_features_set = ProductFeatureSet(assumption_set_df, "Product Feature", prod_code)
+    
+    # Read assumptions into assumption sets for Base Projection, Valuation and Capital Requiremnet Inner Projections
+
     base_asmpset = AssumptionSet(assumption_set_df, "Base Projection", prod_code)
     valn_asmpset = AssumptionSet(assumption_set_df, "Valuation", prod_code)
     capreq_asmpset = AssumptionSet(assumption_set_df, "Capital Requirement", prod_code)
@@ -317,10 +325,6 @@ function run_product(prod_code::String, runset::RunSet)
 
         project_present_value_bef_resv_capreq!(pvcft, ift, asmpt.disc_rate_mth)
 
-        # Calculate PV of Outgo net Income
-
-        project_present_value_outgo_net_income!(pvcft)
-
         # Run Projection for Reserve Per Policy using Valuation Assumptions Set
         
         project_per_policy_reserve!(ppt, polt, input_tables_dict, mp, valn_asmpset, s, prod_code, runset)
@@ -329,14 +333,10 @@ function run_product(prod_code::String, runset::RunSet)
 
         project_per_policy_capreq!(ppt, polt, input_tables_dict, mp, capreq_asmpset, s, prod_code, runset)
 
-        # Project In force Cash Flow and calculate Present Value for increase in Reserves and Capital Requirements
+        # Project In force Cash Flow and Present Value for and after increase in Reserves and Capital Requirements
 
-        project_in_force_inc_resv_capreq!(ift, asmpt, ppt, svt)   # to split
-        project_present_value_inc_resv_capreq!(pvcft, ift, asmpt.disc_rate_mth)   # to split
-        
-        # Calculate PV of outgo net income (#to change to income net outgo aka profit)
-        
-        project_present_value_outgo_net_income!(pvcft)
+        project_in_force_inc_resv_capreq!(ift, asmpt, ppt, svt)
+        project_present_value_inc_resv_capreq!(pvcft, ift, asmpt.disc_rate_mth)
         
         # Print result by product
 
