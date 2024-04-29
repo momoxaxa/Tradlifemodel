@@ -1,3 +1,5 @@
+module Utils
+using Dates
 """
 
 if_months(iss_date::Date, valn_date::Date=valn_date)
@@ -8,6 +10,8 @@ get_prem_freq(prem_mode::String)
 rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
 
 """
+
+export if_months, read_excel_ind, read_excel_PY, read_excel_AA, get_prem_freq, rev_cumsum_disc
 
 # Calculate months policy has been in force
 function if_months(iss_date::Date, valn_date::Date=valn_date)
@@ -100,4 +104,3 @@ function rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
     end
     return result
 end
-

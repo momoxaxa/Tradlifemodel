@@ -1,3 +1,5 @@
+include("Utils.jl")
+
 # Define struct for model points
 
 struct ModelPoint

@@ -55,3 +55,7 @@ xf = XLSX.readxlsx("$(input_file_path)Tables.xlsx")
 for sheet in XLSX.sheetnames(xf)
     input_tables_dict[sheet] = DataFrame(XLSX.readtable("$(input_file_path)Tables.xlsx", sheet))
 end
+
+# User Defined Formula
+
+user_defined_formula_df = DataFrame(XLSX.readtable("$(input_file_path)settings.xlsx", "user_defined_formula"))
