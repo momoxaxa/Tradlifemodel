@@ -1,5 +1,3 @@
-module Utils
-using Dates
 """
 
 if_months(iss_date::Date, valn_date::Date=valn_date)
@@ -8,10 +6,11 @@ read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Array, durati
 read_excel_AA(exceldata::DataFrame, sex::String, att_age::Array)
 get_prem_freq(prem_mode::String)
 rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
+get_formula_variables(formula::Expr, formula_variable, prodfeature)
 
 """
 
-export if_months, read_excel_ind, read_excel_PY, read_excel_AA, get_prem_freq, rev_cumsum_disc
+using Dates
 
 # Calculate months policy has been in force
 function if_months(iss_date::Date, valn_date::Date=valn_date)

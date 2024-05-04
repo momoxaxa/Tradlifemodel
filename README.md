@@ -76,15 +76,14 @@ Currently, two products and four runs are set up.
    - Load the model point
    - Project policy information tables
    - Project assumptions tables based on base projection assumption set
-   - Project Per Policy Table with product feature Set
+   - Project Per Policy Table with product feature set
    - Project Per Policy Table with assumption tables
    - Project survivalship
    - Project in force cash flow before reserve and capital requirement
    - Project present value of in force cash flow before reserve and capital requirement
-      - Project reserve per policy based on reserving assumption set (inner projection)
-      - Project capital requirement per policy based on capital requirement assumption set (inner projection)
-   - Project in force cash flow for and after increase in reserve and capital requirement 
-   - Project present value of in force cash flow for and after increase in reserve and capital requirement
+   - Project reserve per policy based on reserving assumption set
+   - Project capital requirement per policy based on capital requirement assumption set
+   - Project in force cash flow and present value for and after increase in reserve and capital requirement
 
 ### Running the Program:
 
@@ -93,12 +92,12 @@ To run the program:
 1. Clone or download this repository to your local machine.
 2. Navigate to the directory where the program is located.
 3. Open a command prompt.
-4. Run the Julia script `main.jl` using the following command:
+4. Run the Julia script `TradLifeModel.jl` using the following command:
    
    ```
-   julia src/main.jl
+   julia src/TradLifeModel.jl
    ```
 
 ### Note:
 
-Thank you for your interest in this program. Please be aware that it has not been tested beyond value checks against the reference spreadsheet, so errors may occur.
+Thank you for your interest in this program. Please be aware that the program has not been tested beyond value checks against the reference spreadsheet, so errors may occur.

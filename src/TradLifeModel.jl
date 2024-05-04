@@ -1,11 +1,10 @@
 using Distributed
-using XLSX
 
 include("Settings.jl")
-include("UserDefinedFormula.jl")
-
+include("utils.jl")
 
 # Multiprocessing
+
 addprocs(num_workers)
 
 @everywhere begin
@@ -15,7 +14,6 @@ addprocs(num_workers)
     start = now()
 
     include("Settings.jl")
-    include("UserDefinedFormula.jl")
     include("DataStruct.jl")
     include("Utils.jl")
     include("ProductFeatures.jl")
@@ -23,7 +21,6 @@ addprocs(num_workers)
     include("Projection.jl")
     include("Print.jl")
 
-    using .ProductFeatures
 end
 
 @sync @distributed for curr_run in selected_runs
@@ -34,7 +31,7 @@ end
     @sync @distributed for prod_code in selected_products
         run_product(prod_code, runset)
     end
-    println(multiple, "a")
+
     println("$curr_run completed.")
 
     # Combine and save results for all products to CSV file
