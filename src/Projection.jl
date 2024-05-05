@@ -263,6 +263,7 @@ function run_product(prod_code::String, runset::RunSet)
     # Read product features into product features set
     
     product_features_set = ProductFeatureSet(assumption_set_df, "Product Feature", prod_code)
+    validate_formula_variables(product_features_set, update_prodfeatset=true, failed_prodfeatures=nothing)
     
     # Read assumptions into assumption sets for Base Projection, Valuation and Capital Requiremnet Inner Projections
 

@@ -1,3 +1,8 @@
+#=
+get_formula_variables(formula::Expr, formula_variable)
+validate_formula_variables(product_features_set::ProductFeatureSet; update_prodfeatset::Bool=false, failed_prodfeatures::Union{Array, Nothing}=nothing)
+=#
+
 using Dates
 
 # Define struct for model points
@@ -41,18 +46,27 @@ end
 
 mutable struct InputFields
     mult::Union{Float64, Missing}
+    table_type::Union{String, Missing}
     table::Union{String, Missing}
     table_column::Union{String, Missing}
+    UDF::Union{String, Missing}
+    UDF_expr::Expr
+    UDF_vars::Array
     PAD::Union{Float64, Missing}
 
     function InputFields(
         mult::Union{Float64, Missing},
+        table_type::Union{String, Missing},
         table::Union{String, Missing},
         table_column::Union{String, Missing}, 
+        UDF::Union{String, Missing},
+        UDF_expr::Expr,
+        UDF_vars::Array,
         PAD::Union{Float64, Missing}
         )
 
-        new(mult, table, table_column, PAD)
+        new(mult, table_type, table, table_column, UDF, UDF_expr, UDF_vars, PAD)
+
     end
 end
 
@@ -67,15 +81,19 @@ mutable struct ProductFeatureSet
         df_prodfeatures = filter("Projection Type" => x -> x == projtype, df)[:, Cols(Between("Projection Type", "Data Type"), Symbol(prodcode))]
 
         prodfeatures = Dict(
-            "death_ben" => InputFields(1.0, "", "", 0.0),
-            "surr_ben" => InputFields(1.0, "", "", 0.0),
-            "commission" => InputFields(1.0, "", "", 0.0)
+            "death_ben" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "surr_ben" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "commission" => InputFields(1.0, "", "", "", "", :(), [], 0.0)
         )
 
         fields_default = Dict(
             "Mult" => 1.0,
+            "Table Type" => "",
             "Table" => "",
             "Table Column" => "",
+            "UDF" => "",
+            "UDF_expr" => :(),
+            "UDF_vars" => [],
             "PAD" => 0.0
         )
         
@@ -85,7 +103,7 @@ mutable struct ProductFeatureSet
             for field in collect(df_prodfeatures_2[:,"Data Type"])
                 fields[field] = filter(row -> row."Data Type" == field, df_prodfeatures_2)[1,4]
             end
-            prodfeatures[prodfeature] = InputFields(fields["Mult"], fields["Table"], fields["Table Column"], fields["PAD"])
+            prodfeatures[prodfeature] = InputFields(fields["Mult"], fields["Table Type"], fields["Table"], fields["Table Column"], fields["UDF"], fields["UDF_expr"], fields["UDF_vars"], fields["PAD"])
         end
 
         new(
@@ -93,6 +111,48 @@ mutable struct ProductFeatureSet
             prodfeatures["surr_ben"],
             prodfeatures["commission"]
         )
+    end
+end
+
+# Get variables from User Defined Formula
+function get_formula_variables(formula::Expr, formula_variable)
+    if length(formula.args) > 0
+        for item in formula.args
+            if typeof(item) == Expr
+                get_formula_variables(item, formula_variable)
+            elseif typeof(item) == Symbol 
+                if !(item in [:+, :-, :*, :/, :^, :%, :min, :max, :.+, :.-, :.*, :./, :.^, :.%])
+                    push!(formula_variable, item)
+                end
+            end
+        end
+    end
+    return formula_variable
+end
+
+# Validate user defined tables contains all the variables used in user defined formula
+# Option to update ProdFeatureSet and option to generate a list of failed product features
+function validate_formula_variables(product_features_set::ProductFeatureSet; update_prodfeatset::Bool=false, failed_prodfeatures::Union{Array, Nothing}=nothing)
+
+    for prodfeature in fieldnames(ProductFeatureSet)
+        udt_name = getfield(product_features_set, Symbol(prodfeature)).table
+        formula_str = getfield(product_features_set, Symbol(prodfeature)).UDF
+        if !(formula_str === missing) && !isempty(formula_str)
+            formula = Meta.parse(formula_str)
+            formula_variables = get_formula_variables(formula, [])
+            fields_in_user_defined_table = names(DataFrame(XLSX.readtable("$(input_file_path)Tables.xlsx", udt_name)))
+            validate_variables = all(item -> item in fields_in_user_defined_table, string.(formula_variables))    
+            if validate_variables 
+                if update_prodfeatset
+                    getfield(product_features_set, Symbol(prodfeature)).UDF_expr = formula
+                    getfield(product_features_set, Symbol(prodfeature)).UDF_vars = formula_variables
+                end
+            else 
+                if failed_prodfeatures !== nothing
+                    push!(failed_prodfeatures, String(prodfeature))
+                end
+            end
+        end
     end
 end
 
@@ -111,19 +171,23 @@ mutable struct AssumptionSet
     function AssumptionSet(df::DataFrame, projtype::String, prodcode::String)
         df_asmp = filter("Projection Type" => x -> x == projtype, df)[:, Cols(Between("Projection Type", "Data Type"), Symbol(prodcode))]
         assumptions = Dict(
-            "mortality" => InputFields(1.0, "", "", 0.0),
-            "lapse" => InputFields(1.0, "", "", 0.0),
-            "expense" => InputFields(1.0, "", "", 0.0),
-            "disc_rate" => InputFields(1.0, "", "", 0.0),
-            "invt_return" => InputFields(1.0, "", "", 0.0),
-            "prem_tax" => InputFields(1.0, "", "", 0.0),
-            "tax" => InputFields(1.0, "", "", 0.0)
+            "mortality" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "lapse" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "expense" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "disc_rate" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "invt_return" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "prem_tax" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "tax" => InputFields(1.0, "", "", "", "", :(), [], 0.0)
         )
 
         fields_default = Dict(
             "Mult" => 1.0,
+            "Table Type" => "",
             "Table" => "",
             "Table Column" => "",
+            "UDF" => "",
+            "UDF_expr" => :(),
+            "UDF_vars" => [],
             "PAD" => 0.0
         )
 
@@ -133,7 +197,7 @@ mutable struct AssumptionSet
             for field in collect(df_asmp_2[:,"Data Type"])
                 fields[field] = filter(row -> row."Data Type" == field, df_asmp_2)[1,4]
             end
-            assumptions[assumption] = InputFields(fields["Mult"], fields["Table"], fields["Table Column"], fields["PAD"])
+            assumptions[assumption] = InputFields(fields["Mult"], fields["Table Type"], fields["Table"], fields["Table Column"], fields["UDF"], fields["UDF_expr"], fields["UDF_vars"], fields["PAD"])
         end
         
         new(

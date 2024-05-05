@@ -18,9 +18,9 @@ export death_benefit, surr_benefit, comm_rate
 function death_benefit(input_tables_dict::Dict, init_sum_assured::Float64, pol_year::Array, duration::Array, product_features_set::Main.ProductFeatureSet)
     
     mult = product_features_set.death_ben.mult
-    if 1==1 # to update to if table type is UDT
-        formula = udt_Dict["Death_Benefit"][2]
-        variables = udt_Dict["Death_Benefit"][3]
+    if product_features_set.death_ben.table_type == "User Defined Table"
+        formula = product_features_set.death_ben.UDF_expr
+        variables = product_features_set.death_ben.UDF_vars
         for var in variables
             setproperty!(ProductFeatures, var, read_excel_PY(input_tables_dict[product_features_set.death_ben.table], string(var), pol_year, duration))
         end
