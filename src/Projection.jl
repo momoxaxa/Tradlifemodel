@@ -29,19 +29,19 @@ function project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_
     
     # Premium Per Policy
 
-    ppt.premium_pp = fill(mp.init_prem, proj_len) .* modal_cf_indicator
+    ppt.premium_pp = premium(input_tables_dict, mp.premium, pol_year, modal_cf_indicator, duration, product_features_set)
 
     # Sum Assured Per Policy
 
-    ppt.sum_assured_pp = fill(mp.init_sum_assured, proj_len)
+    ppt.sum_assured_pp = sum_assured(input_tables_dict, mp.sum_assured, pol_year, duration, product_features_set)
 
     # Death Benefit Per Policy
 
-    ppt.death_ben_pp = death_benefit(input_tables_dict, mp.init_sum_assured, pol_year, duration, product_features_set)
+    ppt.death_ben_pp = death_benefit_factor(input_tables_dict, pol_year, duration, product_features_set) .* ppt.sum_assured_pp ./ 1000 ## check
 
     # Surrender Benefit Per Policy
 
-    ppt.surr_ben_pp = surr_benefit(input_tables_dict, mp.init_sum_assured, pol_year, duration, product_features_set)
+    ppt.surr_ben_pp = surr_benefit_factor(input_tables_dict, pol_year, duration, product_features_set) .* ppt.sum_assured_pp ./ 1000  ## check
 
     # Commission Per Policy
 
@@ -288,7 +288,7 @@ function run_product(prod_code::String, runset::RunSet)
         
         # Initiatize and Load Policy Information Table
         
-        polt = PolicyInfoTable(mp.curr_dur, mp.iss_age, mp.prem_mode)
+        polt = PolicyInfoTable(mp.curr_dur, mp.issue_age, mp.prem_mode)
         
         # Initialize Assumptions, Per Policy, Survivalship, In Force, Present Value Tables
         

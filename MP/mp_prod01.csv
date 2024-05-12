@@ -1,4 +1,4 @@
-﻿Pol_ID,Prod_ID,Issue_Date,Issue_Age,Sex,Pol_Term,Sum_Assured,Premium,Premium_Mode
+﻿pol_id,prod_id,issue_date,issue_age,sex,pol_term,sum_assured,premium,premium_mode
 100001,prod01,1/1/2022,35,Male,55,100000,2000,A
 100002,prod01,30/6/2023,25,Female,25,100000,1000,S
 100003,prod01,1/1/2022,35,Male,55,100000,2000,A

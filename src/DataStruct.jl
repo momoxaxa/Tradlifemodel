@@ -10,31 +10,31 @@ using Dates
 struct ModelPoint
     pol_id::Integer
     prod_id::String
-    iss_date::Date
-    iss_age::Integer
+    issue_date::Date
+    issue_age::Integer
     sex::String
     pol_term::Integer
-    init_sum_assured::Float64
-    init_prem::Float64
+    sum_assured::Float64
+    premium::Float64
     prem_mode::String
     curr_dur::Integer
     curr_pol_yr::Integer
     pol_proj_len::Integer
 
     function ModelPoint(df::DataFrame, k::Integer)
-        curr_dur = if_months(df[k, "Issue_Date"], valn_date) + 1
+        curr_dur = if_months(df[k, "issue_date"], valn_date) + 1
         curr_pol_yr = ceil(curr_dur/12)
-        pol_proj_len = df[k, "Pol_Term"] * 12 - curr_dur + 1
+        pol_proj_len = df[k, "pol_term"] * 12 - curr_dur + 1
         new(
-            df[k,"Pol_ID"],
-            df[k,"Prod_ID"],
-            df[k, "Issue_Date"],
-            df[k,"Issue_Age"], 
-            df[k,"Sex"], 
-            df[k,"Pol_Term"], 
-            df[k,"Sum_Assured"],
-            df[k,"Premium"],
-            df[k,"Premium_Mode"],
+            df[k,"pol_id"],
+            df[k,"prod_id"],
+            df[k, "issue_date"],
+            df[k,"issue_age"], 
+            df[k,"sex"], 
+            df[k,"pol_term"], 
+            df[k,"sum_assured"],
+            df[k,"premium"],
+            df[k,"premium_mode"],
             curr_dur,
             curr_pol_yr,
             pol_proj_len
@@ -73,6 +73,8 @@ end
 # Define struct for Product Feature Sets
 
 mutable struct ProductFeatureSet
+    premium::InputFields
+    sum_assured::InputFields
     death_ben::InputFields
     surr_ben::InputFields
     commission::InputFields
@@ -81,6 +83,8 @@ mutable struct ProductFeatureSet
         df_prodfeatures = filter("Projection Type" => x -> x == projtype, df)[:, Cols(Between("Projection Type", "Data Type"), Symbol(prodcode))]
 
         prodfeatures = Dict(
+            "premium" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
+            "sum_assured" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
             "death_ben" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
             "surr_ben" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
             "commission" => InputFields(1.0, "", "", "", "", :(), [], 0.0)
@@ -107,6 +111,8 @@ mutable struct ProductFeatureSet
         end
 
         new(
+            prodfeatures["premium"],
+            prodfeatures["sum_assured"],
             prodfeatures["death_ben"],
             prodfeatures["surr_ben"],
             prodfeatures["commission"]
@@ -270,11 +276,11 @@ mutable struct PolicyInfoTable <: Projection
     att_age::Array{Integer}
     modal_cf_indicator::Array{Float64}
    
-    function PolicyInfoTable(curr_dur::Integer, iss_age::Integer, prem_mode::String)
+    function PolicyInfoTable(curr_dur::Integer, issue_age::Integer, prem_mode::String)
         date = [valn_date+Dates.Day(1) + Dates.Month(i-1) for i in 1:proj_len]
         duration = collect(curr_dur:proj_len+curr_dur-1)
         pol_year = ceil.(duration/12)
-        att_age = iss_age .+ pol_year .- 1
+        att_age = issue_age .+ pol_year .- 1
         prem_freq = get_prem_freq(prem_mode)
         modal_cf_indicator = Int.(mod.(duration .- 1, 12/prem_freq) .== 0)
         new(
