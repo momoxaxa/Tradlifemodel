@@ -331,7 +331,6 @@ end
 
 mutable struct PerPolicyCFTable <: Projection
     premium_pp::Vector{Float64}
-    sum_assured_pp::Vector{Float64}
     comm_pp::Vector{Float64}
     prem_tax_pp::Vector{Float64}
     death_ben_pp::Vector{Float64}
@@ -344,7 +343,6 @@ mutable struct PerPolicyCFTable <: Projection
     function PerPolicyCFTable()
         new(
             zeros(Float64, proj_len),  # premium_pp
-            zeros(Float64, proj_len),  # sum_assured_pp
             zeros(Float64, proj_len),  # comm_pp
             zeros(Float64, proj_len),  # prem_tax_pp
             zeros(Float64, proj_len),  # death_ben_pp

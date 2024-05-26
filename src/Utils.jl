@@ -24,11 +24,12 @@ end
 
 # Read assumptions from Excel - Policy Year
 function read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Array, duration::Array, distributionoption::String="None")
+    year_col_index = findfirst(col -> startswith(string(col), "Year"), names(exceldata))
     assumptions_array = Float64[]
     index = 1
     if distributionoption in ("None", "EvenlySpreadOut")
         for k in 1:proj_len
-            index = findfirst(exceldata.Year .== pol_year[k])
+            index = findfirst(exceldata[:, year_col_index] .== pol_year[k])
             if index !== nothing
                 append!(assumptions_array, exceldata[index, excelheader])
             else
@@ -41,7 +42,7 @@ function read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Arra
     elseif distributionoption == "BOP"
         for k in 1:proj_len
             if mod(duration[k], 12) == 1
-                index = findfirst(exceldata.Year .== pol_year[k])
+                index = findfirst(exceldata[:, year_col_index] .== pol_year[k])
                 if index !== nothing
                     append!(assumptions_array, exceldata[index, excelheader])
                 else
@@ -56,18 +57,26 @@ function read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Arra
 end
 
 # Read assumptions from Excel - Attained Age
-function read_excel_AA(exceldata::DataFrame, sex::String, att_age::Array)
+function read_excel_AA(exceldata::DataFrame, excelheader::String, att_age::Array)
     assumptions_array = Float64[]
     index = 1
     for k in 1:proj_len
         index = findfirst(exceldata.Age .== att_age[k])
         if index !== nothing
-            append!(assumptions_array, exceldata[index, sex])
+            append!(assumptions_array, exceldata[index, excelheader])
         else
             append!(assumptions_array, 0.0)
         end  
     end
     return assumptions_array
+end
+
+# Read assumptions from Excel - Entry Age
+function read_excel_EA(exceldata::DataFrame, excelheader::String, issue_age::Integer)
+    index = findfirst(exceldata.Age .== issue_age)
+    if index !== nothing
+        return exceldata[index, excelheader] .* ones(Float64, proj_len)
+    end
 end
 
 # Get premium frequency for a model point
