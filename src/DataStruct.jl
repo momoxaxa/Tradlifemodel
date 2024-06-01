@@ -14,6 +14,7 @@ struct ModelPoint
     issue_age::Integer
     sex::String
     pol_term::Integer
+    prem_term::Integer
     sum_assured::Float64
     premium::Float64
     prem_mode::String
@@ -32,6 +33,7 @@ struct ModelPoint
             df[k,"issue_age"], 
             df[k,"sex"], 
             df[k,"pol_term"], 
+            df[k, "prem_term"],
             df[k,"sum_assured"],
             df[k,"premium"],
             df[k,"premium_mode"],

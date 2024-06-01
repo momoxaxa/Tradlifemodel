@@ -29,19 +29,19 @@ function project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_
     
     # Premium Per Policy
 
-    ppt.premium_pp = premium(input_tables_dict, mp.premium, pol_year, mp.issue_age, mp.sum_assured, modal_cf_indicator, duration, product_features_set)
+    ppt.premium_pp = premium(input_tables_dict, mp, pol_year, modal_cf_indicator, duration, product_features_set)
 
     # Death Benefit Per Policy
 
-    ppt.death_ben_pp = death_benefit(input_tables_dict, pol_year, mp.sum_assured, duration, product_features_set)
+    ppt.death_ben_pp = death_benefit(input_tables_dict, mp, pol_year, duration, product_features_set)
 
     # Surrender Benefit Per Policy
 
-    ppt.surr_ben_pp = surr_benefit(input_tables_dict, pol_year, mp.sum_assured, mp.issue_age, duration, product_features_set)
+    ppt.surr_ben_pp = surr_benefit(input_tables_dict, mp, pol_year, duration, product_features_set)
 
     # Commission Per Policy
 
-    ppt.comm_pp = comm_rate(input_tables_dict, pol_year, duration, product_features_set) .* ppt.premium_pp
+    ppt.comm_pp = comm_perc(input_tables_dict, mp, pol_year, duration, product_features_set) .* ppt.premium_pp
 
 end
 
