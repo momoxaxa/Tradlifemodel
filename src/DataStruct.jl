@@ -13,6 +13,7 @@ struct ModelPoint
     issue_date::Date
     issue_age::Integer
     sex::String
+    smoker::String
     pol_term::Integer
     prem_term::Integer
     sum_assured::Float64
@@ -32,6 +33,7 @@ struct ModelPoint
             df[k, "issue_date"],
             df[k,"issue_age"], 
             df[k,"sex"], 
+            df[k,"smoker"], 
             df[k,"pol_term"], 
             df[k, "prem_term"],
             df[k,"sum_assured"],

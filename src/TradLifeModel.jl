@@ -9,7 +9,7 @@ addprocs(num_workers)
 
 @everywhere begin
     using CSV, DataFrames
-    using XLSX, Dates
+    using XLSX, Dates, MortalityTables, OffsetArrays
 
     start = now()
 
