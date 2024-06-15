@@ -16,14 +16,35 @@ function read_sel_ult_mort(mort_table, mp::ModelPoint, polt::PolicyInfoTable)
     sel_ult_vector = repeat(sel_ult_vector, inner=12)[polt.duration[1]:end]
     if length(sel_ult_vector) < proj_len
         annual_rate = append!(sel_ult_vector, zeros(Float64, proj_len - length(sel_ult_vector)))
+    else
+        annual_rate = sel_ult_vector[1:proj_len]
     end
     return annual_rate
+end
+
+# Create select and ultmate mortality table
+function create_sel_ult_table(df)
+    ult_start_age = df[1, "Attained Age"]
+    ult_end_age = maximum(dropmissing(df, :"Attained Age")[:, "Attained Age"])
+    ult_end_age_loc = findfirst(df[:, "Attained Age"] .== ult_end_age)
+    ult_vector = Vector{Float64}(df[1:ult_end_age_loc, "Ultimate"])
+    ult = UltimateMortality(ult_vector; start_age = ult_start_age)
+
+    sel_start_age = df[1, 1]
+    sel_end_age = maximum(dropmissing(df, 1)[:, 1])
+    sel_end_age_loc = findfirst(df[:, 1] .== sel_end_age)
+    sel_matrix = Matrix(df[1:sel_end_age_loc, 2:end-2])
+    sel = SelectMortality(sel_matrix, ult, start_age=sel_start_age)
+    
+    mort_table = MortalityTable(sel,ult)
+    return mort_table
 end
 
 # Read mortality assumptions
 
 function read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.mortality.table]
+    annual_rate = zeros(proj_len)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjMort
@@ -35,29 +56,39 @@ function read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
     
     mult = curr_asmpset.mortality.mult * adj
     
-    if curr_asmpset.mortality.table_type == "Attained Age Aggregate"
-        annual_rate = read_excel_AA(df, "Aggregate", polt.att_age) * mult
+    if curr_asmpset.mortality.table_type == "Attained Age"
+        annual_rate = read_excel_AA(df, "Unisex", polt.att_age) * mult
+
     elseif curr_asmpset.mortality.table_type == "Attained Age Sex Distinct"
         annual_rate = read_excel_AA(df, mp.sex, polt.att_age) * mult
+
     elseif curr_asmpset.mortality.table_type == "Attained Age Sex Smoker Distinct"
         annual_rate = read_excel_AA(df, string(mp.sex, " ", mp.smoker), polt.att_age) * mult
-    elseif curr_asmpset.mortality.table_type == "Select and Ultimate Aggregate"
-        ult_start_age = df[1, "Attained Age"]
-        ult_end_age = maximum(dropmissing(df, :"Attained Age")[:, "Attained Age"])
-        ult_end_age_loc = findfirst(df[:, "Attained Age"] .== ult_end_age)
-        ult_vector = Vector{Float64}(df[1:ult_end_age_loc, "Ultimate"])
-        ult = UltimateMortality(ult_vector; start_age = ult_start_age)
 
-        sel_start_age = df[1, 1]
-        sel_end_age = maximum(dropmissing(df, 1)[:, 1])
-        sel_end_age_loc = findfirst(df[:, 1] .== sel_end_age)
-        sel_matrix = Matrix(df[1:sel_end_age_loc, 2:end-2])
-        sel = SelectMortality(sel_matrix, ult, start_age=sel_start_age)
-        
-        mort_table = MortalityTable(sel,ult)
+    elseif curr_asmpset.mortality.table_type == "Select and Ultimate"
+        mort_table = create_sel_ult_table(df)
         annual_rate = read_sel_ult_mort(mort_table, mp, polt) * mult
-    elseif curr_asmpset.mortality.table_type == "Reference Table for SOA Select and Ultimate Table"
-        mort_table = MortalityTables.table(1514)
+
+    elseif curr_asmpset.mortality.table_type == "Select and Ultimate - Sex Distinct"
+        mort_table_name = filter(row ->row."Class" == mp.sex, df)[1, "Mort Table Name"]
+        mort_table_df = input_tables_dict[mort_table_name]
+        mort_table = create_sel_ult_table(mort_table_df)
+        annual_rate = read_sel_ult_mort(mort_table, mp, polt) * mult
+
+    elseif curr_asmpset.mortality.table_type == "Select and Ultimate - Sex Smoker Distinct"
+        mort_table_name = filter(row ->row."Class" == string(mp.sex, " ", mp.smoker), df)[1, "Mort Table Name"]
+        mort_table_df = input_tables_dict[mort_table_name]
+        mort_table = create_sel_ult_table(mort_table_df)
+        annual_rate = read_sel_ult_mort(mort_table, mp, polt) * mult
+
+    elseif curr_asmpset.mortality.table_type == "Select and Ultimate - Sex Distinct - SOA Table ID"
+        mort_table_id = filter(row ->row."Class" == mp.sex, df)[1, "SOA Table ID"]
+        mort_table = MortalityTables.table(mort_table_id)
+        annual_rate = read_sel_ult_mort(mort_table, mp, polt) * mult
+        
+    elseif curr_asmpset.mortality.table_type == "Select and Ultimate - Sex Smoker Distinct - SOA Table ID"
+        mort_table_id = filter(row ->row."Class" == string(mp.sex, " ", mp.smoker), df)[1, "SOA Table ID"]
+        mort_table = MortalityTables.table(mort_table_id)
         annual_rate = read_sel_ult_mort(mort_table, mp, polt) * mult
     end
     
@@ -75,7 +106,7 @@ end
 
 # Read lapse assumptions
 
-function read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
+function read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.lapse.table]
 
     if curr_asmpset.projtype == "Base Projection"
@@ -87,7 +118,11 @@ function read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_
     end
 
     mult = curr_asmpset.lapse.mult * adj
-    annual_rate = read_excel_PY(df, "lapse_rate", pol_year, duration) * mult
+    if curr_asmpset.lapse.table_type == "Pol Year/Pol Term"
+        annual_rate = read_excel_PY(df, string(mp.pol_term), polt.pol_year, polt.duration) * mult
+    elseif curr_asmpset.lapse.table_type == "Pol Year/Pol Term/Prem Term"
+        annual_rate = read_excel_PY_MI(input_tables_dict[curr_asmpset.lapse.table], mp.pol_term, mp.prem_term, "Value", polt.pol_year)
+    end
     
     PAD = curr_asmpset.lapse.PAD 
     if PAD !== missing

@@ -76,7 +76,7 @@ function comm_perc(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year::Array
             setproperty!(ProductFeatures, var, read_excel_PY(input_tables_dict[product_features_set.commission.table], string(var), pol_year, duration))
         end
         assumptions_array = eval(formula)
-    elseif product_features_set.commission.table_type == "Perc by Year/Pol Term"
+    elseif product_features_set.commission.table_type == "Perc by Pol Year/Pol Term"
         assumptions_array = read_excel_PY(input_tables_dict[product_features_set.commission.table], string(mp.pol_term), pol_year, duration)
     elseif product_features_set.commission.table_type == "Perc by Pol Year/Pol Term/Prem Term"
         assumptions_array = read_excel_PY_MI(input_tables_dict[product_features_set.commission.table], mp.pol_term, mp.prem_term, "Value", pol_year)
