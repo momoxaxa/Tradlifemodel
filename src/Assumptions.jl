@@ -175,8 +175,9 @@ end
 
 # Read discount rate assumptions
 
-function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
+function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.disc_rate.table]
+    annual_rate = zeros(proj_len)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjDiscRate
@@ -187,7 +188,24 @@ function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
     end
         
     mult = curr_asmpset.disc_rate.mult
-    annual_rate = read_excel_PY(df, curr_asmpset.disc_rate.table_column, pol_year, duration) * mult .+ adj
+
+    if curr_asmpset.disc_rate.table_type == "Prj Year"
+        annual_rate = read_excel_PRJY_CY(df, curr_asmpset.disc_rate.table_column, polt.proj_year) * mult .+ adj
+    elseif curr_asmpset.disc_rate.table_type == "Cal Year"
+        annual_rate = read_excel_PRJY_CY(df, curr_asmpset.disc_rate.table_column, year.(polt.date)) * mult .+ adj
+    elseif curr_asmpset.disc_rate.table_type == "Mix of Prj Year and Cal Year"
+        int_table_name = filter(row -> row."Class" == curr_asmpset.disc_rate.table_column, df)[1, "Interest Rate Table Name"]
+        int_table_df = input_tables_dict[int_table_name]
+ 
+        year_index_type = filter(row -> row."Class" == curr_asmpset.disc_rate.table_column, df)[1, "Prj Year/Cal Year"]
+        year_index =    if year_index_type == "Calendar Year"
+                            year.(polt.date)
+                        elseif year_index_type == "Projection Year"
+                            polt.proj_year
+                        end
+        
+        annual_rate = read_excel_PRJY_CY(int_table_df, curr_asmpset.disc_rate.table_column, year_index * mult) .+ adj
+    end
     
     PAD = curr_asmpset.disc_rate.PAD 
     if PAD !== missing
@@ -202,15 +220,32 @@ end
 
 # Read investment return assumptions
 
-function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)         
+function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.disc_rate.table]
+    annual_rate = zeros(proj_len)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjInvtRet
 
         mult = curr_asmpset.invt_return.mult
         
-        annual_rate = read_excel_PY(df, curr_asmpset.invt_return.table_column, pol_year, duration) * mult .+ adj
+        if curr_asmpset.invt_return.table_type == "Prj Year"
+            annual_rate = read_excel_PRJY_CY(df, curr_asmpset.invt_return.table_column, polt.proj_year) * mult .+ adj
+        elseif curr_asmpset.invt_return.table_type == "Cal Year"
+            annual_rate = read_excel_PRJY_CY(df, curr_asmpset.invt_return.table_column, year.(polt.date)) * mult .+ adj
+        elseif curr_asmpset.disc_rate.table_type == "Mix of Prj Year and Cal Year"
+            int_table_name = filter(row ->row."Class" == curr_asmpset.invt_return.table_column, df)[1, "Interest Rate Table Name"]
+            int_table_df = input_tables_dict[int_table_name]
+
+            year_index_type = filter(row ->row."Class" == curr_asmpset.invt_return.table_column, df)[1, "Prj Year/Cal Year"]
+            year_index =    if year_index_type == "Calendar Year"
+                                year.(polt.date)
+                            elseif year_index_type == "Projection Year"
+                                polt.proj_year
+                            end
+
+            annual_rate = read_excel_PRJY_CY(int_table_df, curr_asmpset.invt_return.table_column, year.(polt.date)) * mult .+ adj
+        end
     
         assumptions_array = (1 .+ annual_rate).^(1/12) .- 1
         setfield!(curr_asmpt, :invt_ret_ann, annual_rate)

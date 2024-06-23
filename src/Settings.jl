@@ -22,8 +22,8 @@ valn_date = filter(row ->row."Option" == "Valuation Date", general_settings_df)[
 
 # Projection Years
 
-proj_yr = filter(row ->row."Option" == "Projection Year", general_settings_df)[1, "Value"]
-proj_len = proj_yr * 12
+proj_yrs = filter(row ->row."Option" == "Projection Year", general_settings_df)[1, "Value"]
+proj_len = proj_yrs * 12
 
 # Capital Requirement Gross Up Factor
 

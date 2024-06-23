@@ -276,6 +276,7 @@ abstract type Projection end
 mutable struct PolicyInfoTable <: Projection
     date::Array{Date}
     duration::Array{Integer}
+    proj_year::Array{Integer}
     pol_year::Array{Integer}
     att_age::Array{Integer}
     modal_cf_indicator::Array{Float64}
@@ -283,6 +284,7 @@ mutable struct PolicyInfoTable <: Projection
     function PolicyInfoTable(curr_dur::Integer, issue_age::Integer, prem_mode::String)
         date = [valn_date+Dates.Day(1) + Dates.Month(i-1) for i in 1:proj_len]
         duration = collect(curr_dur:proj_len+curr_dur-1)
+        proj_year = repeat(collect(1:proj_yrs),inner=12)
         pol_year = ceil.(duration/12)
         att_age = issue_age .+ pol_year .- 1
         prem_freq = get_prem_freq(prem_mode)
@@ -290,6 +292,7 @@ mutable struct PolicyInfoTable <: Projection
         new(
             date,  # date
             duration,  # duration
+            proj_year, # proj_year
             pol_year,  # pol_year
             att_age,  # att_age
             modal_cf_indicator  # modal_cf_indicator          

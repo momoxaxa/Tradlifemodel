@@ -3,13 +3,13 @@
 if_months(iss_date::Date, valn_date::Date=valn_date)
 read_excel_ind(exceldata::DataFrame, datatype::String, excelheader::String="Value")  
 read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Array, duration::Array, distributionoption::String="None")
+read_excel_PRJY_CY(exceldata::DataFrame, excelheader::String, year::Array)
 read_excel_PY_MI(exceldata::DataFrame, index_1, index_2, excelheader::String, pol_year::Array)
 read_excel_AA(exceldata::DataFrame, excelheader::String, att_age::Array)
 read_excel_EA(exceldata::DataFrame, excelheader::String, issue_age::Integer)
 read_excel_EA_MI(exceldata::DataFrame, index_1, index_2, excelheader::String, issue_age::Integer)
 get_prem_freq(prem_mode::String)
 rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
-get_formula_variables(formula::Expr, formula_variable, prodfeature)
 
 """
 
@@ -54,6 +54,20 @@ function read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Arra
                 append!(assumptions_array, 0.0)
             end
         end
+    end
+    return assumptions_array
+end
+
+# Read assumptions from Excel - Projection Year and Calendar Year
+function read_excel_PRJY_CY(exceldata::DataFrame, excelheader::String, year::Array)
+    assumptions_array = Float64[]
+    for k in 1:proj_len
+        index = findfirst(exceldata[:, 1] .== year[k])
+        if index !== nothing
+            append!(assumptions_array, exceldata[index, excelheader])
+        else
+            append!(assumptions_array, 0.0) 
+        end  
     end
     return assumptions_array
 end
