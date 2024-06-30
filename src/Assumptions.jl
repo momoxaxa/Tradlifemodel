@@ -139,7 +139,7 @@ end
 
 # Read expense assumptions
 
-function read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet, runset::RunSet)
+function read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
 
     assumptions_array = zeros(Float64, proj_len)
     df = input_tables_dict[curr_asmpset.expense.table]
@@ -156,11 +156,11 @@ function read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, po
             
         mult = curr_asmpset.expense.mult * adj
         if assumption == "acq_exp_perc_prem" || assumption == "maint_exp_perc_prem"
-            assumptions_array = read_excel_PY(df, assumption, pol_year, duration) * mult
+            assumptions_array = read_excel_PY(df, assumption, polt.pol_year, polt.duration) * mult
         elseif assumption == "acq_exp_per_pol"
-            assumptions_array = read_excel_PY(df, assumption, pol_year, duration, "BOP") * mult
+            assumptions_array = read_excel_PY(df, assumption, polt.pol_year, polt.duration, "BOP") * mult
         elseif assumption == "maint_exp_per_pol"
-            assumptions_array = read_excel_PY(df, assumption, pol_year, duration, "EvenlySpreadOut") * mult
+            assumptions_array = read_excel_PY(df, assumption, polt.pol_year, polt.duration, "EvenlySpreadOut") * mult
         end
 
         PAD = curr_asmpset.expense.PAD            

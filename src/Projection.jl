@@ -224,7 +224,7 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
 
     read_mortality!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset, runset)
     read_lapse!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset, runset)
-    read_expense!(asmpt_inner, input_tables_dict, polt.pol_year, polt.duration, curr_asmpset, runset)
+    read_expense!(asmpt_inner, input_tables_dict, polt, curr_asmpset, runset)
     read_disc_rate!(asmpt_inner, input_tables_dict, polt, curr_asmpset, runset)
     read_invt_return!(asmpt_inner, input_tables_dict, polt, curr_asmpset, runset)
     read_prem_tax!(asmpt_inner, input_tables_dict, polt, curr_asmpset)
@@ -298,7 +298,7 @@ function run_product(prod_code::String, runset::RunSet)
 
         read_mortality!(asmpt, input_tables_dict, mp, polt, base_asmpset, runset)
         read_lapse!(asmpt, input_tables_dict, mp, polt, base_asmpset, runset)
-        read_expense!(asmpt, input_tables_dict, polt.pol_year, polt.duration, base_asmpset, runset)
+        read_expense!(asmpt, input_tables_dict, polt, base_asmpset, runset)
         read_disc_rate!(asmpt, input_tables_dict, polt, base_asmpset, runset)
         read_invt_return!(asmpt, input_tables_dict, polt, base_asmpset, runset)
         read_prem_tax!(asmpt, input_tables_dict, polt, base_asmpset)
