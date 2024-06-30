@@ -255,26 +255,32 @@ end
 
 # Read premium tax assumptions
 
-function read_prem_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet)
+function read_prem_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
     
-    assumption = curr_asmpset.prem_tax.table_column
-    assumptions_array = zeros(Float64, proj_len)
     df = input_tables_dict[curr_asmpset.prem_tax.table]
     mult = curr_asmpset.prem_tax.mult
-    assumptions_array = read_excel_PY(df, assumption, pol_year, duration) * mult
-    setfield!(curr_asmpt, Symbol(assumption), assumptions_array)
+
+    if curr_asmpset.prem_tax.table_type == "Scalar"
+        assumptions_array = read_excel_ind(df) * ones(proj_len) * mult
+    elseif curr_asmpset.prem_tax.table_type == "Policy Year"
+        assumptions_array = read_excel_PY(df, "Value", polt.pol_year, polt.duration) * mult
+    end
+    setfield!(curr_asmpt, :prem_tax_rate, assumptions_array)
 
 end
 
 # Read tax assumptions
 
-function read_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, pol_year::Array, duration::Array, curr_asmpset::AssumptionSet)
+function read_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
 
-    assumption = curr_asmpset.tax.table_column
-    assumptions_array = zeros(Float64, proj_len)
     df = input_tables_dict[curr_asmpset.tax.table]
     mult = curr_asmpset.tax.mult
-    assumptions_array = read_excel_PY(df, assumption, pol_year, duration) * mult
-    setfield!(curr_asmpt, Symbol(assumption), assumptions_array)
+
+    if curr_asmpset.tax.table_type == "Scalar"
+        assumptions_array = read_excel_ind(df) * ones(proj_len) * mult
+    elseif curr_asmpset.tax.table_type == "Policy Year"
+        assumptions_array = read_excel_PY(df, "Value", polt.pol_year, polt.duration) * mult
+    end
+    setfield!(curr_asmpt, :tax_rate, assumptions_array)
 
 end

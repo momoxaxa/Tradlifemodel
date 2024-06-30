@@ -21,19 +21,24 @@ function if_months(iss_date::Date, valn_date::Date=valn_date)
 end
 
 # Read assumptions from Excel - Indicators
-function read_excel_ind(exceldata::DataFrame, datatype::String, excelheader::String="Value")   
-    exceldata[exceldata.Type .== datatype, excelheader][1]
+function read_excel_ind(exceldata::DataFrame, rowlabel::Union{String, Nothing}=nothing, columnheader::String="Value")   
+    if rowlabel === nothing
+        exceldata[1, columnheader][1]
+    else
+        filter(row -> row[1] == rowlabel, exceldata)[1, columnheader]
+        @show "a"
+    end
 end
 
 # Read assumptions from Excel - Policy Year
-function read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Array, duration::Array, distributionoption::String="None")
+function read_excel_PY(exceldata::DataFrame, columnheader::String, pol_year::Array, duration::Array, distributionoption::String="None")
     assumptions_array = Float64[]
     index = 1
     if distributionoption in ("None", "EvenlySpreadOut")
         for k in 1:proj_len
             index = findfirst(exceldata[:, 1] .== pol_year[k])
             if index !== nothing
-                append!(assumptions_array, exceldata[index, excelheader])
+                append!(assumptions_array, exceldata[index, columnheader])
             else
                 append!(assumptions_array, 0.0) 
             end  
@@ -46,7 +51,7 @@ function read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Arra
             if mod(duration[k], 12) == 1
                 index = findfirst(exceldata[:, 1] .== pol_year[k])
                 if index !== nothing
-                    append!(assumptions_array, exceldata[index, excelheader])
+                    append!(assumptions_array, exceldata[index, columnheader])
                 else
                     append!(assumptions_array, 0.0)
                 end
