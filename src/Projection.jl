@@ -5,7 +5,7 @@ project_per_policy_with_assumptions!(ppt::PerPolicyCFTable, asmpt:: AssumptionsT
 project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, dur_at_valn_date)
 
 project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
-project_present_value_bef_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth::Array)
+project_present_value_bef_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth)
 
 project_present_value_outgo_net_income!(pvcft::PVCFTable)
 project_present_value_profit!(pvcft::PVCFTable)
@@ -15,7 +15,7 @@ project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_
 project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, capreq_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, capreq_method::String="Risk Based Capital")
 
 project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::AssumptionsTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
-project_present_value_inc_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth::Array)
+project_present_value_inc_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth)
 
 inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String, runset::RunSet)
 
@@ -65,18 +65,16 @@ function project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable,
 
     # Survivalship
 
-    for k in 1:proj_len
-        if k == 1
-            svt.pol_if[k] = 1
-        else
-            svt.pol_if[k] = svt.pol_if[k-1] - svt.pol_death[k-1] - svt.pol_lapse[k-1] - svt.pol_maturity[k-1]
-        end       
-
-        svt.pol_death[k] = svt.pol_if[k] * asmpt.mort_rate_mth[k]
-        svt.pol_lapse[k] = (svt.pol_if[k] - svt.pol_death[k]) * asmpt.lapse_rate_mth[k]
-        
-        if k == pol_term*12 - curr_dur + 1
-            svt.pol_maturity[k] = svt.pol_if[k] - svt.pol_death[k] - svt.pol_lapse[k]
+    for t in 0:proj_len
+        if t == 0
+            svt.pol_if[t] = 1
+        elseif t <= pol_term*12 - dur_valdate
+            svt.pol_death[t] = svt.pol_if[t-1] * asmpt.mort_rate_mth[t]
+            svt.pol_lapse[t] = (svt.pol_if[t-1] - svt.pol_death[t]) * asmpt.lapse_rate_mth[t]
+            if t == pol_term*12 - dur_valdate
+                svt.pol_maturity[t] = svt.pol_if[t-1] - svt.pol_death[t] - svt.pol_lapse[t]
+            end
+            svt.pol_if[t] = svt.pol_if[t-1] - svt.pol_death[t] - svt.pol_lapse[t] - svt.pol_maturity[t]
         end
     end
 
@@ -86,17 +84,17 @@ function project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCF
 
     # In Force Cashflow
 
-    ift.premium_if = ppt.premium_pp .* svt.pol_if
-    ift.prem_tax_if = ppt.prem_tax_pp .* svt.pol_if
-    ift.comm_if = ppt.comm_pp .* svt.pol_if
-    ift.acq_exp_if = ppt.acq_exp_pp .* svt.pol_if
-    ift.maint_exp_if = ppt.maint_exp_pp .* svt.pol_if
+    ift.premium_if = ppt.premium_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
+    ift.prem_tax_if = ppt.prem_tax_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
+    ift.comm_if = ppt.comm_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
+    ift.acq_exp_if = ppt.acq_exp_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
+    ift.maint_exp_if = ppt.maint_exp_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
     ift.death_ben_if = ppt.death_ben_pp .* svt.pol_death
     ift.surr_ben_if = ppt.surr_ben_pp .* svt.pol_lapse
 
 end
 
-function project_present_value_bef_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth::Array)
+function project_present_value_bef_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth)
 
     # Present Value of Cashflow
 
@@ -129,9 +127,7 @@ function project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTabl
     
         resv_pp_lapse_up = inner_proj(valn_asmpset_lapse_up, polt, ppt, input_tables_dict, mp, s, prod_code, "valn_lapse_up", runset)
         resv_pp_lapse_down = inner_proj(valn_asmpset_lapse_down, polt, ppt, input_tables_dict, mp, s, prod_code, "valn_lapse_down", runset)
-
-        ppt.resv_pp[1:mp.pol_proj_len] = max.(resv_pp_lapse_up[1:mp.pol_proj_len], resv_pp_lapse_down[1:mp.pol_proj_len])
-
+        ppt.resv_pp[0:mp.pol_proj_len-1] = max.(resv_pp_lapse_up[0:mp.pol_proj_len-1], resv_pp_lapse_down[0:mp.pol_proj_len-1])
     end
 
 end
@@ -150,7 +146,7 @@ function project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable
 
         capreq_lapse_up = max.(capreq_pp_lapse_up .- ppt.resv_pp, 0)
         capreq_lapse_down = max.(capreq_pp_lapse_down .- ppt.resv_pp, 0)
-        ppt.capreq_pp = max.(capreq_lapse_up, capreq_lapse_down) .* (1 + capreq_grossup_factor)
+        ppt.capreq_pp[0:mp.pol_proj_len-1] = max.(capreq_lapse_up, capreq_lapse_down)[0:mp.pol_proj_len-1] .* (1 + capreq_grossup_factor)
     end
 
 end
@@ -160,14 +156,15 @@ function project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::Assumptio
     # In Force Cashflow
 
     ift.resv_if = ppt.resv_pp .* svt.pol_if
-    ift.inc_resv_if = append!(ift.resv_if[2:end], 0) - ift.resv_if
+    ift.resv_if[0] = 0.0 # Force time 0 reserve to be zero
+    ift.inc_resv_if = ift.resv_if - OffsetArray([0; ift.resv_if[0:end-1]], Origin(0))
     ift.invt_return_if = (
         ift.premium_if 
         .- ift.comm_if 
         .- ift.prem_tax_if 
         .- ift.acq_exp_if 
         .- ift.maint_exp_if 
-        .+ ift.resv_if
+        .+ OffsetArray([0; ift.resv_if[0:end-1]], Origin(0))
         ) .* asmpt.invt_ret_mth
 
     ift.prof_bef_tax_capreq_if = (
@@ -184,8 +181,9 @@ function project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::Assumptio
     ift.tax_if = ift.prof_bef_tax_capreq_if .* asmpt.tax_rate
     ift.prof_aft_tax_bef_capreq_if = ift.prof_bef_tax_capreq_if .- ift.tax_if
     ift.capreq_if = ppt.capreq_pp .* svt.pol_if
-    ift.inc_capreq_if = append!(ift.capreq_if[2:end], 0) - ift.capreq_if
-    ift.invt_return_on_capreq_if = ift.capreq_if .* asmpt.invt_ret_mth
+    ift.capreq_if[0] = 0.0 # Force time 0 capital requirement to be zero
+    ift.inc_capreq_if = ift.capreq_if - OffsetArray([0; ift.capreq_if[0:end-1]], Origin(0))
+    ift.invt_return_on_capreq_if = OffsetArray([0; ift.capreq_if[0:end-1]], Origin(0)) .* asmpt.invt_ret_mth
     ift.tax_on_invt_return_on_capreq_if = ift.invt_return_on_capreq_if .* asmpt.tax_rate
     ift.prof_aft_tax_capreq_if = (
         ift.prof_aft_tax_bef_capreq_if 
@@ -196,7 +194,7 @@ function project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::Assumptio
 
 end
 
-function project_present_value_inc_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth::Array)
+function project_present_value_inc_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth)
 
     # Present Value of Cashflow
 
@@ -241,8 +239,8 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
         CSV.write("$output_file_path$curr_run\\firstmpresult_innerproj_$(inner_proj_loop)_$prod_code.csv", firstmpresult)
     end
 
-    result = zeros(Float64, proj_len)
-    result[1:mp.pol_proj_len] = pvcft_inner.pv_cf[1:mp.pol_proj_len] ./ svt_inner.pol_if[1:mp.pol_proj_len]
+    result = zeros(Float64, proj_len+1) |> ZerobasedIndex!
+    result[0:mp.pol_proj_len] = pvcft_inner.pv_cf[0:mp.pol_proj_len] ./ svt_inner.pol_if[0:mp.pol_proj_len]
     return result
 end
 
@@ -283,8 +281,7 @@ function run_product(prod_code::String, runset::RunSet)
         mp = ModelPoint(model_point_df, s)
         
         # Initiatize and Load Policy Information Table
-        
-        polt = PolicyInfoTable(mp.curr_dur, mp.issue_age, mp.prem_mode)
+        polt = PolicyInfoTable(mp.dur_valdate, mp.issue_age, mp.prem_mode)
         
         # Initialize Assumptions, Per Policy, Survivalship, In Force, Present Value Tables
         

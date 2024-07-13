@@ -16,7 +16,7 @@ function print_single_mp(polt, asmpt, ppt, svt, ift, pvcft)
         "pvcft" => pvcft
         )
     for row in eachrow(print_option_df)
-        result[:, row.Variable] = getfield(struct_name_dict[row.Struct], Symbol(row.Variable))
+        result[:, row.Variable] = OffsetArray(getfield(struct_name_dict[row.Struct], Symbol(row.Variable)), Origin(1))
     end
     return result
 end
@@ -30,9 +30,9 @@ function print_aggregate_result(date, ppt, svt, ift, pvcft)
         "ift" => ift,
         "pvcft" => pvcft
         )
-    result[:, :date] = date
+    result[:, :date] = OffsetArray(date,Origin(1))
     for row in eachrow(print_agg_df)
-        result[:, row.Variable] = getfield(struct_name_dict[row.Struct], Symbol(row.Variable))            
+        result[:, row.Variable] = OffsetArray(getfield(struct_name_dict[row.Struct], Symbol(row.Variable)), Origin(1))    
     end
     return result
 end

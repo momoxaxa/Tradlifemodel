@@ -1,4 +1,4 @@
-"""
+#=
 
 read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
 read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
@@ -7,17 +7,18 @@ read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::Stri
 read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
 read_other_assumptions!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet)
 
-"""
+=#
 
 # Read mortality assumptions from select and ultimate table
 function read_sel_ult_mort(mort_table, mp::ModelPoint, polt::PolicyInfoTable)
     sel_ult_vector = mort_table.select[mp.issue_age]
-    sel_ult_vector = Array(OffsetArray(sel_ult_vector, OffsetArrays.Origin(1)))
-    sel_ult_vector = repeat(sel_ult_vector, inner=12)[polt.duration[1]:end]
-    if length(sel_ult_vector) < proj_len
-        annual_rate = append!(sel_ult_vector, zeros(Float64, proj_len - length(sel_ult_vector)))
+    sel_ult_vector = OffsetArray(sel_ult_vector, Origin(1))
+    sel_ult_vector = repeat(sel_ult_vector, inner=12)[polt.duration[1]:end] ##
+    sel_ult_vector = OffsetArray([0;sel_ult_vector], Origin(0))
+    if length(sel_ult_vector) < proj_len+1
+        annual_rate = append!(sel_ult_vector, zeros(Float64, proj_len + 1 - length(sel_ult_vector)))
     else
-        annual_rate = sel_ult_vector[1:proj_len]
+        annual_rate = sel_ult_vector[0:proj_len]
     end
     return annual_rate
 end
@@ -97,7 +98,7 @@ function read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
         annual_rate = (1+PAD) * annual_rate
     end
     
-    annual_rate = min.(annual_rate, 1)
+    annual_rate = min.(annual_rate, 1) |> ZerobasedIndex!
     assumptions_array = 1 .- (1 .- annual_rate).^(1/12)
     setfield!(curr_asmpt, :mort_rate_ann, annual_rate)
     setfield!(curr_asmpt, :mort_rate_mth, assumptions_array)
@@ -177,7 +178,7 @@ end
 
 function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.disc_rate.table]
-    annual_rate = zeros(proj_len)
+    annual_rate = zeros(proj_len+1)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjDiscRate
@@ -222,7 +223,7 @@ end
 
 function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.disc_rate.table]
-    annual_rate = zeros(proj_len)
+    annual_rate = zeros(proj_len+1)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjInvtRet

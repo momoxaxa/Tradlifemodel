@@ -1,9 +1,30 @@
 #=
+if_months(iss_date::Date, valn_date::Date=valn_date)::Integer
+get_prem_freq(prem_mode::String)
 get_formula_variables(formula::Expr, formula_variable)
 validate_formula_variables(product_features_set::ProductFeatureSet; update_prodfeatset::Bool=false, failed_prodfeatures::Union{Array, Nothing}=nothing)
 =#
 
 using Dates
+
+# Calculate months policy has been in force
+function if_months(iss_date::Date, valn_date::Date=valn_date)::Integer
+    return (year(valn_date) - year(iss_date)) * 12 + month(valn_date) - month(iss_date) + 1
+end
+
+# Get premium frequency for a model point
+function get_prem_freq(prem_mode::String)
+    if prem_mode == "A"
+        prem_freq = 1
+    elseif prem_mode == "S"
+        prem_freq = 2
+    elseif prem_mode == "Q"
+        prem_freq = 4
+    else
+        prem_freq = 12
+    end
+    return prem_freq
+end
 
 # Define struct for model points
 
@@ -274,21 +295,22 @@ end
 abstract type Projection end
 
 mutable struct PolicyInfoTable <: Projection
-    date::Array{Date}
-    duration::Array{Integer}
-    proj_year::Array{Integer}
-    pol_year::Array{Integer}
-    att_age::Array{Integer}
-    modal_cf_indicator::Array{Float64}
-   
-    function PolicyInfoTable(curr_dur::Integer, issue_age::Integer, prem_mode::String)
-        date = [valn_date+Dates.Day(1) + Dates.Month(i-1) for i in 1:proj_len]
-        duration = collect(curr_dur:proj_len+curr_dur-1)
-        proj_year = repeat(collect(1:proj_yrs),inner=12)
+    date::OffsetArray{Date}
+    duration::OffsetArray{}
+    proj_year::OffsetArray{}
+    pol_year::OffsetArray{}
+    att_age::OffsetArray{}
+    modal_cf_indicator::OffsetArray{}
+    
+    function PolicyInfoTable(dur_valdate::Integer, issue_age::Integer, prem_mode::String)
+        date = ZerobasedIndex!([valn_date + Dates.Month(t) for t in 0:proj_len])
+        duration =  ZerobasedIndex!(collect(dur_valdate:proj_len+dur_valdate))
+        proj_year = ZerobasedIndex!([0; repeat(collect(1:proj_yrs),inner=12)])
         pol_year = ceil.(duration/12)
         att_age = issue_age .+ pol_year .- 1
         prem_freq = get_prem_freq(prem_mode)
         modal_cf_indicator = Int.(mod.(duration .- 1, 12/prem_freq) .== 0)
+
         new(
             date,  # date
             duration,  # duration
@@ -297,170 +319,170 @@ mutable struct PolicyInfoTable <: Projection
             att_age,  # att_age
             modal_cf_indicator  # modal_cf_indicator          
         )
-    end
+    end   
 end
 
 mutable struct AssumptionsTable <: Projection 
-    mort_rate_ann::Vector{Float64}
-    mort_rate_mth::Vector{Float64}
-    lapse_rate_ann::Vector{Float64}
-    lapse_rate_mth::Vector{Float64}
-    acq_exp_per_pol::Vector{Float64}
-    acq_exp_perc_prem::Vector{Float64}
-    maint_exp_per_pol::Vector{Float64}
-    maint_exp_perc_prem::Vector{Float64}
-    disc_rate_ann::Vector{Float64}
-    disc_rate_mth::Vector{Float64}
-    invt_ret_ann::Vector{Float64}
-    invt_ret_mth::Vector{Float64}
-    prem_tax_rate::Vector{Float64}
-    tax_rate::Vector{Float64}
+    mort_rate_ann::OffsetArray{}
+    mort_rate_mth::OffsetArray{}
+    lapse_rate_ann::OffsetArray{}
+    lapse_rate_mth::OffsetArray{}
+    acq_exp_per_pol::OffsetArray{}
+    acq_exp_perc_prem::OffsetArray{}
+    maint_exp_per_pol::OffsetArray{}
+    maint_exp_perc_prem::OffsetArray{}
+    disc_rate_ann::OffsetArray{}
+    disc_rate_mth::OffsetArray{}
+    invt_ret_ann::OffsetArray{}
+    invt_ret_mth::OffsetArray{}
+    prem_tax_rate::OffsetArray{}
+    tax_rate::OffsetArray{}
 
     function AssumptionsTable()
         new(
-            zeros(Float64, proj_len),  # mort_rate_ann
-            zeros(Float64, proj_len),  # mort_rate_mth
-            zeros(Float64, proj_len),  # lapse_rate_ann
-            zeros(Float64, proj_len),  # lapse_rate_mth
-            zeros(Float64, proj_len),  # acq_exp_per_pol
-            zeros(Float64, proj_len),  # acq_exp_perc_prem
-            zeros(Float64, proj_len),  # maint_exp_per_pol
-            zeros(Float64, proj_len),  # maint_exp_perc_prem
-            zeros(Float64, proj_len),  # disc_rate_ann
-            zeros(Float64, proj_len),  # disc_rate_mth
-            zeros(Float64, proj_len),  # invt_ret_ann
-            zeros(Float64, proj_len),  # invt_ret_mth
-            zeros(Float64, proj_len),  # prem_tax_rate
-            zeros(Float64, proj_len)  # tax_rate
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # mort_rate_ann
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # mort_rate_mth
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # lapse_rate_ann
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # lapse_rate_mth
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_per_pol
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_perc_prem
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_per_pol
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_perc_prem
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # disc_rate_ann
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # disc_rate_mth
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_ret_ann
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_ret_mth
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prem_tax_rate
+            ZerobasedIndex!(zeros(Float64, proj_len+1))  # tax_rate
         )
     end
 end
 
 mutable struct PerPolicyCFTable <: Projection
-    premium_pp::Vector{Float64}
-    comm_pp::Vector{Float64}
-    prem_tax_pp::Vector{Float64}
-    death_ben_pp::Vector{Float64}
-    surr_ben_pp::Vector{Float64}
-    acq_exp_pp::Vector{Float64}
-    maint_exp_pp::Vector{Float64}
-    resv_pp::Vector{Float64}
-    capreq_pp::Vector{Float64}
+    premium_pp::OffsetArray{Float64}
+    comm_pp::OffsetArray{Float64}
+    prem_tax_pp::OffsetArray{Float64}
+    death_ben_pp::OffsetArray{Float64}
+    surr_ben_pp::OffsetArray{Float64}
+    acq_exp_pp::OffsetArray{Float64}
+    maint_exp_pp::OffsetArray{Float64}
+    resv_pp::OffsetArray{Float64}
+    capreq_pp::OffsetArray{Float64}
 
     function PerPolicyCFTable()
         new(
-            zeros(Float64, proj_len),  # premium_pp
-            zeros(Float64, proj_len),  # comm_pp
-            zeros(Float64, proj_len),  # prem_tax_pp
-            zeros(Float64, proj_len),  # death_ben_pp
-            zeros(Float64, proj_len),  # surr_ben_pp
-            zeros(Float64, proj_len),  # acq_exp_pp
-            zeros(Float64, proj_len),  # maint_exp_pp
-            zeros(Float64, proj_len),  # resv_pp
-            zeros(Float64, proj_len)  # capreq_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # premium_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # comm_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prem_tax_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # death_ben_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # surr_ben_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # resv_pp
+            ZerobasedIndex!(zeros(Float64, proj_len+1))  # capreq_pp
         )
     end
 end
 
 mutable struct SurvivalshipTable <: Projection  
-    pol_if::Vector{Float64}
-    pol_death::Vector{Float64}
-    pol_lapse::Vector{Float64}
-    pol_maturity::Vector{Float64}
+    pol_if::OffsetArray{Float64}
+    pol_death::OffsetArray{Float64}
+    pol_lapse::OffsetArray{Float64}
+    pol_maturity::OffsetArray{Float64}
 
     function SurvivalshipTable()
         new(
-            zeros(Float64, proj_len),  # pol_if
-            zeros(Float64, proj_len),  # pol_death
-            zeros(Float64, proj_len),  # pol_lapse
-            zeros(Float64, proj_len)  # pol_maturity
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pol_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pol_death
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pol_lapse
+            ZerobasedIndex!(zeros(Float64, proj_len+1))  # pol_maturity
         )
     end
 end
 
 mutable struct InForceCFTable <: Projection
-    premium_if::Vector{Float64}
-    prem_tax_if::Vector{Float64}
-    comm_if::Vector{Float64}
-    acq_exp_if::Vector{Float64}
-    maint_exp_if::Vector{Float64}
-    death_ben_if::Vector{Float64}
-    surr_ben_if::Vector{Float64}
-    resv_if::Vector{Float64}
-    inc_resv_if::Vector{Float64}
-    invt_return_if::Vector{Float64}
-    prof_bef_tax_capreq_if::Vector{Float64}
-    tax_if::Vector{Float64}
-    prof_aft_tax_bef_capreq_if::Vector{Float64}
-    capreq_if::Vector{Float64}
-    inc_capreq_if::Vector{Float64}
-    invt_return_on_capreq_if::Vector{Float64}
-    tax_on_invt_return_on_capreq_if::Vector{Float64}
-    prof_aft_tax_capreq_if::Vector{Float64}
+    premium_if::OffsetArray{Float64}
+    prem_tax_if::OffsetArray{Float64}
+    comm_if::OffsetArray{Float64}
+    acq_exp_if::OffsetArray{Float64}
+    maint_exp_if::OffsetArray{Float64}
+    death_ben_if::OffsetArray{Float64}
+    surr_ben_if::OffsetArray{Float64}
+    resv_if::OffsetArray{Float64}
+    inc_resv_if::OffsetArray{Float64}
+    invt_return_if::OffsetArray{Float64}
+    prof_bef_tax_capreq_if::OffsetArray{Float64}
+    tax_if::OffsetArray{Float64}
+    prof_aft_tax_bef_capreq_if::OffsetArray{Float64}
+    capreq_if::OffsetArray{Float64}
+    inc_capreq_if::OffsetArray{Float64}
+    invt_return_on_capreq_if::OffsetArray{Float64}
+    tax_on_invt_return_on_capreq_if::OffsetArray{Float64}
+    prof_aft_tax_capreq_if::OffsetArray{Float64}
 
     function InForceCFTable()
         new(
-            zeros(Float64, proj_len),  # premium_if
-            zeros(Float64, proj_len),  # prem_tax_if
-            zeros(Float64, proj_len),  # comm_if
-            zeros(Float64, proj_len),  # acq_exp_if
-            zeros(Float64, proj_len),  # maint_exp_if
-            zeros(Float64, proj_len),  # death_ben_if
-            zeros(Float64, proj_len),  # surr_ben_if
-            zeros(Float64, proj_len),  # resv_if
-            zeros(Float64, proj_len),  # inc_resv_if
-            zeros(Float64, proj_len),  # invt_return_if
-            zeros(Float64, proj_len),  # prof_bef_tax_capreq_if
-            zeros(Float64, proj_len),  # tax_if
-            zeros(Float64, proj_len),  # prof_aft_tax_bef_capreq_if
-            zeros(Float64, proj_len),  # capreq_if
-            zeros(Float64, proj_len),  # inc_capreq_if
-            zeros(Float64, proj_len),  # invt_return_on_capreq_if
-            zeros(Float64, proj_len),  # tax_on_invt_return_on_capreq_if
-            zeros(Float64, proj_len)  # prof_aft_tax_capreq_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # premium_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prem_tax_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # comm_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # death_ben_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # surr_ben_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # resv_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # inc_resv_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_return_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prof_bef_tax_capreq_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # tax_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prof_aft_tax_bef_capreq_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # capreq_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # inc_capreq_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_return_on_capreq_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # tax_on_invt_return_on_capreq_if
+            ZerobasedIndex!(zeros(Float64, proj_len+1))  # prof_aft_tax_capreq_if
 
         )
     end
 end
 
 mutable struct PVCFTable <: Projection
-    pv_premium::Vector{Float64}
-    pv_prem_tax::Vector{Float64}
-    pv_comm::Vector{Float64}
-    pv_acq_exp::Vector{Float64}
-    pv_maint_exp::Vector{Float64}
-    pv_death_ben::Vector{Float64}
-    pv_surr_ben::Vector{Float64}
-    pv_cf::Vector{Float64}
-    pv_inc_resv::Vector{Float64}
-    pv_invt_return::Vector{Float64}
-    pv_prof_bef_tax_capreq::Vector{Float64}
-    pv_tax::Vector{Float64}
-    pv_prof_aft_tax_bef_capreq::Vector{Float64}
-    pv_inc_capreq::Vector{Float64}
-    pv_invt_return_on_capreq::Vector{Float64}
-    pv_tax_on_invt_return_on_capreq::Vector{Float64}
-    pv_prof_aft_tax_capreq::Vector{Float64}
+    pv_premium::OffsetArray{Float64}
+    pv_prem_tax::OffsetArray{Float64}
+    pv_comm::OffsetArray{Float64}
+    pv_acq_exp::OffsetArray{Float64}
+    pv_maint_exp::OffsetArray{Float64}
+    pv_death_ben::OffsetArray{Float64}
+    pv_surr_ben::OffsetArray{Float64}
+    pv_cf::OffsetArray{Float64}
+    pv_inc_resv::OffsetArray{Float64}
+    pv_invt_return::OffsetArray{Float64}
+    pv_prof_bef_tax_capreq::OffsetArray{Float64}
+    pv_tax::OffsetArray{Float64}
+    pv_prof_aft_tax_bef_capreq::OffsetArray{Float64}
+    pv_inc_capreq::OffsetArray{Float64}
+    pv_invt_return_on_capreq::OffsetArray{Float64}
+    pv_tax_on_invt_return_on_capreq::OffsetArray{Float64}
+    pv_prof_aft_tax_capreq::OffsetArray{Float64}
 
     function PVCFTable()
         new(
-            zeros(Float64, proj_len),  # pv_premium
-            zeros(Float64, proj_len),  # pv_prem_tax
-            zeros(Float64, proj_len),  # pv_comm
-            zeros(Float64, proj_len),  # pv_acq_exp
-            zeros(Float64, proj_len),  # pv_maint_exp
-            zeros(Float64, proj_len),  # pv_death_ben
-            zeros(Float64, proj_len),  # pv_surr_ben
-            zeros(Float64, proj_len),  # pv_cf
-            zeros(Float64, proj_len),  # pv_inc_resv
-            zeros(Float64, proj_len),  # pv_invt_return
-            zeros(Float64, proj_len),  # pv_prof_bef_tax_capreq
-            zeros(Float64, proj_len),  # pv_tax
-            zeros(Float64, proj_len),  # pv_prof_aft_tax_bef_capreq
-            zeros(Float64, proj_len),  # pv_inc_capreq
-            zeros(Float64, proj_len),  # pv_invt_return_on_capreq
-            zeros(Float64, proj_len),  # pv_tax_on_invt_return_on_capreq
-            zeros(Float64, proj_len)  # pv_prof_aft_tax_capreq
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_premium
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_prem_tax
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_comm
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_acq_exp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_maint_exp
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_death_ben
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_surr_ben
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_cf
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_inc_resv
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_invt_return
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_prof_bef_tax_capreq
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_tax
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_prof_aft_tax_bef_capreq
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_inc_capreq
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_invt_return_on_capreq
+            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_tax_on_invt_return_on_capreq
+            ZerobasedIndex!(zeros(Float64, proj_len+1))  # pv_prof_aft_tax_capreq
         )
     end
 end

@@ -7,7 +7,7 @@ export premium, death_benefit, surr_benefit, comm_perc
 
 # Premium
 
-function premium(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year::Array, modal_cf_indicator::Array, duration::Array, product_features_set::Main.ProductFeatureSet)
+function premium(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year, modal_cf_indicator, duration, product_features_set::Main.ProductFeatureSet)
     mult = product_features_set.premium.mult
     if product_features_set.premium.table_type == "User Defined Table"
         formula = product_features_set.premium.UDF_expr
@@ -29,7 +29,7 @@ end
 
 # Death Benefit
 
-function death_benefit(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year::Array, duration::Array, product_features_set::Main.ProductFeatureSet)
+function death_benefit(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year, duration, product_features_set::Main.ProductFeatureSet)
     
     mult = product_features_set.death_ben.mult
     if product_features_set.death_ben.table_type == "User Defined Table"
@@ -48,7 +48,7 @@ end
 
 # Surrender Benefit
 
-function surr_benefit(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year::Array, duration::Array, product_features_set::Main.ProductFeatureSet)
+function surr_benefit(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year, duration, product_features_set::Main.ProductFeatureSet)
     mult = product_features_set.surr_ben.mult
     if product_features_set.surr_ben.table_type == "User Defined Table"
         formula = product_features_set.surr_ben.UDF_expr
@@ -67,7 +67,7 @@ end
 
 # Commission
 
-function comm_perc(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year::Array, duration::Array, product_features_set::Main.ProductFeatureSet)
+function comm_perc(input_tables_dict::Dict, mp::Main.ModelPoint, pol_year, duration, product_features_set::Main.ProductFeatureSet)
     mult = product_features_set.commission.mult
     if product_features_set.commission.table_type == "User Defined Table"
         formula = product_features_set.commission.UDF_expr
