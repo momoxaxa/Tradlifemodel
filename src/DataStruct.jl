@@ -19,14 +19,14 @@ struct ModelPoint
     sum_assured::Float64
     premium::Float64
     prem_mode::String
-    curr_dur::Integer
+    dur_valdate::Integer
     curr_pol_yr::Integer
     pol_proj_len::Integer
 
     function ModelPoint(df::DataFrame, k::Integer)
-        curr_dur = if_months(df[k, "issue_date"], valn_date) + 1
-        curr_pol_yr = ceil(curr_dur/12)
-        pol_proj_len = df[k, "pol_term"] * 12 - curr_dur + 1
+        dur_valdate = if_months(df[k, "issue_date"], valn_date)
+        curr_pol_yr = ceil((dur_valdate+1)/12) ##
+        pol_proj_len = df[k, "pol_term"] * 12 - dur_valdate
         new(
             df[k,"pol_id"],
             df[k,"prod_id"],
@@ -39,7 +39,7 @@ struct ModelPoint
             df[k,"sum_assured"],
             df[k,"premium"],
             df[k,"premium_mode"],
-            curr_dur,
+            dur_valdate,
             curr_pol_yr,
             pol_proj_len
             )

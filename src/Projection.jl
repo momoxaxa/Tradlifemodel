@@ -2,7 +2,7 @@
 project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator, product_features_set)
 project_per_policy_with_assumptions!(ppt::PerPolicyCFTable, asmpt:: AssumptionsTable)
 
-project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, curr_dur)
+project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, dur_at_valn_date)
 
 project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
 project_present_value_bef_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth::Array)
@@ -61,7 +61,7 @@ function project_per_policy_with_assumptions!(ppt::PerPolicyCFTable, asmpt:: Ass
 
 end
 
-function project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, curr_dur)
+function project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, dur_valdate)
 
     # Survivalship
 
@@ -230,7 +230,7 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
     read_prem_tax!(asmpt_inner, input_tables_dict, polt, curr_asmpset)
 
     project_per_policy_with_assumptions!(ppt_inner, asmpt_inner)
-    project_survivalship!(svt_inner, asmpt_inner, mp.pol_term, mp.curr_dur)
+    project_survivalship!(svt_inner, asmpt_inner, mp.pol_term, mp.dur_valdate)
     project_in_force_bef_resv_capreq!(ift_inner, ppt_inner, svt_inner)
     project_present_value_bef_resv_capreq!(pvcft_inner, ift_inner, asmpt_inner.disc_rate_mth)
     project_present_value_outgo_net_income!(pvcft_inner)
@@ -314,7 +314,7 @@ function run_product(prod_code::String, runset::RunSet)
 
         # Calculate decrement using assumptions and store in Survivalship Table
 
-        project_survivalship!(svt, asmpt, mp.pol_term, mp.curr_dur)
+        project_survivalship!(svt, asmpt, mp.pol_term, mp.dur_valdate)
         
         # Apply decrement from Survivalship Table to Per Policy Table and store in In Force Table
 
