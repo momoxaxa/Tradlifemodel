@@ -105,7 +105,7 @@ mutable struct ProductFeatureSet
     commission::InputFields
 
     function ProductFeatureSet(df::DataFrame, projtype::String, prodcode::String)
-        df_prodfeatures = filter("Projection Type" => x -> x == projtype, df)[:, Cols(Between("Projection Type", "Data Type"), Symbol(prodcode))]
+        dict_prodfeatures = filter("Product Name" => x -> x == prodcode, df)[1, projtype]
 
         prodfeatures = Dict(
             "premium" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
@@ -126,13 +126,12 @@ mutable struct ProductFeatureSet
             "PAD" => 0.0
         )
         
-        for prodfeature in collect(unique(df_prodfeatures[:,"Projection Variable"]))
-            df_prodfeatures_2 = filter("Projection Variable" => x -> x == prodfeature, df_prodfeatures)
+        for (prod_feat, prod_feat_fields) in dict_prodfeatures
             fields = copy(fields_default)
-            for field in collect(df_prodfeatures_2[:,"Data Type"])
-                fields[field] = filter(row -> row."Data Type" == field, df_prodfeatures_2)[1,4]
+            for (field, value) in prod_feat_fields
+                fields[field] = value
             end
-            prodfeatures[prodfeature] = InputFields(fields["Mult"], fields["Table Type"], fields["Table"], fields["Table Column"], fields["UDF"], fields["UDF_expr"], fields["UDF_vars"], fields["PAD"])
+            prodfeatures[prod_feat] = InputFields(fields["Mult"], fields["Table Type"], fields["Table"], fields["Table Column"], fields["UDF"], fields["UDF_expr"], fields["UDF_vars"], fields["PAD"])
         end
 
         new(
@@ -200,7 +199,8 @@ mutable struct AssumptionSet
     projtype::String
 
     function AssumptionSet(df::DataFrame, projtype::String, prodcode::String)
-        df_asmp = filter("Projection Type" => x -> x == projtype, df)[:, Cols(Between("Projection Type", "Data Type"), Symbol(prodcode))]
+        dict_asmp = filter("Product Name" => x -> x == prodcode, df)[1, projtype]
+
         assumptions = Dict(
             "mortality" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
             "lapse" => InputFields(1.0, "", "", "", "", :(), [], 0.0),
@@ -222,11 +222,10 @@ mutable struct AssumptionSet
             "PAD" => 0.0
         )
 
-        for assumption in collect(unique(df_asmp[:,"Projection Variable"]))
-            df_asmp_2 = filter("Projection Variable" => x -> x == assumption, df_asmp)
+        for (assumption, asmp_fields) in dict_asmp
             fields = copy(fields_default)
-            for field in collect(df_asmp_2[:,"Data Type"])
-                fields[field] = filter(row -> row."Data Type" == field, df_asmp_2)[1,4]
+            for (field, value) in asmp_fields
+                fields[field] = value
             end
             assumptions[assumption] = InputFields(fields["Mult"], fields["Table Type"], fields["Table"], fields["Table Column"], fields["UDF"], fields["UDF_expr"], fields["UDF_vars"], fields["PAD"])
         end
@@ -263,11 +262,26 @@ mutable struct RunSet
     CapReqDiscRate::Float64
 
     function RunSet(df::DataFrame, run_number::String)
-        df_run = filter("Run Number" => x -> x !== "Run Indicator" && x !== "Run Description", df)
+        list = [
+            "Base Projection - Mortality",
+            "Base Projection - Lapse",
+            "Base Projection - Expense",
+            "Base Projection - Discount Rate",
+            "Base Projection - Investment Return",
+            "Valuation - Mortality",
+            "Valuation - Lapse",
+            "Valuation - Expense",
+            "Valuation - Discount Rate",
+            "Capital Requirement - Mortality",
+            "Capital Requirement - Lapse",
+            "Capital Requirement - Expense",
+            "Capital Requirement - Discount Rate"
+            ]
+        df_run = filter(row -> row."Run Number" == run_number, df)
         dict_run = Dict()
         
-        for row in eachrow(df_run)
-            dict_run[row."Run Number"] = row[Symbol(run_number)]
+        for item in list
+            dict_run[item] = df[1, item]
         end
 
         new(

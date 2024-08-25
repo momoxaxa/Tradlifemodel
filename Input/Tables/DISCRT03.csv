@@ -1,0 +1,4 @@
+Class,Interest Rate Table Name,Prj Year/Cal Year
+investment_return,DISCRT02,Calendar Year
+disc_rate,DISCRT02,Calendar Year
+valn_int_rate,DISCRT01,Projection Year

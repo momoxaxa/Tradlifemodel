@@ -197,15 +197,15 @@ function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
     elseif curr_asmpset.disc_rate.table_type == "Mix of Prj Year and Cal Year"
         int_table_name = filter(row -> row."Class" == curr_asmpset.disc_rate.table_column, df)[1, "Interest Rate Table Name"]
         int_table_df = input_tables_dict[int_table_name]
- 
+
         year_index_type = filter(row -> row."Class" == curr_asmpset.disc_rate.table_column, df)[1, "Prj Year/Cal Year"]
         year_index =    if year_index_type == "Calendar Year"
                             year.(polt.date)
                         elseif year_index_type == "Projection Year"
                             polt.proj_year
                         end
-        
-        annual_rate = read_excel_PRJY_CY(int_table_df, curr_asmpset.disc_rate.table_column, year_index * mult) .+ adj
+
+        annual_rate = read_excel_PRJY_CY(int_table_df, curr_asmpset.disc_rate.table_column, year_index) * mult .+ adj
     end
     
     PAD = curr_asmpset.disc_rate.PAD 

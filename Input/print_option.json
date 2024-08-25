@@ -1,0 +1,342 @@
+[
+    {
+        "Variable": "date",
+        "Struct": "polt", 
+        "Print": "Yes"
+    },
+    {
+        "Variable": "duration",
+        "Struct": "polt",
+        "Print": "No"
+    },
+    {
+        "Variable": "proj_year",
+        "Struct": "polt",
+        "Print": "No"
+    },
+    {
+        "Variable": "pol_year",
+        "Struct": "polt",
+        "Print": "No"
+    },
+    {
+        "Variable": "att_age",
+        "Struct": "polt",
+        "Print": "No"
+    },
+    {
+        "Variable": "modal_cf_indicator",
+        "Struct": "polt",
+        "Print": "No"
+    },
+    {
+        "Variable": "mort_rate_ann",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "mort_rate_mth",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "lapse_rate_ann",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "lapse_rate_mth",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "acq_exp_per_pol",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "acq_exp_perc_prem",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "maint_exp_per_pol",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "maint_exp_perc_prem",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "disc_rate_ann",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "disc_rate_mth",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "invt_ret_ann",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "invt_ret_mth",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "prem_tax_rate",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "tax_rate",
+        "Struct": "asmpt",
+        "Print": "No"
+    },
+    {
+        "Variable": "premium_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "comm_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "prem_tax_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "death_ben_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "surr_ben_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "acq_exp_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "maint_exp_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "resv_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "capreq_pp",
+        "Struct": "ppt",
+        "Print": "No"
+    },
+    {
+        "Variable": "pol_if",
+        "Struct": "svt",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pol_death",
+        "Struct": "svt",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pol_lapse",
+        "Struct": "svt",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pol_maturity",
+        "Struct": "svt",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "premium_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "prem_tax_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "comm_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "acq_exp_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "maint_exp_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "death_ben_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "surr_ben_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "resv_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "inc_resv_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "invt_return_if",
+        "Struct": "ift",
+        "Print": "Yes"
+},
+    {
+        "Variable": "prof_bef_tax_capreq_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "tax_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "prof_aft_tax_bef_capreq_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "capreq_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "inc_capreq_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "invt_return_on_capreq_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "tax_on_invt_return_on_capreq_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "prof_aft_tax_capreq_if",
+        "Struct": "ift",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_premium",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_prem_tax",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_comm",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_acq_exp",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_maint_exp",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_death_ben",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_surr_ben",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_cf",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_inc_resv",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_invt_return",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_prof_bef_tax_capreq",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_tax",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_prof_aft_tax_bef_capreq",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_inc_capreq",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_invt_return_on_capreq",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_tax_on_invt_return_on_capreq",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    },
+    {
+        "Variable": "pv_prof_aft_tax_capreq",
+        "Struct": "pvcft",
+        "Print": "Yes"
+    }
+]

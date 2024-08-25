@@ -1,0 +1,7 @@
+{
+    "Valuation Date": "2021-12-31",
+    "Projection Year": 60,
+    "Capital Requirement Gross Up Factor": 0.3,
+    "Number of Workers for Multiprocessing": 0,
+    "Products to run": ["Prod01"]
+}
