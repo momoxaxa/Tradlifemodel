@@ -1,14 +1,13 @@
-using JSON, DataFrames, CSV, Dates
 
 # Model Points and Output file paths
 
-modelpoints_file_path = "MP/"
-output_file_path = "Output/"
+modelpoints_file_path = joinpath(dirname(@__DIR__),"MP/")
+output_file_path = joinpath(dirname(@__DIR__),"Output/")
 
 # General Settings
 
-general_settings_file = "input/general_settings.json"
 general_settings_dict = JSON.parsefile(general_settings_file; dicttype=Dict)
+general_settings_file = joinpath(dirname(@__DIR__),"input/general_settings.json")
 
 # General Settings - Products to run
 
@@ -33,15 +32,15 @@ num_workers = general_settings_dict["Number of Workers for Multiprocessing"]
 
 # Run Settings
 
-run_settings_file = "input/run_settings.json"
 run_settings_arr = JSON.parsefile(run_settings_file; dicttype=Dict)
+run_settings_file = joinpath(dirname(@__DIR__),"input/run_settings.json")
 
 run_settings_df = DataFrame(run_settings_arr)
 selected_runs = filter(row -> row."Run Indicator" == "Yes", run_settings_df)[:,"Run Number"]
-
+println(run_settings_arr)
 # Product Setup Files
 
-prod_setup_file_path = "input/Products/"
+prod_setup_file_path = joinpath(dirname(@__DIR__),"input/Products/")
 prod_setup_arr = [
     let
         content = JSON.parsefile(joinpath(prod_setup_file_path, file), dicttype=Dict)
@@ -58,20 +57,20 @@ assumption_set_df = DataFrame(prod_setup_arr)
 
 # Input file for Table Listings
 
-table_listing_file = "input/table_listings.json"
 table_listing_dict = JSON.parsefile(table_listing_file, dicttype=Dict)
+table_listing_file = joinpath(dirname(@__DIR__),"input/table_listings.json")
 
 # Input Tables
 
 input_tables_dict = Dict()
 for (table_name, fields) in table_listing_dict
-    input_tables_dict[table_name] = CSV.read(joinpath("input/tables/", fields["Table Filename"]), DataFrame)
+    input_tables_dict[table_name] = CSV.read(joinpath(dirname(@__DIR__),"input/tables/", fields["Table Filename"]), DataFrame)
 end
 
 # Print Options
 
-print_option_file = "input/print_option.json"
 print_option_dict = JSON.parsefile(print_option_file; dicttype=Dict)
+print_option_file = joinpath(dirname(@__DIR__),"input/print_option.json")
 
 print_option_df = DataFrame(print_option_dict)
 print_agg_df = filter(row -> row.Print == "Yes" && row.Variable !== "date", print_option_df)

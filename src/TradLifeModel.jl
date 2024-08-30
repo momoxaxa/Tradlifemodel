@@ -1,7 +1,15 @@
+module TradLifeModel
+
 using Distributed
 
 include("Settings.jl")
-include("utils.jl")
+include("Utils.jl")
+include("DataStruct.jl")
+include("Assumptions.jl")
+include("Print.jl")
+include("Projection.jl")
+
+start = now()
 
 # Multiprocessing
 
@@ -11,15 +19,12 @@ addprocs(num_workers)
     using CSV, DataFrames
     using XLSX, Dates, MortalityTables, OffsetArrays
 
-    start = now()
-
     include("Settings.jl")
-    include("DataStruct.jl")
     include("Utils.jl")
-    include("ProductFeatures.jl")
+    include("DataStruct.jl")
     include("Assumptions.jl")
-    include("Projection.jl")
     include("Print.jl")
+    include("Projection.jl")
 
 end
 
@@ -44,5 +49,7 @@ end
     end
 
     CSV.write("$output_file_path$curr_run\\result_allproducts.csv", resultallproducts)
+
+end
 
 end

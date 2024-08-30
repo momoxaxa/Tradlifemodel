@@ -10,7 +10,7 @@ read_excel_EA_MI(exceldata::DataFrame, index_1, index_2, excelheader::String, is
 rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
 =#
 
-using OffsetArrays
+using OffsetArrays, DataFrames
 using OffsetArrays: Origin
 
 # Convert Array from 1-based index to 0-based index
