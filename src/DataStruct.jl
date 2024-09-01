@@ -70,24 +70,24 @@ end
 # Define struct for Input Fields
 
 mutable struct InputFields
-    mult::Union{Float64, Missing}
+    mult::Union{Integer, Float64, Missing}
     table_type::Union{String, Missing}
     table::Union{String, Missing}
     table_column::Union{String, Missing}
     UDF::Union{String, Missing}
     UDF_expr::Expr
     UDF_vars::Array
-    PAD::Union{Float64, Missing}
+    PAD::Union{Integer, Float64, Missing}
 
     function InputFields(
-        mult::Union{Float64, Missing},
+        mult::Union{Integer, Float64, Missing},
         table_type::Union{String, Missing},
         table::Union{String, Missing},
         table_column::Union{String, Missing}, 
         UDF::Union{String, Missing},
         UDF_expr::Expr,
         UDF_vars::Array,
-        PAD::Union{Float64, Missing}
+        PAD::Union{Integer, Float64, Missing}
         )
 
         new(mult, table_type, table, table_column, UDF, UDF_expr, UDF_vars, PAD)

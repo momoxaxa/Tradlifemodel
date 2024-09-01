@@ -1,3 +1,4 @@
+using JSON3, DataFrames, CSV, Dates
 
 # Model Points and Output file paths
 
@@ -6,8 +7,8 @@ output_file_path = joinpath(dirname(@__DIR__),"Output/")
 
 # General Settings
 
-general_settings_dict = JSON.parsefile(general_settings_file; dicttype=Dict)
 general_settings_file = joinpath(dirname(@__DIR__),"input/general_settings.json")
+general_settings_dict = JSON3.read(general_settings_file, Dict)
 
 # General Settings - Products to run
 
@@ -32,18 +33,17 @@ num_workers = general_settings_dict["Number of Workers for Multiprocessing"]
 
 # Run Settings
 
-run_settings_arr = JSON.parsefile(run_settings_file; dicttype=Dict)
 run_settings_file = joinpath(dirname(@__DIR__),"input/run_settings.json")
+run_settings_arr = JSON3.read(run_settings_file, Vector{Dict})
 
 run_settings_df = DataFrame(run_settings_arr)
 selected_runs = filter(row -> row."Run Indicator" == "Yes", run_settings_df)[:,"Run Number"]
-println(run_settings_arr)
 # Product Setup Files
 
 prod_setup_file_path = joinpath(dirname(@__DIR__),"input/Products/")
 prod_setup_arr = [
     let
-        content = JSON.parsefile(joinpath(prod_setup_file_path, file), dicttype=Dict)
+        content = JSON3.read(joinpath(prod_setup_file_path, file), Dict)
         prod_name = replace(file, ".json" => "")
         content["Product Name"] = prod_name
         content
@@ -57,8 +57,8 @@ assumption_set_df = DataFrame(prod_setup_arr)
 
 # Input file for Table Listings
 
-table_listing_dict = JSON.parsefile(table_listing_file, dicttype=Dict)
 table_listing_file = joinpath(dirname(@__DIR__),"input/table_listings.json")
+table_listing_dict = JSON3.read(table_listing_file, Dict)
 
 # Input Tables
 
@@ -69,8 +69,8 @@ end
 
 # Print Options
 
-print_option_dict = JSON.parsefile(print_option_file; dicttype=Dict)
 print_option_file = joinpath(dirname(@__DIR__),"input/print_option.json")
+print_option_dict = JSON3.read(print_option_file, Vector{Dict})
 
 print_option_df = DataFrame(print_option_dict)
 print_agg_df = filter(row -> row.Print == "Yes" && row.Variable !== "date", print_option_df)
