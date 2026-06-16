@@ -1,0 +1,309 @@
+/* ── TradLifeModel — base.css (light / Excel theme) ──────────────────────────
+   Shared design tokens, reset, header, nav, typography.
+   Imported by every page stylesheet.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+:root {
+    --tlm-bg:      #ffffff;
+    --tlm-surface: #f7f7f8;
+    --tlm-border:  #e4e4e7;
+    --tlm-accent:  #52525b;
+    --tlm-green:   #16a34a;
+    --tlm-red:     #dc2626;
+    --tlm-yellow:  #d97706;
+    --tlm-muted:   #71717a;
+    --tlm-text:    #18181b;
+    --tlm-mono:    'IBM Plex Mono', monospace;
+    --tlm-sans:    'IBM Plex Sans', sans-serif;
+}
+
+/* ── Reset ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--tlm-bg);
+    color: var(--tlm-text);
+    font-family: var(--tlm-sans);
+    min-height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.tlm-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--tlm-border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.tlm-logo {
+    font-family: var(--tlm-mono);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--tlm-text);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+}
+
+/* ── Badge ───────────────────────────────────────────────────────────────────── */
+.tlm-badge {
+    background: var(--tlm-surface);
+    color: var(--tlm-muted);
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    font-family: var(--tlm-mono);
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    letter-spacing: 0.08em;
+}
+
+/* ── Header spacer ───────────────────────────────────────────────────────────── */
+.tlm-header-spacer { flex: 1; }
+
+/* ── Nav ─────────────────────────────────────────────────────────────────────── */
+.tlm-nav { display: flex; align-items: center; }
+
+.tlm-nav a {
+    font-family: var(--tlm-mono);
+    font-size: 0.72rem;
+    color: var(--tlm-muted);
+    text-decoration: none;
+    margin-left: 1.25rem;
+    padding: 0 0 2px;
+    transition: color 0.15s;
+    white-space: nowrap;
+}
+
+.tlm-nav a:hover  { color: var(--tlm-text); }
+
+.tlm-nav a.active {
+    color: var(--tlm-accent);
+    border-bottom: 2px solid var(--tlm-accent);
+}
+
+/* ── Shared app shell ────────────────────────────────────────────────────────── */
+.tlm-app {
+    display: flex;
+    height: calc(100vh - 48px);
+    overflow: hidden;
+}
+
+.tlm-sidenav {
+    width: 200px;
+    min-width: 200px;
+    background: var(--tlm-surface);
+    border-right: 1px solid var(--tlm-border);
+    padding: 1rem 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow-y: auto;
+}
+
+.tlm-sidenav-label {
+    font-family: var(--tlm-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--tlm-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 1rem 0.4rem;
+}
+
+.tlm-sidenav a {
+    display: block;
+    font-family: var(--tlm-mono);
+    font-size: 0.8rem;
+    color: var(--tlm-muted);
+    text-decoration: none;
+    padding: 0.35rem 1rem 0.35rem 1.25rem;
+    border-left: 2px solid transparent;
+    transition: color 0.1s, background 0.1s;
+}
+
+.tlm-sidenav a:hover { color: var(--tlm-text); background: #ededf0; }
+
+.tlm-sidenav a.active {
+    color: var(--tlm-accent);
+    background: #eef0fd;
+    border-left-color: var(--tlm-accent);
+    font-weight: 600;
+}
+
+.tlm-page-main {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--tlm-bg);
+    padding: 1.5rem;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────────── */
+.tlm-card {
+    background: var(--tlm-bg);
+    border: 1px solid var(--tlm-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* ── Section title ───────────────────────────────────────────────────────────── */
+.tlm-section-title {
+    font-family: var(--tlm-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--tlm-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.25rem;
+    border-bottom: 1px solid var(--tlm-border);
+    background: var(--tlm-surface);
+}
+
+/* ── Shared buttons ──────────────────────────────────────────────────────────── */
+.btn-primary {
+    background: var(--tlm-accent);
+    border: none;
+    border-radius: 3px;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.48rem 1.2rem;
+    transition: filter 0.15s;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-primary:hover    { filter: brightness(1.1); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    color: var(--tlm-muted);
+    cursor: pointer;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    padding: 0.45rem 1.1rem;
+    transition: border-color 0.15s, color 0.15s;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-ghost:hover { border-color: var(--tlm-accent); color: var(--tlm-accent); }
+
+.btn-danger {
+    background: transparent;
+    border: 1px solid var(--tlm-red);
+    border-radius: 3px;
+    color: var(--tlm-red);
+    cursor: pointer;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    padding: 0.42rem 1rem;
+    transition: background 0.15s, border-color 0.15s;
+}
+.btn-danger:hover { background: #fde8e6; border-color: var(--tlm-red); }
+
+/* ── Notice banner ───────────────────────────────────────────────────────────── */
+.tlm-notice {
+    padding: 0.55rem 1.25rem;
+    border-radius: 3px;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    margin: 0.75rem 0;
+}
+.tlm-notice--success {
+    background: #dcfce7;
+    color: var(--tlm-green);
+    border: 1px solid #bbf7d0;
+}
+.tlm-notice--error {
+    background: #fee2e2;
+    color: var(--tlm-red);
+    border: 1px solid #fecaca;
+}
+
+/* ── Shared form controls ────────────────────────────────────────────────────── */
+.tlm-label {
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--tlm-text);
+    letter-spacing: 0.01em;
+}
+
+.tlm-input {
+    background: #ffffff;
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    color: var(--tlm-text);
+    font-family: var(--tlm-mono);
+    font-size: 0.83rem;
+    padding: 0.38rem 0.7rem;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+    color-scheme: light;
+}
+.tlm-input:focus      { border-color: var(--tlm-accent); }
+.tlm-input--short     { width: 160px; }
+
+.tlm-divider {
+    border: none;
+    border-top: 1px solid var(--tlm-border);
+    margin: 0;
+}
+
+.tlm-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.tlm-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.tlm-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.tlm-field--row {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────────── */
+.tlm-toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    border-radius: 4px;
+    padding: 0.55rem 1.25rem;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    pointer-events: none;
+}
+.tlm-toast.success {
+    background: #dcfce7;
+    color: var(--tlm-green);
+    border: 1px solid #bbf7d0;
+}
+.tlm-toast.error {
+    background: #fee2e2;
+    color: var(--tlm-red);
+    border: 1px solid #fecaca;
+}

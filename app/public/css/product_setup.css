@@ -1,0 +1,163 @@
+/* ── Product Setup page ──────────────────────────────────────────────────────
+   Requires base.css for tokens and shared controls.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* ── Product list items (inside tlm-sidenav) ──────────────────────────────── */
+.ps-add-btn {
+    margin: 0.25rem 0.75rem 0.5rem;
+    padding: 0.3rem 0.75rem;
+    font-family: var(--tlm-mono);
+    font-size: 0.75rem;
+    background: transparent;
+    color: var(--tlm-green);
+    border: 1px solid #bbf7d0;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+    display: block;
+    width: calc(100% - 1.5rem);
+}
+.ps-add-btn:hover { background: #dcfce7; }
+
+.ps-prod-list { list-style: none; margin: 0; padding: 0; }
+.ps-prod-item { margin: 0; }
+
+.ps-prod-link {
+    display: block;
+    font-family: var(--tlm-mono);
+    font-size: 0.8rem;
+    color: var(--tlm-muted);
+    text-decoration: none;
+    padding: 0.35rem 1rem 0.35rem 1.25rem;
+    border-left: 2px solid transparent;
+    transition: color 0.1s, background 0.1s;
+}
+.ps-prod-link:hover { color: var(--tlm-text); background: #ededf0; }
+
+.ps-prod--active .ps-prod-link {
+    color: var(--tlm-accent);
+    background: #eef0fd;
+    border-left-color: var(--tlm-accent);
+    font-weight: 600;
+}
+
+/* ── Main panel ───────────────────────────────────────────────────────────── */
+.ps-placeholder {
+    font-family: var(--tlm-mono);
+    font-size: 0.82rem;
+    color: var(--tlm-muted);
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 1px dashed var(--tlm-border);
+    border-radius: 4px;
+}
+
+/* ── Form header ──────────────────────────────────────────────────────────── */
+.ps-form-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--tlm-border);
+}
+
+.ps-name-wrap  { display: flex; flex-direction: column; gap: 0.3rem; }
+.ps-form-actions { display: flex; gap: 0.6rem; align-items: center; }
+
+/* ── Sections ─────────────────────────────────────────────────────────────── */
+.ps-sections { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.ps-section {
+    border: 1px solid var(--tlm-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ps-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--tlm-surface);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--tlm-border);
+}
+.ps-section-header:hover { background: #ededf0; }
+
+.ps-section-arrow { font-size: 0.65rem; color: var(--tlm-muted); width: 10px; }
+
+.ps-section-title {
+    font-family: var(--tlm-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--tlm-text);
+}
+
+.ps-section-body { overflow-x: auto; background: var(--tlm-bg); }
+
+/* ── Table ────────────────────────────────────────────────────────────────── */
+.ps-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+}
+
+.ps-th {
+    background: var(--tlm-surface);
+    color: var(--tlm-muted);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.35rem 0.6rem;
+    border-bottom: 2px solid var(--tlm-border);
+    white-space: nowrap;
+}
+.ps-th--label { width: 130px; }
+.ps-th--type  { min-width: 200px; }
+.ps-th--sm    { width: 80px; }
+
+.ps-row { border-bottom: 1px solid var(--tlm-border); }
+.ps-row:last-child { border-bottom: none; }
+.ps-row:hover { background: #f5f5ff; }
+
+.ps-cell { padding: 0.3rem 0.5rem; vertical-align: middle; }
+.ps-cell--label { font-weight: 600; color: var(--tlm-text); white-space: nowrap; padding-left: 0.75rem; }
+.ps-cell--type  { color: var(--tlm-muted); font-size: 0.72rem; }
+
+/* ── Form controls ────────────────────────────────────────────────────────── */
+.ps-select {
+    background: #ffffff;
+    color: var(--tlm-text);
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    font-family: var(--tlm-mono);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 100px;
+    max-width: 160px;
+}
+.ps-select:focus { outline: none; border-color: var(--tlm-accent); }
+
+.ps-input {
+    background: #ffffff;
+    color: var(--tlm-text);
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    font-family: var(--tlm-mono);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+}
+.ps-input:focus { outline: none; border-color: var(--tlm-accent); }
+.ps-input--sm { width: 70px; }
+.ps-input--md { width: 130px; }
+
+.ps-type-display {
+    font-family: var(--tlm-mono);
+    font-size: 0.72rem;
+    color: var(--tlm-muted);
+    font-style: italic;
+}

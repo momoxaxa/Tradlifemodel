@@ -1,0 +1,125 @@
+/* ── Run Settings page ───────────────────────────────────────────────────────
+   Requires base.css for tokens and shared controls.
+────────────────────────────────────────────────────────────────────────────── */
+
+.rs-content {
+    max-width: 100%;
+}
+
+.rs-wrapper {
+    overflow: auto;
+    max-height: calc(100vh - 220px);
+    border-bottom: 1px solid var(--tlm-border);
+}
+
+.rs-grid {
+    border-collapse: collapse;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    width: max-content;
+}
+
+.rs-sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--tlm-bg);
+    box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--tlm-surface);
+    border-bottom: 2px solid var(--tlm-border);
+}
+
+.rs-corner { z-index: 3; min-width: 140px; width: 140px; }
+
+.rs-run-th {
+    text-align: center;
+    padding: 0.4rem 0.25rem;
+    color: var(--tlm-accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    min-width: 120px;
+    width: 120px;
+}
+
+.rs-label {
+    text-align: right;
+    padding: 0.3rem 0.75rem 0.3rem 1rem;
+    color: var(--tlm-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-right: 1px solid var(--tlm-border);
+    background: var(--tlm-bg);
+}
+
+.rs-cell {
+    padding: 0.2rem 0.5rem;
+    text-align: center;
+    border: 1px solid #e8e8e8;
+}
+
+.rs-grid tbody tr:nth-child(even):not(.rs-group-row) .rs-cell,
+.rs-grid tbody tr:nth-child(even):not(.rs-group-row) .rs-label {
+    background: #fafafa;
+}
+
+.rs-grid tbody tr:not(.rs-group-row):hover .rs-cell  { background: #f5f5ff; }
+.rs-grid tbody tr:not(.rs-group-row):hover .rs-label { color: var(--tlm-text); }
+
+.rs-cell--num { text-align: right; white-space: nowrap; padding-right: 0.5rem; }
+
+.rs-input {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    color: var(--tlm-text);
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    padding: 0.18rem 0.3rem;
+    outline: none;
+    transition: border-color 0.12s, background 0.12s;
+    display: block;
+}
+.rs-input:focus { border-color: var(--tlm-accent); background: #f5f5ff; }
+
+.rs-input--num  { width: 68px; text-align: right; display: inline-block; }
+.rs-input--text { width: 220px; text-align: left; resize: none; overflow-y: auto; line-height: 1.35; padding: 0.25rem 0.3rem; }
+
+.rs-check {
+    accent-color: var(--tlm-accent);
+    width: 14px; height: 14px;
+    cursor: pointer; display: block; margin: 0 auto;
+}
+
+.rs-group-row .rs-label,
+.rs-group-row .rs-group-fill {
+    background: var(--tlm-surface);
+    border-top: 1px solid var(--tlm-border);
+    border-bottom: 1px solid var(--tlm-border);
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+}
+
+.rs-group-label {
+    color: var(--tlm-accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left !important;
+}
+
+.rs-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--tlm-border);
+}

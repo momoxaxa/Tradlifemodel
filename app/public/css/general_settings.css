@@ -1,0 +1,53 @@
+/* ── General Settings page ───────────────────────────────────────────────────
+   Requires base.css for tokens and shared controls.
+────────────────────────────────────────────────────────────────────────────── */
+
+.gs-form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.gs-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--tlm-surface);
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+}
+
+.gs-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+}
+
+.gs-checkbox-label:hover .gs-checkbox-text { color: var(--tlm-text); }
+
+.gs-checkbox {
+    accent-color: var(--tlm-accent);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.gs-checkbox-text {
+    font-family: var(--tlm-mono);
+    font-size: 0.82rem;
+    color: var(--tlm-muted);
+    transition: color 0.1s;
+}
+
+.gs-btn-next {
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    color: var(--tlm-accent);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.gs-btn-next:hover { text-decoration: underline; }
