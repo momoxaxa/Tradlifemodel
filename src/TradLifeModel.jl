@@ -1,5 +1,3 @@
-module TradLifeModel
-
 using Distributed
 
 include("Settings.jl")
@@ -17,11 +15,12 @@ addprocs(num_workers)
 
 @everywhere begin
     using CSV, DataFrames
-    using XLSX, Dates, MortalityTables, OffsetArrays
+    using Dates, MortalityTables, OffsetArrays
 
     include("Settings.jl")
     include("Utils.jl")
     include("DataStruct.jl")
+    include("ProductFeatures.jl")
     include("Assumptions.jl")
     include("Print.jl")
     include("Projection.jl")
@@ -37,12 +36,18 @@ end
         run_product(prod_code, runset)
     end
 
-    println("$curr_run completed.")
+    println("$curr_run completed at $(now()).")
 
-    # Combine and save results for all products to CSV file
+end
+
+# Combine and save results for all products to CSV file
+for curr_run in selected_runs
+
+    resultallproducts = DataFrame()
+
     for (i, prod_code) in enumerate(selected_products)
         if i == 1
-            global resultallproducts = CSV.read("$output_file_path$curr_run\\result_$prod_code.csv", DataFrame)
+            resultallproducts = CSV.read("$output_file_path$curr_run\\result_$prod_code.csv", DataFrame)
         else
             resultallproducts[:, Not(:date)] .+= CSV.read("$output_file_path$curr_run\\result_$prod_code.csv", DataFrame)[:, Not(:date)]
         end
@@ -52,4 +57,5 @@ end
 
 end
 
-end
+elapsed = Dates.value(now() - start) / 1000
+println("All runs completed in $(elapsed) seconds")

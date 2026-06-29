@@ -44,13 +44,13 @@
         "disc_rate":{
             "Mult": 1.0,
             "Table": "DISCRT01",
-            "Table Type": "Prj Year",
+            "Table Type": "Projection Year",
             "Table Column": "disc_rate"
         },
         "invt_return":{
             "Mult": 1.0,
             "Table": "DISCRT01",
-            "Table Type": "Prj Year",
+            "Table Type": "Projection Year",
             "Table Column": "investment_return"
         },
         "prem_tax":{
@@ -86,7 +86,7 @@
         "disc_rate":{
             "Mult": 1.0,
             "Table": "DISCRT01",
-            "Table Type": "Prj Year",
+            "Table Type": "Projection Year",
             "Table Column": "valn_int_rate",
             "PAD": 0.0
         },
@@ -100,7 +100,7 @@
         "mortality":{
             "Mult": 0.8,
             "Table": "MORT01",
-            "Table Type": "Select and Ultimate - Sex Distinct",
+            "Table Type": "Attained Age",
             "PAD": 0.15
         },
         "lapse":{
@@ -118,7 +118,7 @@
         "disc_rate":{
             "Mult": 1.0,
             "Table": "DISCRT01",
-            "Table Type": "Prj Year",
+            "Table Type": "Projection Year",
             "Table Column": "valn_int_rate",
             "PAD": 0.0
         },

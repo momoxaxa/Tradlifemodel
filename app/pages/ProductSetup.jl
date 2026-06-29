@@ -4,10 +4,13 @@ using Genie, Genie.Router, Genie.Renderer.Html
 using HTTP: escapehtml
 using JSON3
 
-# Paths
-const INPUT_PATH     = joinpath(dirname(dirname(dirname(@__FILE__))), "Input")
-const PRODUCTS_DIR   = joinpath(INPUT_PATH, "products")
-const LISTINGS_PATH  = joinpath(INPUT_PATH, "table_listings.json")
+# ============================================================
+# Constants — paths, sections definition, field-category map
+# ============================================================
+
+const INPUT_PATH    = joinpath(dirname(dirname(dirname(@__FILE__))), "Input")
+const PRODUCTS_DIR  = joinpath(INPUT_PATH, "products")
+const LISTINGS_PATH = joinpath(INPUT_PATH, "table_listings.json")
 
 # Each section (e.g. Product Feature): (json_key, display_label, rows)
 # Each row (e.g. premium): (field_key, display_label, has_pad, has_table_col, has_udf)
@@ -45,25 +48,29 @@ const SECTIONS = [
 
 # Category for each field
 const FIELD_CAT = Dict(
-    "premium"    => "premium",
-    "death_ben"  => "death_ben",
-    "surr_ben"   => "surr_ben",
-    "commission" => "commission",
-    "mortality"  => "mortality",
-    "lapse"      => "lapse",
-    "expense"    => "expense",
-    "disc_rate"  => "disc_rate",
-    "invt_return"=> "disc_rate",
-    "prem_tax"   => "prem_tax",
-    "tax"        => "tax",
+    "premium"     => "premium",
+    "death_ben"   => "death_ben",
+    "surr_ben"    => "surr_ben",
+    "commission"  => "commission",
+    "mortality"   => "mortality",
+    "lapse"       => "lapse",
+    "expense"     => "expense",
+    "disc_rate"   => "disc_rate",
+    "invt_return" => "disc_rate",
+    "prem_tax"    => "prem_tax",
+    "tax"         => "tax",
 )
 
-# Load json to Dict
+# ============================================================
+# Helpers — JSON I/O, product list, table lookups
+# ============================================================
+
+# Load JSON file into Dict
 function load_json(path::String)::Dict{String,Any}
     JSON3.read(read(path, String), Dict{String,Any})
 end
 
-# Convert to HTML special characters for rendering page
+# Escape HTML special characters to prevent XSS
 he(s) = escapehtml(string(s))
 
 # Load listing of all existing tables
@@ -77,16 +84,15 @@ function tables_for_cat(listings::Dict{String,Any}, cat::String)::Vector{String}
           if string(get(v, "Table Category", "")) == cat])
 end
 
-# List table type for a selected table
+# Get table type for a selected table
 function table_type_for(listings::Dict{String,Any}, tname::String)::String
     haskey(listings, tname) || return ""
-    v = listings[tname]
-    string(get(v, "Table Type", ""))
+    string(get(listings[tname], "Table Type", ""))
 end
 
 # List all existing products
 function list_products()::Vector{String}
-    sort([replace(f, ".json"=>"") for f in readdir(PRODUCTS_DIR) if endswith(f, ".json")])
+    sort([replace(f, ".json" => "") for f in readdir(PRODUCTS_DIR) if endswith(f, ".json")])
 end
 
 # Load selected product to Dict
@@ -96,9 +102,12 @@ end
 
 # Save product to JSON
 function save_product(name::String, data::Dict{String,Any})
-    open(joinpath(PRODUCTS_DIR, name * ".json"), "w") do io
-        JSON3.pretty(io,data)
+    path = joinpath(PRODUCTS_DIR, name * ".json")
+    tmp  = path * ".tmp"
+    open(tmp, "w") do io
+        JSON3.pretty(io, data)
     end
+    mv(tmp, path, force=true)
 end
 
 # Delete selected product
@@ -107,13 +116,17 @@ function delete_product(name::String)
     isfile(path) && rm(path)
 end
 
+# ============================================================
+# HTML Builders — dropdowns, section rows, type map JS
+# ============================================================
+
 # Table dropdown for a field
 function table_dropdown(id::String, listings::Dict{String,Any},
                         cat::String, selected::String)::String
     tbls = tables_for_cat(listings, cat)
     opts = "<option value=''>-- None --</option>" *
-        join(["<option value='$(he(t))' $(t==selected ? "selected" : "")>$(he(t))</option>"
-              for t in tbls], "")
+           join(["<option value='$(he(t))' $(t==selected ? "selected" : "")>$(he(t))</option>"
+                 for t in tbls], "")
     "<select id='$(he(id))' name='$(he(id))' class='ps-select' " *
     "onchange=\"updateType('$(he(id))')\">" * opts * "</select>"
 end
@@ -121,11 +134,10 @@ end
 # Table column dropdown for disc_rate and invt_return fields
 function table_col_dropdown(id::String, val::String)::String
     opts = "<option value=''>-- None --</option>" *
-        join(["<option value='$(he(t))' $(t==val ? "selected" : "")>$(he(t))</option>"
-              for t in ["investment_return", "disc_rate", "valn_int_rate"]], "")
-    "<select id='$(he(id))' name='$(he(id))' class='ps-select' " * opts * "</select>"
+           join(["<option value='$(he(t))' $(t==val ? "selected" : "")>$(he(t))</option>"
+                 for t in ["investment_return", "disc_rate", "valn_int_rate"]], "")
+    "<select id='$(he(id))' name='$(he(id))' class='ps-select'>" * opts * "</select>"
 end
-
 
 # Section HTML (e.g. Product Feature) with fields (e.g. Premium)
 function section_html(sec_key::String, sec_label::String,
@@ -137,12 +149,12 @@ function section_html(sec_key::String, sec_label::String,
         fkey, flabel, has_pad, has_table_col, has_udf = row
         fdata = get(sec_data, fkey, Dict{String,Any}())
 
-        sel_table  = string(get(fdata, "Table",        ""))
-        mult_val   = string(get(fdata, "Mult",          1))
-        pad_val    = string(get(fdata, "PAD",           0))
-        tcol_val   = string(get(fdata, "Table Column", ""))
-        udf_val    = string(get(fdata, "UDF",          ""))
-        ttype_val  = string(get(fdata, "Table Type",   ""))
+        sel_table = string(get(fdata, "Table",        ""))
+        mult_val  = string(get(fdata, "Mult",          1))
+        pad_val   = string(get(fdata, "PAD",           0))
+        tcol_val  = string(get(fdata, "Table Column", ""))
+        udf_val   = string(get(fdata, "UDF",          ""))
+        ttype_val = string(get(fdata, "Table Type",   ""))
 
         cat      = get(FIELD_CAT, fkey, "")
         table_id = "$(sec_key)__$(fkey)__table"
@@ -159,8 +171,7 @@ function section_html(sec_key::String, sec_label::String,
         pad_html   = has_pad ?
                      "<input type='number' id='$(he(pad_id))' name='$(he(pad_id))' " *
                      "class='ps-input ps-input--sm' step='any' value='$(he(pad_val))' placeholder='PAD'>" : ""
-        tcol_html  = has_table_col ?
-                     table_col_dropdown(tcol_id, tcol_val) : ""
+        tcol_html  = has_table_col ? table_col_dropdown(tcol_id, tcol_val) : ""
         udf_html   = has_udf ?
                      "<input type='text' id='$(he(udf_id))' name='$(he(udf_id))' " *
                      "class='ps-input ps-input--md' value='$(he(udf_val))' placeholder='UDF'>" : ""
@@ -176,53 +187,56 @@ function section_html(sec_key::String, sec_label::String,
         </tr>"""
     end for row in rows], "\n")
 
-    # Turn off table headers for columns not applicable to the section
-    (theader_PAD, theader_TCOL, theader_UDF) = 
-      if sec_key == "Product Feature"
-        ("","", "UDF")
-      elseif sec_key =="Base Projection"
-        ("", "Table Column", "")
-      else
-        ("PAD", "Table Column", "")
-      end
+    # Column headers vary by section
+    theader_PAD, theader_TCOL, theader_UDF =
+        if sec_key == "Product Feature"
+            ("", "", "UDF")
+        elseif sec_key == "Base Projection"
+            ("", "Table Column", "")
+        else
+            ("PAD", "Table Column", "")
+        end
 
     """<div class='ps-section'>
-      <div class='ps-section-header' onclick='toggleSection(this)'>
-        <span class='ps-section-arrow'>&#x25BC;</span>
-        <span class='ps-section-title'>$(he(sec_label))</span>
-      </div>
-      <div class='ps-section-body'>
-        <table class='ps-table'>
-          <thead><tr>
-            <th class='ps-th ps-th--label'>Assumption</th>
-            <th class='ps-th'>Table</th>
-            <th class='ps-th ps-th--type'>Table Type</th>
-            <th class='ps-th ps-th--sm'>Mult</th>
-            <th class='ps-th ps-th--sm'>$(theader_PAD)</th>
-            <th class='ps-th'>$(theader_TCOL)</th>
-            <th class='ps-th'>$(theader_UDF)</th>
-          </tr></thead>
-          <tbody>$(rows_html)</tbody>
-        </table>
-      </div>
-    </div>"""
+  <div class='ps-section-header' onclick='toggleSection(this)'>
+    <span class='ps-section-arrow'>&#x25BC;</span>
+    <span class='ps-section-title'>$(he(sec_label))</span>
+  </div>
+  <div class='ps-section-body'>
+    <table class='ps-table'>
+      <thead><tr>
+        <th class='ps-th ps-th--label'>Assumption</th>
+        <th class='ps-th'>Table</th>
+        <th class='ps-th ps-th--type'>Table Type</th>
+        <th class='ps-th ps-th--sm'>Mult</th>
+        <th class='ps-th ps-th--sm'>$(theader_PAD)</th>
+        <th class='ps-th'>$(theader_TCOL)</th>
+        <th class='ps-th'>$(theader_UDF)</th>
+      </tr></thead>
+      <tbody>$(rows_html)</tbody>
+    </table>
+  </div>
+</div>"""
 end
 
-# Table type lookup JS object (e.g. {"MORT01": "Attained Age", "EXP01": "Policy Year"}) 
+# Table type lookup JS object (e.g. {"MORT01": "Attained Age", "EXP01": "Policy Year"})
 function build_type_map_js(listings::Dict{String,Any})::String
     entries = join(["\"$(he(string(t)))\": \"$(he(table_type_for(listings, string(t))))\""
                     for t in keys(listings)], ",\n")
     "var _typeMap = {$entries};"
 end
 
-# Render page
+# ============================================================
+# HTML Builder — render page
+# ============================================================
+
 function render_page(;
-        sel_product::String  = "",
+        sel_product::String         = "",
         prod_data::Dict{String,Any} = Dict{String,Any}(),
         listings::Dict{String,Any},
-        notice::String       = "",
-        notice_type::String  = "success",
-        show_form::Bool  = false)
+        notice::String              = "",
+        notice_type::String         = "success",
+        show_form::Bool             = false)
 
     products    = list_products()
     notice_html = isempty(notice) ? "" :
@@ -248,21 +262,23 @@ function render_page(;
                               for (sec_key, sec_label, rows) in SECTIONS], "\n")
 
         """<div class='ps-form-header'>
-          <div class='ps-name-wrap'>
-            <label class='tlm-label'>Product Name</label>
-            <input type='text' id='prod-name' class='tlm-input' style='max-width:200px'
-                   value='$(he(pname))' placeholder='e.g. Prod01' $(ro_attr)>
-          </div>
-          <div class='ps-form-actions'>
-            <button class='btn-primary' onclick='saveProduct()'>&#x1F4BE; Save</button>
-            $(is_new ? "" :
-              "<button class='btn-danger' onclick='deleteProduct(\"$(he(sel_product))\")'>&#x1F5D1; Delete</button>")
-          </div>
-        </div>
-        $(notice_html)
-        <div class='ps-sections'>
-          $(sections_html)
-        </div>"""
+  <div class='ps-name-wrap'>
+    <label class='tlm-label'>Product Name</label>
+    <input type='text' id='prod-name' class='tlm-input' style='max-width:200px'
+           value='$(he(pname))' placeholder='e.g. Prod01' $(ro_attr)>
+  </div>
+  <div class='ps-form-actions'>
+    <button class='btn-primary' onclick='saveProduct()'>&#x1F4BE; Save</button>
+    $(is_new ? "" :
+      "<button class='btn-ghost' onclick='saveAsProduct()'>&#x1F4BE; Save As</button>")
+    $(is_new ? "" :
+      "<button class='btn-danger' onclick='deleteProduct(\"$(he(sel_product))\")'>&#x1F5D1; Delete</button>")
+  </div>
+</div>
+$(notice_html)
+<div class='ps-sections'>
+  $(sections_html)
+</div>"""
     end
 
     type_map_js = build_type_map_js(listings)
@@ -279,7 +295,7 @@ function render_page(;
 <body>
 
 <header class="tlm-header">
-  <div class="tlm-logo">TradLifeModel</div>
+  <a href="/" class="tlm-logo" style="text-decoration:none;color:inherit;">TradLifeModel</a>
   <div class="tlm-badge">PRODUCT SETUP</div>
 </header>
 
@@ -287,13 +303,12 @@ function render_page(;
 
   <nav class="tlm-sidenav">
     <div class="tlm-sidenav-label">Navigation</div>
-    <a href="/general-settings">General Settings</a>
     <a href="/table-setup">Table Setup</a>
     <a href="/product-setup" class="active">Product Setup</a>
     <a href="/run-settings">Run Settings</a>
-    
+    <a href="/general-settings">General Settings</a>
+    <a href="/run-monitor">Run Monitor</a>
     <hr style="border:none;border-top:1px solid var(--tlm-border);margin:0.5rem 0">
-
     <div class="tlm-sidenav-label">Products</div>
     <button class='ps-add-btn' onclick='newProduct()'>+ Add New</button>
     <ul class='ps-prod-list'>$(prod_items)</ul>
@@ -315,7 +330,8 @@ function render_page(;
 <script>
 $(type_map_js)
 
-<!-- Update table type after a table is being selected -->
+var _existingProducts = $(JSON3.write(list_products()));
+
 function updateType(dropId) {
   var sel    = document.getElementById(dropId);
   var typeId = dropId.replace('__table', '__type');
@@ -323,31 +339,23 @@ function updateType(dropId) {
   if (typeEl && sel) { typeEl.textContent = _typeMap[sel.value] || ''; }
 }
 
-<!-- Toggle section -->
 function toggleSection(hdr) {
   var body  = hdr.nextElementSibling;
   var arrow = hdr.querySelector('.ps-section-arrow');
   var open  = body.style.display !== 'none';
-  body.style.display  = open ? 'none' : '';
-  arrow.innerHTML     = open ? '&#x25BA;' : '&#x25BC;';
+  body.style.display = open ? 'none' : '';
+  arrow.innerHTML    = open ? '&#x25BA;' : '&#x25BC;';
 }
-<!-- Load product -->
-function loadProduct(name) { post('load', name, ''); }
 
-<!-- Add new product -->
-  function newProduct()      { post('new',  '',   ''); }
-
-<!-- Delete an existing product -->
+function loadProduct(name)    { post('load',   name, ''); }
+function newProduct()         { post('new',    '',   ''); }
 function deleteProduct(name) {
   if (!confirm('Delete product ' + name + '? This cannot be undone.')) return;
   post('delete', name, '');
 }
 
-<!-- Save new or existing product -->
-function saveProduct() {
-  var name = document.getElementById('prod-name').value.trim();
-  if (!name) { alert('Please enter a product name.'); return; }
-  var data = {};
+function collectProductData() {
+  var data     = {};
   var sections = $(JSON3.write([sec_key for (sec_key,_,_) in SECTIONS]));
   sections.forEach(function(secKey) {
     data[secKey] = {};
@@ -375,10 +383,35 @@ function saveProduct() {
       }
     });
   });
-  post('save', name, JSON.stringify(data));
+  return data;
 }
 
-<!-- Submit hidden form for load, new, delete, save action -->
+function saveProduct() {
+  var name = document.getElementById('prod-name').value.trim().toUpperCase();
+  document.getElementById('prod-name').value = name;
+  if (!name) { alert('Please enter a product name.'); return; }
+  // For new products, disallow existing names (case-insensitive)
+  if (!"$(he(sel_product))" && _existingProducts.map(function(p) { return p.toUpperCase(); }).indexOf(name) !== -1) {
+    alert("Product '" + name + "' already exists. Please choose a different name.");
+    return;
+  }
+  post('save', name, JSON.stringify(collectProductData()));
+}
+
+function saveAsProduct() {
+  var newName = prompt('Save as new product name:');
+  if (!newName || !newName.trim()) return;
+  newName = newName.trim().toUpperCase();
+  var existingUpper = _existingProducts.map(function(p) { return p.toUpperCase(); });
+  // Keep prompting until a unique name is given
+  while (existingUpper.indexOf(newName) !== -1) {
+    newName = prompt("Product '" + newName + "' already exists. Please choose a different name:");
+    if (!newName || !newName.trim()) return;
+    newName = newName.trim().toUpperCase();
+  }
+  post('save', newName, JSON.stringify(collectProductData()));
+}
+
 function post(action, prodName, payload) {
   document.getElementById('f-action').value   = action;
   document.getElementById('f-prodname').value = prodName;
@@ -393,7 +426,10 @@ function post(action, prodName, payload) {
     return html(page)
 end
 
+# ============================================================
 # Routes
+# ============================================================
+
 function register_routes()
 
     route("/product-setup", method=GET) do
@@ -418,7 +454,7 @@ function register_routes()
             payload = get(params, :payload, "")
 
             isempty(name) && return render_page(;
-                show_form=true, listings,             
+                show_form=true, listings,
                 notice="Please enter a product name.", notice_type="error")
 
             isempty(payload) && return render_page(;
@@ -426,7 +462,7 @@ function register_routes()
                 notice="No data received.", notice_type="error")
 
             try
-                data = JSON3.read(payload, Dict{String, Any})
+                data = JSON3.read(payload, Dict{String,Any})
                 save_product(name, data)
                 return render_page(; sel_product=name, prod_data=data, listings,
                     notice="Saved to $(joinpath(PRODUCTS_DIR, name*".json"))",
@@ -440,15 +476,15 @@ function register_routes()
         elseif action == "delete"
             name = get(params, :prod_name, "")
             try
-              delete_product(name)
-              return render_page(; listings,
-                notice="Deleted $(joinpath(PRODUCTS_DIR, name*".json"))", notice_type="success")
+                delete_product(name)
+                return render_page(; listings,
+                    notice="Deleted $(joinpath(PRODUCTS_DIR, name*".json"))",
+                    notice_type="success")
             catch err
-              @error "Delete failed" err=err
-              return render_page(; sel_product=name, listings,
-                notice="Delete fail: $err", notice_type="error")
+                @error "Delete failed" err=err
+                return render_page(; sel_product=name, listings,
+                    notice="Delete failed: $err", notice_type="error")
             end
-            
         end
 
         render_page(; listings)

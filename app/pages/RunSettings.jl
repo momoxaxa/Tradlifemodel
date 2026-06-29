@@ -3,111 +3,91 @@ module RunSettings
 using Genie, Genie.Router, Genie.Renderer.Html
 using HTTP: escapehtml
 using JSON3
-using Printf
 
-# Paths
+# ============================================================
+# Constants — paths, table structure, column keys
+# ============================================================
+
 const INPUT_PATH    = joinpath(dirname(dirname(dirname(@__FILE__))), "Input")
 const SETTINGS_FILE = joinpath(INPUT_PATH, "run_settings.json")
 const NUM_RUNS      = 20
-
-# Field definitions - type, prefix (for HTML name), label (for HTML label), key (for key in json file), default value
-const FIELD_ROWS = [
-    (:check,  "run_indicator",        "Run Indicator",   "Run Indicator",                       "No"),
-    (:text,   "run_description",      "Description",     "Run Description",                     ""),
-    (:group,  "",                     "Base Projection", "",                                     ""),
-    (:number, "bp_mortality",         "Mortality",       "Base Projection - Mortality",         "100.0"),
-    (:number, "bp_lapse",             "Lapse",           "Base Projection - Lapse",             "100.0"),
-    (:number, "bp_expense",           "Expense",         "Base Projection - Expense",           "100.0"),
-    (:number, "bp_discount_rate",     "Discount Rate",   "Base Projection - Discount Rate",     "0.0"),
-    (:number, "bp_investment_return", "Inv. Return",     "Base Projection - Investment Return", "0.0"),
-    (:group,  "",                     "Valuation",       "",                                     ""),
-    (:number, "val_mortality",        "Mortality",       "Valuation - Mortality",                "100.0"),
-    (:number, "val_lapse",            "Lapse",           "Valuation - Lapse",                    "100.0"),
-    (:number, "val_expense",          "Expense",         "Valuation - Expense",                  "100.0"),
-    (:number, "val_discount_rate",    "Discount Rate",   "Valuation - Discount Rate",            "0.0"),
-    (:group,  "",                     "Capital Req.",    "",                                     ""),
-    (:number, "cr_mortality",         "Mortality",       "Capital Requirement - Mortality",      "100.0"),
-    (:number, "cr_lapse",             "Lapse",           "Capital Requirement - Lapse",          "100.0"),
-    (:number, "cr_expense",           "Expense",         "Capital Requirement - Expense",        "100.0"),
-    (:number, "cr_discount_rate",     "Discount Rate",   "Capital Requirement - Discount Rate",  "0.0"),
+const TABLE_STRUCTURE = [
+    (key="Run Number",                          title="Run Number",        width=70,  type="numeric", mask="",      readonly=true ),
+    (key="Run Indicator",                       title="Run Indicator",     width=70,  type="checkbox", mask="",     readonly=false),
+    (key="Run Description",                     title="Run Description",   width=200, type="text",     mask="",     readonly=false),
+    (key="Base Projection - Mortality",         title="Mortality",         width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Base Projection - Lapse",             title="Lapse",             width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Base Projection - Expense",           title="Expense",           width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Base Projection - Discount Rate",     title="Discount Rate",     width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Base Projection - Investment Return", title="Investment Return", width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Valuation - Mortality",               title="Mortality",         width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Valuation - Lapse",                   title="Lapse",             width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Valuation - Expense",                 title="Expense",           width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Valuation - Discount Rate",           title="Discount Rate",     width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Capital Requirement - Mortality",     title="Mortality",         width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Capital Requirement - Lapse",         title="Lapse",             width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Capital Requirement - Expense",       title="Expense",           width=85,  type="numeric", mask="0.00%", readonly=false),
+    (key="Capital Requirement - Discount Rate", title="Discount Rate",     width=85,  type="numeric", mask="0.00%", readonly=false),
 ]
-# Convert to HTML special characters for rendering page
+const KEYS = [col.key for col in TABLE_STRUCTURE]
+
+# ============================================================
+# Helpers — default data, JSS data builder, column definitions
+# ============================================================
+
+# Escape HTML special characters to prevent XSS
 he(s) = escapehtml(string(s))
 
-# Read current settings from JSON to Dict for rendering page
-function load_settings()::Vector{Dict}
-    JSON3.read(SETTINGS_FILE, Vector{Dict})
+# Default data when no saved file exists
+function default_data()
+    data = [[i, "NO", "Run $(lpad(i,2,'0'))", 0,0,0,0,0,0,0,0,0,0,0,0,0] for i in 1:NUM_RUNS]
+    return JSON3.write(data)
 end
 
-# Convert POST params to Dict for saving to JSON and re-rendering page after submission
-function form_to_settings(params::Dict)::Vector{Dict}
-    params = Dict(string(k) => string(v) for (k,v) in params)
-    runs = Vector{Dict}()
-    for i in 0:(NUM_RUNS-1)
-        run = Dict{String,Any}()
-        run["Run Number"]    = "Run " * lpad(string(i+1), 2, '0')
-        run["Run Indicator"] = haskey(params, "run_indicator_$(i)") ? "Yes" : "No"
-        for (type, prefix, _, key, default) in FIELD_ROWS
-            type in (:text, :number) || continue
-            run[key] = type == :number ?
-                parse(Float64, get(params, "$(prefix)_$(i)", default)) / 100.0 :
-                strip(get(params, "$(prefix)_$(i)", default))
+# Load existing run settings
+function jss_data()
+    isfile(SETTINGS_FILE) || return default_data()
+    runs = JSON3.read(read(SETTINGS_FILE, String))
+    all_data = []
+    for run in runs
+        data = []
+        for (i, k) in enumerate(KEYS)
+            value = get(run, Symbol(k), nothing)
+            if k == "Run Indicator"
+                value = (value == "Yes" || value == true) ? true : false
+            end
+            push!(data, value)
         end
-        push!(runs, run)
+        push!(all_data, data)
     end
-    runs
+    return JSON3.write(all_data)
 end
 
-# ── Table HTML ─────────────────────────────────────────────────────────────────
-function table_html(runs::Vector{Dict})::String
-    run_headers = join([
-        "<th class='rs-run-th'>Run $(lpad(string(i),2,'0'))</th>"
-        for i in 1:NUM_RUNS], "")
-
-    thead = """<thead><tr>
-      <th class='rs-corner rs-sticky'></th>
-      $(run_headers)
-    </tr></thead>"""
-
-    body_rows = String[]
-    for (type, prefix, label, key, default) in FIELD_ROWS
-        if type == :group
-            push!(body_rows, """<tr class='rs-group-row'>
-              <th class='rs-label rs-sticky rs-group-label'>$(label)</th>
-              <td colspan='$(NUM_RUNS)' class='rs-group-fill'></td>
-            </tr>""")
-
-        elseif type == :check
-            cells = join([begin
-                checked = string(get(runs[i], key, default)) == "Yes" ? " checked" : ""
-                "<td class='rs-cell rs-cell--check'><input type='checkbox' class='rs-check' name='$(prefix)_$(i-1)' value='Yes'$(checked)></td>"
-            end for i in 1:NUM_RUNS], "")
-            push!(body_rows, "<tr><th class='rs-label rs-sticky'>$(label)</th>$(cells)</tr>")
-
-        elseif type == :text
-            cells = join([
-                "<td class='rs-cell'><textarea class='rs-input rs-input--text' name='$(prefix)_$(i-1)' rows='3'>$(he(get(runs[i], key, default)))</textarea></td>"
-                for i in 1:NUM_RUNS], "")
-            push!(body_rows, "<tr><th class='rs-label rs-sticky'>$(label)</th>$(cells)</tr>")
-
-        elseif type == :number
-            cells = join([begin
-                raw_val = Float64(get(runs[i], key, parse(Float64, default)))
-                val_str = @sprintf("%.2f", raw_val * 100)
-                "<td class='rs-cell rs-cell--num'><input type='number' class='rs-input rs-input--num' name='$(prefix)_$(i-1)' value='$(val_str)' step='0.01'> %</td>"
-            end for i in 1:NUM_RUNS], "")
-            push!(body_rows, "<tr><th class='rs-label rs-sticky'>$(label)</th>$(cells)</tr>")
-        end
+# Column definitions for jspreadsheet
+function jss_columns()
+    cols = []
+    for c in TABLE_STRUCTURE
+        col = Dict{String,Any}(
+            "title" => c.title,
+            "width" => c.width,
+            "type"  => c.type
+        )
+        !isempty(c.mask) && (col["mask"]    = c.mask)
+        c.readonly       && (col["readOnly"] = true)
+        push!(cols, col)
     end
-
-    "<table class='rs-grid'>$(thead)<tbody>$(join(body_rows,""))</tbody></table>"
+    return JSON3.write(cols)
 end
 
-# ── Render ─────────────────────────────────────────────────────────────────────
-function render_page(runs::Vector{Dict};
-                     notice::String="", notice_type::String="success")
-    notice_html = isempty(notice) ? "" :
+# ============================================================
+# HTML Builder
+# ============================================================
+
+function render_page(; notice::String="", notice_type::String="success")
+    notice_html   = isempty(notice) ? "" :
         "<div class='tlm-notice tlm-notice--$(notice_type)'>$(he(notice))</div>"
+    table_data    = jss_data()
+    table_columns = jss_columns()
 
     html("""<!DOCTYPE html>
 <html lang="en">
@@ -117,10 +97,15 @@ function render_page(runs::Vector{Dict};
   <title>TradLifeModel — Run Settings</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/run_settings.css">
+  <link rel="stylesheet" href="/css/jspreadsheet.min.css">
+  <link rel="stylesheet" href="/css/jsuites.min.css">
+  <script src="/js/jsuites.min.js"></script>
+  <script src="/js/index.min.js"></script>
 </head>
 <body>
+
 <header class="tlm-header">
-  <div class="tlm-logo">TradLifeModel</div>
+  <a href="/" class="tlm-logo" style="text-decoration:none;color:inherit;">TradLifeModel</a>
   <div class="tlm-badge">RUN SETTINGS</div>
 </header>
 
@@ -128,55 +113,125 @@ function render_page(runs::Vector{Dict};
 
   <nav class="tlm-sidenav">
     <div class="tlm-sidenav-label">Navigation</div>
-    <a href="/general-settings">General Settings</a>
     <a href="/table-setup">Table Setup</a>
     <a href="/product-setup">Product Setup</a>
     <a href="/run-settings" class="active">Run Settings</a>
+    <a href="/general-settings">General Settings</a>
+    <a href="/run-monitor">Run Monitor</a>
   </nav>
 
   <main class="tlm-page-main">
     $(notice_html)
     <div class="tlm-card">
-    <form action="/run-settings" method="post" id="runs-form">
+      <form method="POST" action="/run-settings" id="runs-form">
+        <input type="hidden" id="runs-data" name="runs_data">
         <div class="rs-wrapper">
-        $(table_html(runs))
+          <div id="rs-spreadsheet"></div>
         </div>
         <div class="rs-actions">
-            <button type="submit" class="btn-primary">&#x1F4BE; Save Settings</button>
-          </div>
-    </form>
+          <button type="submit" class="btn-primary">&#x1F4BE; Save Settings</button>
+        </div>
+      </form>
     </div>
   </main>
 
 </div>
+
+<script>
+let table = jspreadsheet(document.getElementById('rs-spreadsheet'), {
+  data: $(table_data),
+  columns: $(table_columns),
+  nestedHeaders: [[
+    { title: '',                    colspan: 3 },
+    { title: 'Base Projection',     colspan: 5 },
+    { title: 'Valuation',           colspan: 4 },
+    { title: 'Capital Requirement', colspan: 4 }
+  ]],
+  wordWrap: true,
+  tableOverflow: false,
+  tableWidth: '1200px',
+  freezeColumns: 3,
+
+  // Block non-numeric characters while typing (columns 3 onwards)
+  oncreateeditor: function(el, cell, x, y, input) {
+    if (parseInt(x) >= 3) {
+      input.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9.\\-]/g, '');
+      });
+    }
+  },
+
+  // Reject non-numeric values on cell commit (catches paste)
+  onbeforechange: function(instance, cell, x, y, value) {
+    if (parseInt(x) >= 3 && value !== '' && isNaN(value)) {
+      return '';
+    }
+  }
+});
+
+const keys = $(JSON3.write(KEYS));
+
+document.getElementById('runs-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  let runs = [];
+  for (let r = 0; r < $(NUM_RUNS); r++) {
+    let rowdata = table.getRowData(r);
+    let run = {};
+
+    for (let i = 0; i < keys.length; i++) {
+      let value = rowdata[i];
+
+      if (i === 1) {
+        // checkbox → Yes/No
+        value = (value === true || value === "true") ? "Yes" : "No";
+      } else if (i >= 3) {
+        // ensure numeric — jspreadsheet may return strings for unedited cells
+        value = parseFloat(value);
+      }
+
+      run[keys[i]] = value;
+    }
+
+    runs.push(run);
+  }
+
+  document.getElementById('runs-data').value = JSON.stringify(runs);
+  e.target.submit();
+});
+</script>
+
 </body>
 </html>""")
 end
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+# ============================================================
+# Routes
+# ============================================================
+
 function register_routes()
 
     route("/run-settings", method=GET) do
-        render_page(load_settings())
+        render_page()
     end
 
     route("/run-settings", method=POST) do
-        params  = Genie.Router.params()
-        runs = form_to_settings(params)
+        runs = JSON3.read(Genie.Requests.postpayload(:runs_data, "[]"))
         tmp  = SETTINGS_FILE * ".tmp"
         try
             open(tmp, "w") do io
-                JSON3.pretty(io,JSON3.write(runs))
+                JSON3.pretty(io, runs)
             end
             mv(tmp, SETTINGS_FILE, force=true)
-            render_page(runs;
+            render_page(;
                 notice="Saved to $(SETTINGS_FILE)",
                 notice_type="success")
         catch e
             @error "Save failed" exception=e
             isfile(tmp) && rm(tmp)
-            render_page(load_settings();
-                notice="Save failed: $e", notice_type="error")
+            render_page(;
+                notice="Save failed: $e",
+                notice_type="error")
         end
     end
 

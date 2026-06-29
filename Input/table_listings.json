@@ -135,13 +135,13 @@
         "Table Category": "disc_rate",
         "Table Filename": "DISCRT01.csv",
         "Table Details": "Policy Year Discount Rate Table",
-        "Table Type": "Prj Year"
+        "Table Type": "Projection Year"
     },
     "DISCRT02": {
         "Table Category": "disc_rate",
         "Table Filename": "DISCRT02.csv",
         "Table Details": "Calendar Year Discount Rate Table",
-        "Table Type": "Cal Year"
+        "Table Type": "Calendar Year"
     },
     "DISCRT03": {
         "Table Category": "disc_rate",

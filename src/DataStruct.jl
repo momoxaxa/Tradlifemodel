@@ -170,7 +170,8 @@ function validate_formula_variables(product_features_set::ProductFeatureSet; upd
         if !(formula_str === missing) && !isempty(formula_str)
             formula = Meta.parse(formula_str)
             formula_variables = get_formula_variables(formula, [])
-            fields_in_user_defined_table = names(DataFrame(XLSX.readtable("$(input_file_path)Tables.xlsx", udt_name)))
+            fields_in_user_defined_table = haskey(input_tables_dict, udt_name) ?
+                names(input_tables_dict[udt_name]) : String[]
             validate_variables = all(item -> item in fields_in_user_defined_table, string.(formula_variables))    
             if validate_variables 
                 if update_prodfeatset

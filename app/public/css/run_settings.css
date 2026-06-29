@@ -123,3 +123,10 @@ thead th {
     padding: 0.75rem 1.25rem;
     border-top: 1px solid var(--tlm-border);
 }
+
+#rs-spreadsheet thead td[data-x] {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow: visible !important;
+        height: auto !important;
+        }

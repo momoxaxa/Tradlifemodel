@@ -1,0 +1,287 @@
+{
+  "premium": {
+    "Rate per 1000 SA by Age/Pol Term": {
+      "dims": "matrix",
+      "row_name": "Age",
+      "n_row": 120,
+      "col_group": "Pol Term",
+      "n_col": 120
+    },
+    "Mult to MP Premium by Duration": {
+      "dims": "vector",
+      "row_name": "Duration",
+      "n_row": 120,
+      "col_names": [
+        "Mult"
+      ]
+    },
+    "User Defined Table": {
+      "dims": "user_defined",
+      "row_name": "Year",
+      "n_row": 120
+    }
+  },
+  "death_ben": {
+    "Mult to MP SA by Duration": {
+      "dims": "vector",
+      "row_name": "Duration",
+      "n_row": 120,
+      "col_names": [
+        "Mult"
+      ]
+    },
+    "User Defined Table": {
+      "dims": "user_defined",
+      "row_name": "Year",
+      "n_row": 120
+    }
+  },
+  "surr_ben": {
+    "Rate per 1000 SA by Year/Age": {
+      "dims": "matrix",
+      "row_name": "Year",
+      "n_row": 120,
+      "col_group": "Age",
+      "n_col": 120
+    },
+    "User Defined Table": {
+      "dims": "user_defined",
+      "row_name": "Year",
+      "n_row": 120
+    }
+  },
+  "commission": {
+    "Perc by Pol Year/Pol Term": {
+      "dims": "matrix",
+      "row_name": "Pol Year",
+      "n_row": 120,
+      "col_group": "Pol Term",
+      "n_col": 120
+    },
+    "User Defined Table": {
+      "dims": "user_defined",
+      "row_name": "Year",
+      "n_row": 120
+    }
+  },
+  "mortality": {
+    "Attained Age": {
+      "dims": "vector",
+      "row_name": "Age",
+      "n_row": 120,
+      "col_names": [
+        "Unisex"
+      ]
+    },
+    "Attained Age Sex Distinct": {
+      "dims": "fixed_col",
+      "row_name": "Age",
+      "n_row": 120,
+      "col_names": [
+        "Male",
+        "Female"
+      ]
+    },
+    "Attained Age Sex Smoker Distinct": {
+      "dims": "fixed_col",
+      "row_name": "Age",
+      "n_row": 120,
+      "col_names": [
+        "Male Non-Smoker",
+        "Male Smoker",
+        "Female Non-Smoker",
+        "Female Smoker"
+      ]
+    },
+    "Select and Ultimate": {
+      "dims": "select_ultimate",
+      "row_name": "Issue Age",
+      "row_input": "max_age",
+      "col_input": "select_duration",
+      "ultimate_col": true,
+      "attained_age_col": true
+    },
+    "Select and Ultimate - Sex Distinct": {
+      "dims": "mapping",
+      "row_name": "Class",
+      "row_values": [
+        "Male",
+        "Female"
+      ],
+      "col_names": [
+        "Mort Table Name",
+        "Table Type"
+      ],
+      "col_types": [
+        "dropdown",
+        "auto"
+      ],
+      "filter_types": [
+        "Select and Ultimate"
+      ]
+    },
+    "Select and Ultimate - Sex Smoker Distinct": {
+      "dims": "mapping",
+      "row_name": "Class",
+      "row_values": [
+        "Male Non-Smoker",
+        "Male Smoker",
+        "Female Non-Smoker",
+        "Female Smoker"
+      ],
+      "col_names": [
+        "Mort Table Name",
+        "Table Type"
+      ],
+      "col_types": [
+        "dropdown",
+        "auto"
+      ],
+      "filter_types": [
+        "Select and Ultimate"
+      ]
+    },
+    "Select and Ultimate - Sex Distinct - SOA Table ID": {
+      "dims": "mapping_ID",
+      "row_name": "Class",
+      "row_values": [
+        "Male",
+        "Female"
+      ],
+      "col_names": [
+        "SOA Table ID",
+        "Table Name"
+      ],
+      "col_types": [
+        "numeric",
+        "auto"
+      ]
+    },
+    "Select and Ultimate - Sex Smoker Distinct - SOA Table ID": {
+      "dims": "mapping_ID",
+      "row_name": "Class",
+      "row_values": [
+        "Male Non-Smoker",
+        "Male Smoker",
+        "Female Non-Smoker",
+        "Female Smoker"
+      ],
+      "col_names": [
+        "SOA Table ID",
+        "Table Name"
+      ],
+      "col_types": [
+        "numeric",
+        "auto"
+      ]
+    }
+  },
+  "lapse": {
+    "Pol Year/Pol Term": {
+      "dims": "matrix",
+      "row_name": "Pol Year",
+      "n_row": 120,
+      "col_group": "Pol Term",
+      "n_col": 120
+    }
+  },
+  "expense": {
+    "Policy Year": {
+      "dims": "fixed_col",
+      "row_name": "Year",
+      "n_row": 120,
+      "col_names": [
+        "acq_exp_per_pol",
+        "acq_exp_perc_prem",
+        "maint_exp_per_pol",
+        "maint_exp_perc_prem"
+      ]
+    }
+  },
+  "disc_rate": {
+    "Projection Year": {
+      "dims": "fixed_col",
+      "row_name": "Prj Year",
+      "n_row": 120,
+      "col_names": [
+        "inv_return",
+        "disc_rate",
+        "valn_int_rate"
+      ]
+    },
+    "Calendar Year": {
+      "dims": "fixed_col",
+      "row_name": "Cal Year",
+      "n_row": 120,
+      "row_input": "start_year",
+      "col_names": [
+        "inv_return",
+        "disc_rate",
+        "valn_int_rate"
+      ]
+    },
+    "Mix of Prj Year and Cal Year": {
+      "dims": "mapping",
+      "row_name": "Class",
+      "row_values": [
+        "inv_return",
+        "disc_rate",
+        "valn_int_rate"
+      ],
+      "col_names": [
+        "Interest Rate Table Name",
+        "Prj Year / Cal Year"
+      ],
+      "col_types": [
+        "dropdown",
+        "auto"
+      ],
+      "filter_types": [
+        "Projection Year",
+        "Calendar Year"
+      ]
+    }
+  },
+  "prem_tax": {
+    "Scalar": {
+      "dims": "scalar",
+      "row_name": "Label",
+      "n_row": 1,
+      "col_names": [
+        "Value"
+      ],
+      "row_values": [
+        "prem_tax_rate"
+      ]
+    },
+    "Policy Year": {
+      "dims": "vector",
+      "row_name": "Year",
+      "n_row": 120,
+      "col_names": [
+        "Value"
+      ]
+    }
+  },
+  "tax": {
+    "Scalar": {
+      "dims": "scalar",
+      "row_name": "Label",
+      "n_row": 1,
+      "col_names": [
+        "Value"
+      ],
+      "row_values": [
+        "tax_rate"
+      ]
+    },
+    "Policy Year": {
+      "dims": "vector",
+      "row_name": "Year",
+      "n_row": 120,
+      "col_names": [
+        "Value"
+      ]
+    }
+  }
+}

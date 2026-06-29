@@ -24,7 +24,6 @@ docs/site/
 Manifest.toml
 
 # Other files
-Input/~*.xlsx
 Excel/~*.xlsx
 notes.md
 app/test.html

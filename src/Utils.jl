@@ -1,12 +1,12 @@
 #=
 ZerobasedIndex!(array::Array)
-read_excel_ind(exceldata::DataFrame, datatype::String, excelheader::String="Value")  
-read_excel_PY(exceldata::DataFrame, excelheader::String, pol_year::Array, duration::Array, distributionoption::String="None")
-read_excel_PRJY_CY(exceldata::DataFrame, excelheader::String, year::Array)
-read_excel_PY_MI(exceldata::DataFrame, index_1, index_2, excelheader::String, pol_year::Array)
-read_excel_AA(exceldata::DataFrame, excelheader::String, att_age::Array)
-read_excel_EA(exceldata::DataFrame, excelheader::String, issue_age::Integer)
-read_excel_EA_MI(exceldata::DataFrame, index_1, index_2, excelheader::String, issue_age::Integer)
+read_table_ind(table_data::DataFrame, datatype::String, table_header::String="Value")  
+read_table_PY(table_data::DataFrame, table_header::String, pol_year::Array, duration::Array, distributionoption::String="None")
+read_table_PRJY_CY(table_data::DataFrame, table_header::String, year::Array)
+read_table_PY_MI(table_data::DataFrame, index_1, index_2, table_header::String, pol_year::Array)
+read_table_AA(table_data::DataFrame, table_header::String, att_age::Array)
+read_table_EA(table_data::DataFrame, table_header::String, issue_age::Integer)
+read_table_EA_MI(table_data::DataFrame, index_1, index_2, table_header::String, issue_age::Integer)
 rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
 =#
 
@@ -18,24 +18,24 @@ function ZerobasedIndex!(array)
     return OffsetArray(array, 0:proj_len)
 end
 
-# Read assumptions from Excel - Indicators
-function read_excel_ind(exceldata::DataFrame, rowlabel::Union{String, Nothing}=nothing, columnheader::String="Value")   
+# Read assumptions from table - Indicators
+function read_table_ind(table_data::DataFrame, rowlabel::Union{String, Nothing}=nothing, columnheader::String="Value")   
     if rowlabel === nothing
-        exceldata[1, columnheader][1]
+        table_data[1, columnheader][1]
     else
-        filter(row -> row[1] == rowlabel, exceldata)[1, columnheader] |> ZerobasedIndex!
+        filter(row -> row[1] == rowlabel, table_data)[1, columnheader] |> ZerobasedIndex!
     end
 end
 
-# Read assumptions from Excel - Policy Year
-function read_excel_PY(exceldata::DataFrame, columnheader::String, pol_year, duration, distributionoption::String="None")
+# Read assumptions from table - Policy Year
+function read_table_PY(table_data::DataFrame, columnheader::String, pol_year, duration, distributionoption::String="None")
     assumptions_array = OffsetArray([],Origin(0))
     index = 1
     if distributionoption in ("None", "EvenlySpreadOut")
         for t in 0:proj_len
-            index = findfirst(exceldata[:, 1] .== pol_year[t])
+            index = findfirst(table_data[:, 1] .== pol_year[t])
             if index !== nothing
-                append!(assumptions_array, exceldata[index, columnheader])
+                append!(assumptions_array, table_data[index, columnheader])
             else
                 append!(assumptions_array, 0.0) 
             end  
@@ -46,9 +46,9 @@ function read_excel_PY(exceldata::DataFrame, columnheader::String, pol_year, dur
     elseif distributionoption == "BOP"
         for t in 0:proj_len
             if mod(duration[t], 12) == 1
-                index = findfirst(exceldata[:, 1] .== pol_year[t])
+                index = findfirst(table_data[:, 1] .== pol_year[t])
                 if index !== nothing
-                    append!(assumptions_array, exceldata[index, columnheader])
+                    append!(assumptions_array, table_data[index, columnheader])
                 else
                     append!(assumptions_array, 0.0)
                 end
@@ -60,13 +60,13 @@ function read_excel_PY(exceldata::DataFrame, columnheader::String, pol_year, dur
     return ZerobasedIndex!(assumptions_array)
 end
 
-# Read assumptions from Excel - Projection Year and Calendar Year
-function read_excel_PRJY_CY(exceldata::DataFrame, excelheader::String, year)
+# Read assumptions from table - Projection Year and Calendar Year
+function read_table_PRJY_CY(table_data::DataFrame, table_header::String, year)
     assumptions_array = OffsetArray([], Origin(0))
     for t in 0:proj_len
-        index = findfirst(exceldata[:, 1] .== year[t])
+        index = findfirst(table_data[:, 1] .== year[t])
         if index !== nothing
-            append!(assumptions_array, exceldata[index, excelheader])
+            append!(assumptions_array, table_data[index, table_header])
         else
             append!(assumptions_array, 0.0) 
         end  
@@ -74,14 +74,14 @@ function read_excel_PRJY_CY(exceldata::DataFrame, excelheader::String, year)
     return ZerobasedIndex!(assumptions_array)
 end
 
-# Read assumptions from Excel - Policy Year - Multi-index
-function read_excel_PY_MI(exceldata::DataFrame, index_1, index_2, excelheader::String, pol_year)
+# Read assumptions from table - Policy Year - Multi-index
+function read_table_PY_MI(table_data::DataFrame, index_1, index_2, table_header::String, pol_year)
     assumptions_array = OffsetArray([], Origin(0))
-    data = filter(row -> row[2] == index_1 && row[3] == index_2, exceldata)
+    data = filter(row -> row[2] == index_1 && row[3] == index_2, table_data)
     for t in 0:proj_len
         index = findfirst(data[:, 1] .== pol_year[t])       
         if index !== nothing
-            append!(assumptions_array, data[index, excelheader])
+            append!(assumptions_array, data[index, table_header])
         else
             append!(assumptions_array, 0.0) 
         end  
@@ -89,14 +89,14 @@ function read_excel_PY_MI(exceldata::DataFrame, index_1, index_2, excelheader::S
     return ZerobasedIndex!(assumptions_array)
 end
 
-# Read assumptions from Excel - Attained Age
-function read_excel_AA(exceldata::DataFrame, excelheader::String, att_age)
+# Read assumptions from table - Attained Age
+function read_table_AA(table_data::DataFrame, table_header::String, att_age)
     assumptions_array = OffsetArray([], Origin(0))
     index = 1
     for t in 0:proj_len
-        index = findfirst(exceldata[:, 1] .== att_age[t])   ####
+        index = findfirst(table_data[:, 1] .== att_age[t])   ####
         if index !== nothing
-            append!(assumptions_array, exceldata[index, excelheader])
+            append!(assumptions_array, table_data[index, table_header])
         else
             append!(assumptions_array, 0.0)
         end  
@@ -104,20 +104,20 @@ function read_excel_AA(exceldata::DataFrame, excelheader::String, att_age)
     return ZerobasedIndex!(assumptions_array)
 end
 
-# Read assumptions from Excel - Entry Age
-function read_excel_EA(exceldata::DataFrame, excelheader::String, issue_age::Integer)
-    index = findfirst(exceldata[:, 1] .== issue_age)
+# Read assumptions from table - Entry Age
+function read_table_EA(table_data::DataFrame, table_header::String, issue_age::Integer)
+    index = findfirst(table_data[:, 1] .== issue_age)
     if index !== nothing
-        return exceldata[index, excelheader] .* ZerobasedIndex!(ones(Float64, proj_len+1))
+        return table_data[index, table_header] .* ZerobasedIndex!(ones(Float64, proj_len+1))
     end
 end
 
-# Read assumptions from Excel - Entry Age - Multi-index
-function read_excel_EA_MI(exceldata::DataFrame, index_1, index_2, excelheader::String, issue_age::Integer)
-    data = filter(row -> row[2] == index_1 && row[3] == index_2, exceldata)
+# Read assumptions from table - Entry Age - Multi-index
+function read_table_EA_MI(table_data::DataFrame, index_1, index_2, table_header::String, issue_age::Integer)
+    data = filter(row -> row[2] == index_1 && row[3] == index_2, table_data)
     index = findfirst(data[:, 1] .== issue_age)
     if index !== nothing
-        return data[index, excelheader] .* ZerobasedIndex!(ones(Float64, proj_len+1))
+        return data[index, table_header] .* ZerobasedIndex!(ones(Float64, proj_len+1))
     end
 end
 

@@ -1,25 +1,26 @@
 # app.jl
 
-using Genie
+using Genie, Genie.Renderer.Html
 
+include("pages/Index.jl")
+include("pages/TableSetup.jl")
 include("pages/ProductSetup.jl")
-# include("pages/TableSetup.jl")
-include("pages/GeneralSettings.jl")
 include("pages/RunSettings.jl")
+include("pages/GeneralSettings.jl")
+include("pages/RunMonitor.jl")
 
+using .Index
+using .TableSetup
 using .ProductSetup
-# using .TableSetup
-using .GeneralSettings
 using .RunSettings
+using .GeneralSettings
+using .RunMonitor
 
+Index.register_routes()
+TableSetup.register_routes()
 ProductSetup.register_routes()
-# TableSetup.register_routes()
-GeneralSettings.register_routes()
 RunSettings.register_routes()
-
-# Redirect root to general settings
-route("/") do
-    return Genie.Renderer.redirect("/general-settings")
-end
+GeneralSettings.register_routes()
+RunMonitor.register_routes()
 
 Genie.Server.up(8888, "0.0.0.0", async=false)

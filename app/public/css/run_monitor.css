@@ -1,0 +1,40 @@
+/* ── Run Monitor page ─────────────────────────────────────────────────────────
+   Requires base.css for tokens and shared controls.
+────────────────────────────────────────────────────────────────────────────── */
+
+.rm-panel {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.rm-status {
+    font-family: var(--tlm-mono);
+    font-size: 0.82rem;
+    color: var(--tlm-muted);
+}
+
+.rm-status--running   { color: var(--tlm-yellow); }
+.rm-status--completed { color: var(--tlm-green); }
+.rm-status--failed    { color: var(--tlm-red); }
+
+.rm-log {
+    background: var(--tlm-surface);
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    color: var(--tlm-text);
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    padding: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.rm-log:empty::before {
+    content: "No output yet.";
+    color: var(--tlm-muted);
+}

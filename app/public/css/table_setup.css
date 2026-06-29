@@ -1,0 +1,157 @@
+/* ── Table Setup page ────────────────────────────────────────────────────────
+   Requires base.css for tokens and shared controls.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* ── Category nav items (inside tlm-sidenav) ──────────────────────────────── */
+.ts-nav-group { margin-bottom: 0.5rem; }
+
+.ts-nav-group-label {
+    font-family: var(--tlm-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--tlm-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 1rem 0.2rem;
+    border-top: 1px solid var(--tlm-border);
+}
+
+.ts-nav-group:first-child .ts-nav-group-label { border-top: none; }
+
+.ts-nav-list { list-style: none; margin: 0; padding: 0; }
+.ts-nav-item { margin: 0; }
+
+.ts-nav-link {
+    display: block;
+    font-family: var(--tlm-mono);
+    font-size: 0.8rem;
+    color: var(--tlm-muted);
+    text-decoration: none;
+    padding: 0.35rem 1rem 0.35rem 1.25rem;
+    border-left: 2px solid transparent;
+    transition: color 0.1s, background 0.1s;
+}
+.ts-nav-link:hover { color: var(--tlm-text); background: #ededf0; }
+
+.ts-nav-item--active .ts-nav-link {
+    color: var(--tlm-accent);
+    background: #eef0fd;
+    border-left-color: var(--tlm-accent);
+    font-weight: 600;
+}
+
+/* ── Main panel ───────────────────────────────────────────────────────────── */
+.ts-panel-header  { margin-bottom: 0.75rem; }
+.ts-panel-title {
+    font-family: var(--tlm-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--tlm-text);
+    margin: 0;
+}
+
+.ts-placeholder {
+    font-family: var(--tlm-mono);
+    font-size: 0.82rem;
+    color: var(--tlm-muted);
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 1px dashed var(--tlm-border);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+.ts-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--tlm-border);
+}
+
+.ts-tab {
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    padding: 0.35rem 1rem;
+    background: transparent;
+    color: var(--tlm-muted);
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    position: relative;
+    bottom: -2px;
+}
+.ts-tab:hover { color: var(--tlm-text); background: var(--tlm-surface); }
+
+.ts-tab--active {
+    background: var(--tlm-bg);
+    color: var(--tlm-accent);
+    border-color: var(--tlm-border);
+    border-bottom-color: var(--tlm-bg);
+    font-weight: 600;
+}
+
+.ts-tab--add {
+    margin-left: auto;
+    color: var(--tlm-green);
+    border-color: transparent;
+}
+.ts-tab--add:hover { background: #dcfce7; color: var(--tlm-green); }
+
+.ts-tab-content { min-height: 200px; }
+
+/* ── List Tables tab ──────────────────────────────────────────────────────── */
+.ts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--tlm-mono);
+    font-size: 0.8rem;
+}
+
+.ts-th {
+    background: var(--tlm-surface);
+    color: var(--tlm-muted);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+    border-bottom: 2px solid var(--tlm-border);
+    position: sticky;
+    top: 0;
+}
+
+.ts-trow { border-bottom: 1px solid var(--tlm-border); }
+.ts-trow:hover { background: #f5f5ff; }
+.ts-trow--active { background: #eef0fd; }
+
+.ts-tcell { padding: 0.3rem 0.75rem; color: var(--tlm-muted); vertical-align: middle; }
+.ts-tcell--name { font-weight: 700; color: var(--tlm-text); width: 120px; }
+.ts-tcell--file { font-size: 0.72rem; opacity: 0.75; }
+
+.ts-tlink { color: var(--tlm-accent); text-decoration: none; }
+.ts-tlink:hover { text-decoration: underline; }
+
+.ts-empty {
+    padding: 1.5rem 0.75rem;
+    color: var(--tlm-muted);
+    font-style: italic;
+    text-align: center;
+}
+
+/* ── Edit Table tab ───────────────────────────────────────────────────────── */
+.ts-edit-form { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.ts-edit-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.ts-edit-actions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+
+.ts-scalar-wrap { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+
+/* jspreadsheet overrides */
+.jss-wrap .jss_content { background: #ffffff !important; }
