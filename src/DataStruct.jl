@@ -282,7 +282,7 @@ mutable struct RunSet
         dict_run = Dict()
         
         for item in list
-            dict_run[item] = df[1, item]
+            dict_run[item] = df_run[1, item]
         end
 
         new(

@@ -234,7 +234,7 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
     # function print_innerproj_result()
     if s == 1
         firstmpresult = print_single_mp(polt, asmpt_inner, ppt_inner, svt_inner, ift_inner, pvcft_inner)
-        CSV.write("$output_file_path$curr_run\\firstmpresult_innerproj_$(inner_proj_loop)_$prod_code.csv", firstmpresult)
+        CSV.write(joinpath(output_file_path, "$curr_run", "firstmpresult_innerproj_$(inner_proj_loop)_$prod_code.csv"), firstmpresult)
     end
 
     result = zeros(Float64, proj_len+1) |> ZerobasedIndex!
@@ -336,7 +336,7 @@ function run_product(prod_code::String, runset::RunSet)
 
         if s == 1
             firstmpresult = print_single_mp(polt, asmpt, ppt, svt, ift, pvcft)
-            CSV.write("$output_file_path$curr_run\\firstmpresult_$prod_code.csv", firstmpresult)
+            CSV.write(joinpath(output_file_path, "$curr_run", "firstmpresult_$prod_code.csv"), firstmpresult)
             resultbyproduct = print_aggregate_result(polt.date, ppt, svt, ift, pvcft)
         else
             agg_result = print_aggregate_result(polt.date, ppt, svt, ift, pvcft)
@@ -346,7 +346,7 @@ function run_product(prod_code::String, runset::RunSet)
     end
     
     # Save results to CSV files - by product
-    CSV.write("$output_file_path$curr_run\\result_$prod_code.csv", resultbyproduct)
+    CSV.write(joinpath(output_file_path, "$curr_run", "result_$prod_code.csv"), resultbyproduct)
     println("$curr_run $prod_code completed at $(now())")
 
 end

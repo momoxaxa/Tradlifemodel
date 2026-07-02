@@ -25,5 +25,4 @@ Manifest.toml
 
 # Other files
 Excel/~*.xlsx
-notes.md
-app/test.html
+output/

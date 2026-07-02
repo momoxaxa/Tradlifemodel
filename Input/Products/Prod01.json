@@ -1,131 +1,131 @@
 {
     "Product Feature": {
-        "premium":{
-            "Mult": 1.0,
-            "Table": "PREM03",
-            "Table Type": "Rate per 1000 SA by Issue Age/Pol Term/Prem Term",
-            "UDF": ""
-        },
-        "death_ben":{
-            "Mult": 1.0,
-            "Table": "DB01",
-            "Table Type": "Mult to MP SA by Duration",
-            "UDF": ""
-        },
-        "surr_ben":{
-            "Mult": 1.0,
-            "Table": "SV01",
+        "surr_ben": {
             "Table Type": "Rate per 1000 SA by Year/Age",
+            "Mult": 1,
+            "Table": "SV01",
             "UDF": ""
         },
-        "commission":{
-            "Mult": 1.0,
-            "Table": "COMM01",
+        "commission": {
             "Table Type": "Perc by Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "COMM01",
             "UDF": ""
+        },
+        "premium": {
+            "Table Type": "Rate per 1000 SA by Age/Pol Term",
+            "Mult": 1,
+            "Table": "PREM01",
+            "UDF": ""
+        },
+        "death_ben": {
+            "Table Type": "User Defined Table",
+            "Mult": 1,
+            "Table": "DB02UDT",
+            "UDF": "min(multiple * amount * (1 + inflator) ^ (Year - 1), 200000)"
         }
     },
     "Base Projection": {
-        "mortality":{
-            "Mult": 1.0,
-            "Table": "MORT05",
-            "Table Type": "Select and Ultimate - Sex Distinct"
+        "mortality": {
+            "Table Type": "Select and Ultimate - Sex Distinct",
+            "Mult": 1,
+            "Table": "MORT05"
         },
-        "lapse":{
-            "Mult": 1.0,
-            "Table": "LAPSE02",
-            "Table Type": "Pol Year/Pol Term/Prem Term"
+        "lapse": {
+            "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01"
         },
-        "expense":{
-            "Mult": 1.0,
-            "Table": "EXP01",
-            "Table Type": "Policy Year"
-        },
-        "disc_rate":{
-            "Mult": 1.0,
-            "Table": "DISCRT03",
+        "invt_return": {
             "Table Type": "Mix of Prj Year and Cal Year",
-            "Table Column": "disc_rate"
-        },
-        "invt_return":{
-            "Mult": 1.0,
+            "Mult": 1,
             "Table": "DISCRT03",
-            "Table Type": "Mix of Prj Year and Cal Year",
             "Table Column": "investment_return"
         },
-        "prem_tax":{
-            "Mult": 1.0,
-            "Table": "PREMTAX02",
-            "Table Type": "Policy Year"
+        "tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "TAX02"
         },
-        "tax":{
-            "Mult": 1.0,
-            "Table": "TAX02",
-            "Table Type": "Policy Year"
+        "disc_rate": {
+            "Table Type": "Mix of Prj Year and Cal Year",
+            "Mult": 1,
+            "Table": "DISCRT03",
+            "Table Column": "disc_rate"
+        },
+        "prem_tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "PREMTAX02"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01"
         }
     },
     "Valuation": {
-        "mortality":{
-            "Mult": 1.0,
-            "Table": "MORT05",
+        "mortality": {
             "Table Type": "Select and Ultimate - Sex Distinct",
+            "Mult": 1,
+            "Table": "MORT05",
             "PAD": 0.1
         },
-        "lapse":{
-            "Mult": 1.0,
-            "Table": "LAPSE02",
-            "Table Type": "Pol Year/Pol Term/Prem Term",
+        "lapse": {
+            "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01",
             "PAD": 0.2
         },
-        "expense":{
-            "Mult": 1.0,
-            "Table": "EXP01",
-            "Table Type": "Policy Year",
-            "PAD": 0.1
-        },
-        "disc_rate":{
-            "Mult": 1.0,
-            "Table": "DISCRT03",
+        "disc_rate": {
             "Table Type": "Mix of Prj Year and Cal Year",
+            "Mult": 1,
+            "Table": "DISCRT03",
             "Table Column": "valn_int_rate",
-            "PAD": 0.0
+            "PAD": 0
         },
-        "prem_tax":{
-            "Mult": 1.0,
-            "Table": "PREMTAX02",
-            "Table Type": "Policy Year"
+        "prem_tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "PREMTAX02"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01",
+            "PAD": 0.1
         }
     },
     "Capital Requirement": {
-        "mortality":{
-            "Mult": 1.0,
-            "Table": "MORT05",
+        "mortality": {
             "Table Type": "Select and Ultimate - Sex Distinct",
+            "Mult": 1,
+            "Table": "MORT05",
             "PAD": 0.15
         },
-        "lapse":{
-            "Mult": 1.0,
-            "Table": "LAPSE02",
-            "Table Type": "Pol Year/Pol Term/Prem Term",
+        "lapse": {
+            "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01",
             "PAD": 0.5
         },
-        "expense":{
-            "Mult": 1.0,
-            "Table": "EXP01",
-            "Table Type": "Policy Year",
-            "PAD": 0.2
-        },
-        "disc_rate":{
-            "Mult": 1.0,
-            "Table": "DISCRT03",
+        "disc_rate": {
             "Table Type": "Mix of Prj Year and Cal Year",
+            "Mult": 1,
+            "Table": "DISCRT03",
             "Table Column": "valn_int_rate",
-            "PAD": 0.0
+            "PAD": 0
         },
-        "prem_tax":{
-            "Mult": 1.0,
-            "Table": "PREMTAX02",
-            "Table Type": "Policy Year"
+        "prem_tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "PREMTAX02"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01",
+            "PAD": 0.2
         }
     }
 }

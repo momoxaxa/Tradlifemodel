@@ -11,12 +11,6 @@
         "Table Details": "Premium Mult to MP Premium",
         "Table Type": "Mult to MP Premium by Duration"   
     },
-    "PREM03": {
-        "Table Category": "premium",
-        "Table Filename": "PREM03.csv",
-        "Table Details": "Premium Rate Table by Issue Age/Pol Term/Prem Term",
-        "Table Type": "Rate per 1000 SA by Issue Age/Pol Term/Prem Term"
-    },
     "DB01": {
         "Table Category": "death_ben",
         "Table Filename": "DB01.csv",
@@ -41,12 +35,6 @@
         "Table Details": "Surrender Value UDT",
         "Table Type": "User Defined Table"
     },
-    "SV03": {
-        "Table Category": "surr_ben",
-        "Table Filename": "SV03.csv",
-        "Table Details": "Surrender Value Rate Table by Policy Year/Issue Age/Premium Term",
-        "Table Type": "Rate per 1000 SA by Pol Year/Issue Age/Prem Term"
-    },
     "COMM01": {
         "Table Category": "commission",
         "Table Filename": "COMM01.csv",
@@ -58,12 +46,6 @@
         "Table Filename": "COMM02UDT.csv",
         "Table Details": "Commission % UDT",
         "Table Type": "User Defined Table"
-    },
-    "COMM03": {
-        "Table Category": "commission",
-        "Table Filename": "COMM03.csv",
-        "Table Details": "Commission % by Policy Year/Policy Term/Prem Paying Term",
-        "Table Type": "Perc by Pol Year/Pol Term/Prem Term"
     },
     "MORT01": {
         "Table Category": "mortality",
@@ -118,12 +100,6 @@
         "Table Filename": "LAPSE01.csv",
         "Table Details": "Lapse Table",
         "Table Type": "Pol Year/Pol Term"
-    },
-    "LAPSE02": {
-        "Table Category": "lapse",
-        "Table Filename": "LAPSE02.csv",
-        "Table Details": "Lapse Table",
-        "Table Type": "Pol Year/Pol Term/Prem Term"
     },
     "EXP01": {
         "Table Category": "expense",

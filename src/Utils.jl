@@ -3,11 +3,11 @@ ZerobasedIndex!(array::Array)
 read_table_ind(table_data::DataFrame, datatype::String, table_header::String="Value")  
 read_table_PY(table_data::DataFrame, table_header::String, pol_year::Array, duration::Array, distributionoption::String="None")
 read_table_PRJY_CY(table_data::DataFrame, table_header::String, year::Array)
-read_table_PY_MI(table_data::DataFrame, index_1, index_2, table_header::String, pol_year::Array)
 read_table_AA(table_data::DataFrame, table_header::String, att_age::Array)
 read_table_EA(table_data::DataFrame, table_header::String, issue_age::Integer)
-read_table_EA_MI(table_data::DataFrame, index_1, index_2, table_header::String, issue_age::Integer)
 rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
+eval_udf_node(node, var_dict::Dict{Symbol, Any})
+eval_udf(expr::Expr, var_dict::Dict{Symbol, Any})
 =#
 
 using OffsetArrays, DataFrames
@@ -74,21 +74,6 @@ function read_table_PRJY_CY(table_data::DataFrame, table_header::String, year)
     return ZerobasedIndex!(assumptions_array)
 end
 
-# Read assumptions from table - Policy Year - Multi-index
-function read_table_PY_MI(table_data::DataFrame, index_1, index_2, table_header::String, pol_year)
-    assumptions_array = OffsetArray([], Origin(0))
-    data = filter(row -> row[2] == index_1 && row[3] == index_2, table_data)
-    for t in 0:proj_len
-        index = findfirst(data[:, 1] .== pol_year[t])       
-        if index !== nothing
-            append!(assumptions_array, data[index, table_header])
-        else
-            append!(assumptions_array, 0.0) 
-        end  
-    end
-    return ZerobasedIndex!(assumptions_array)
-end
-
 # Read assumptions from table - Attained Age
 function read_table_AA(table_data::DataFrame, table_header::String, att_age)
     assumptions_array = OffsetArray([], Origin(0))
@@ -112,15 +97,6 @@ function read_table_EA(table_data::DataFrame, table_header::String, issue_age::I
     end
 end
 
-# Read assumptions from table - Entry Age - Multi-index
-function read_table_EA_MI(table_data::DataFrame, index_1, index_2, table_header::String, issue_age::Integer)
-    data = filter(row -> row[2] == index_1 && row[3] == index_2, table_data)
-    index = findfirst(data[:, 1] .== issue_age)
-    if index !== nothing
-        return data[index, table_header] .* ZerobasedIndex!(ones(Float64, proj_len+1))
-    end
-end
-
 # Create cf array with reverse cumulative sum of cf with discounting
 function rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
     n = length(cf) - 1
@@ -139,4 +115,39 @@ function rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
         end
     end
     return result
+end
+
+# Evaluate a node in a UDF expression tree
+function eval_udf_node(node, var_dict::Dict{Symbol, Any})
+    if node isa Symbol
+        return var_dict[node]
+    elseif node isa Number
+        return node
+    elseif node isa Expr
+        return eval_udf(node, var_dict)
+    else
+        error("UDF: unsupported node type $(typeof(node))")
+    end
+end
+
+# Evaluate a UDF Expr by walking the AST — thread-safe, no global scope pollution.
+# Supports operators: + - * / ^ % min max (all broadcast over OffsetArrays)
+function eval_udf(expr::Expr, var_dict::Dict{Symbol, Any})
+    if expr.head == :call
+        op   = expr.args[1]
+        args = [eval_udf_node(arg, var_dict) for arg in expr.args[2:end]]
+        if     op == :+ || op == :.+   return reduce((a, b) -> a .+ b, args)
+        elseif op == :- || op == :.-   return reduce((a, b) -> a .- b, args)
+        elseif op == :* || op == :.*   return reduce((a, b) -> a .* b, args)
+        elseif op == :/ || op == :./   return reduce((a, b) -> a ./ b, args)
+        elseif op == :^ || op == :.^   return reduce((a, b) -> a .^ b, args)
+        elseif op == :% || op == :.%   return reduce((a, b) -> a .% b, args)
+        elseif op == :min              return reduce((a, b) -> min.(a, b), args)
+        elseif op == :max              return reduce((a, b) -> max.(a, b), args)
+        else
+            error("UDF: unsupported operator $op")
+        end
+    else
+        error("UDF: unsupported expression head $(expr.head)")
+    end
 end

@@ -11,7 +11,7 @@ using Dates
 
 const INPUT_PATH    = joinpath(dirname(dirname(dirname(@__FILE__))), "Input")
 const SETTINGS_FILE = joinpath(INPUT_PATH, "general_settings.json")
-const PRODUCTS_DIR  = joinpath(INPUT_PATH, "products")
+const PRODUCTS_DIR  = joinpath(INPUT_PATH, "Products")
 
 # ============================================================
 # Helpers — settings I/O, product list, form parsing
@@ -38,7 +38,7 @@ function form_to_settings(params::Dict)::Dict
         "Valuation Date"                        => string(get(params, :valuation_date, "2025-12")),
         "Projection Year"                       => tryparse(Int,     get(params, :projection_year, "")),
         "Capital Requirement Gross Up Factor"   => tryparse(Float64, get(params, :capreq_grossup, "")),
-        "Number of Workers for Multiprocessing" => tryparse(Int,     get(params, :num_workers, "")),
+        "Multithreading"                        => string(get(params, :multithreading, "Yes")),
         "Products to run"                       => string.(get(params, Symbol("products_to_run[]"), []))
     )
 end
@@ -116,10 +116,11 @@ function render_page(settings::Dict, products::Vector{String};
         </div>
 
         <div class="tlm-field">
-          <label class="tlm-label" for="num_workers">Number of Workers for Multiprocessing</label>
-          <input type="number" id="num_workers" name="num_workers"
-                 value="$(he(get(settings, "Number of Workers for Multiprocessing", 0)))"
-                 min="0" max="10" step="1" class="tlm-input tlm-input--short">
+          <label class="tlm-label" for="multithreading">Multithreading</label>
+          <select id="multithreading" name="multithreading" class="tlm-input tlm-input--short">
+            <option value="Yes" $(get(settings, "Multithreading", "Yes") == "Yes" ? "selected" : "")>Yes</option>
+            <option value="No" $(get(settings, "Multithreading", "Yes") == "No" ? "selected" : "")>No</option>
+          </select>
         </div>
 
         <div class="tlm-field">

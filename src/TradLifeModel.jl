@@ -1,42 +1,52 @@
-using Distributed
+using CSV, DataFrames
+using Dates, MortalityTables, OffsetArrays
 
 include("Settings.jl")
 include("Utils.jl")
 include("DataStruct.jl")
+include("ProductFeatures.jl")
 include("Assumptions.jl")
 include("Print.jl")
 include("Projection.jl")
 
 start = now()
 
-# Multiprocessing
+println("Julia started with $(Threads.nthreads()) thread(s). Multithreading setting: $(use_threads ? "Yes" : "No").")
 
-addprocs(num_workers)
+if use_threads
 
-@everywhere begin
-    using CSV, DataFrames
-    using Dates, MortalityTables, OffsetArrays
+    # One task per (run, product) pair, dynamically scheduled across threads
 
-    include("Settings.jl")
-    include("Utils.jl")
-    include("DataStruct.jl")
-    include("ProductFeatures.jl")
-    include("Assumptions.jl")
-    include("Print.jl")
-    include("Projection.jl")
+    @sync for curr_run in selected_runs
 
-end
+        mkpath("$output_file_path$curr_run")
+        runset = RunSet(run_settings_df, curr_run)
 
-@sync @distributed for curr_run in selected_runs
+        for prod_code in selected_products
+            Threads.@spawn begin
+                print("[thread $(Threads.threadid()) of $(Threads.nthreads())] starting $(runset.RunNumber) $prod_code\n")
+                run_product(prod_code, runset)
+            end
+        end
 
-    mkpath("$output_file_path$curr_run")
-    runset = RunSet(run_settings_df, curr_run)
-
-    @sync @distributed for prod_code in selected_products
-        run_product(prod_code, runset)
     end
 
-    println("$curr_run completed at $(now()).")
+else
+
+    # Sequential: plain loops, deterministic order (easier debugging)
+
+    for curr_run in selected_runs
+
+        mkpath("$output_file_path$curr_run")
+        runset = RunSet(run_settings_df, curr_run)
+
+        for prod_code in selected_products
+            run_product(prod_code, runset)
+        end
+
+        println("$curr_run completed at $(now())")
+
+    end
 
 end
 
@@ -47,13 +57,13 @@ for curr_run in selected_runs
 
     for (i, prod_code) in enumerate(selected_products)
         if i == 1
-            resultallproducts = CSV.read("$output_file_path$curr_run\\result_$prod_code.csv", DataFrame)
+            resultallproducts = CSV.read(joinpath(output_file_path, "$curr_run", "result_$prod_code.csv"), DataFrame)
         else
-            resultallproducts[:, Not(:date)] .+= CSV.read("$output_file_path$curr_run\\result_$prod_code.csv", DataFrame)[:, Not(:date)]
+            resultallproducts[:, Not(:date)] .+= CSV.read(joinpath(output_file_path, "$curr_run", "result_$prod_code.csv"), DataFrame)[:, Not(:date)]
         end
     end
 
-    CSV.write("$output_file_path$curr_run\\result_allproducts.csv", resultallproducts)
+    CSV.write(joinpath(output_file_path, "$curr_run", "result_allproducts.csv"), resultallproducts)
 
 end
 

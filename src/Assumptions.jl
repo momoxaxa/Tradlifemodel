@@ -121,8 +121,6 @@ function read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::
     mult = curr_asmpset.lapse.mult * adj
     if curr_asmpset.lapse.table_type == "Pol Year/Pol Term"
         annual_rate = read_table_PY(df, string(mp.pol_term), polt.pol_year, polt.duration) * mult
-    elseif curr_asmpset.lapse.table_type == "Pol Year/Pol Term/Prem Term"
-        annual_rate = read_table_PY_MI(input_tables_dict[curr_asmpset.lapse.table], mp.pol_term, mp.prem_term, "Value", polt.pol_year)
     end
     
     PAD = curr_asmpset.lapse.PAD 

@@ -10,7 +10,7 @@ current_job = nothing
 
 const GENIE_APP    = dirname(dirname(@__FILE__))
 const PROJECT_DIR  = dirname(GENIE_APP)
-const MODEL_SCRIPT = joinpath(PROJECT_DIR, "src", "tradlifemodel.jl")
+const MODEL_SCRIPT = joinpath(PROJECT_DIR, "src", "TradLifeModel.jl")
 const LOG_FILE     = joinpath(GENIE_APP, "run-monitor.log")
 
 # Initialise log file
@@ -146,7 +146,7 @@ function register_routes()
         current_job = Threads.@spawn begin
             open(LOG_FILE, "w") do io
                 try
-                    run(pipeline(`julia --project=$PROJECT_DIR $MODEL_SCRIPT`,
+                    run(pipeline(`julia --project=$PROJECT_DIR -t auto $MODEL_SCRIPT`,
                                  stdout=io, stderr=io))
                 catch e
                     @error "Model run failed" exception=(e, catch_backtrace())

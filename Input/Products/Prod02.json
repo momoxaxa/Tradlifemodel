@@ -1,131 +1,131 @@
 {
     "Product Feature": {
-        "premium":{
-            "Mult": 1.0,
-            "Table": "PREM01",
-            "Table Type": "Rate per 1000 SA by Age/Pol Term",
-            "UDF": ""
-        },
-        "death_ben":{
-            "Mult": 1.0,
-            "Table": "DB02UDT",
-            "Table Type": "User Defined Table",
-            "UDF": "min.(multiple .* amount .* (1 .+ inflator) .^ (Year .- 1), 200000)"
-        },
-        "surr_ben":{
-            "Mult": 1.0,
-            "Table": "SV01",
+        "surr_ben": {
             "Table Type": "Rate per 1000 SA by Year/Age",
+            "Mult": 1,
+            "Table": "SV01",
             "UDF": ""
         },
-        "commission":{
-            "Mult": 1.0,
-            "Table": "COMM01",
+        "commission": {
             "Table Type": "Perc by Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "COMM01",
             "UDF": ""
+        },
+        "premium": {
+            "Table Type": "Rate per 1000 SA by Age/Pol Term",
+            "Mult": 1,
+            "Table": "PREM01",
+            "UDF": ""
+        },
+        "death_ben": {
+            "Table Type": "User Defined Table",
+            "Mult": 1,
+            "Table": "DB02UDT",
+            "UDF": "min(multiple * amount.* (1 + inflator) ^ (Year - 1), 200000)"
         }
     },
     "Base Projection": {
-        "mortality":{
+        "mortality": {
+            "Table Type": "Attained Age",
             "Mult": 0.8,
-            "Table": "MORT01",
-            "Table Type": "Attained Age"
+            "Table": "MORT01"
         },
-        "lapse":{
-            "Mult": 1.0,
-            "Table": "LAPSE01",
-            "Table Type": "Pol Year/Pol Term"
+        "lapse": {
+            "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01"
         },
-        "expense":{
-            "Mult": 1.0,
-            "Table": "EXP01",
-            "Table Type": "Policy Year"
-        },
-        "disc_rate":{
-            "Mult": 1.0,
-            "Table": "DISCRT01",
+        "invt_return": {
             "Table Type": "Projection Year",
-            "Table Column": "disc_rate"
-        },
-        "invt_return":{
-            "Mult": 1.0,
+            "Mult": 1,
             "Table": "DISCRT01",
-            "Table Type": "Projection Year",
             "Table Column": "investment_return"
         },
-        "prem_tax":{
-            "Mult": 1.0,
-            "Table": "PREMTAX01",
-            "Table Type": "Scalar"
+        "tax": {
+            "Table Type": "Scalar",
+            "Mult": 1,
+            "Table": "TAX01"
         },
-        "tax":{
-            "Mult": 1.0,
-            "Table": "TAX01",
-            "Table Type": "Scalar"
+        "disc_rate": {
+            "Table Type": "Projection Year",
+            "Mult": 1,
+            "Table": "DISCRT01",
+            "Table Column": "disc_rate"
+        },
+        "prem_tax": {
+            "Table Type": "Scalar",
+            "Mult": 1,
+            "Table": "PREMTAX01"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01"
         }
     },
     "Valuation": {
-        "mortality":{
+        "mortality": {
+            "Table Type": "Attained Age",
             "Mult": 0.8,
             "Table": "MORT01",
-            "Table Type": "Attained Age",
             "PAD": 0.1
         },
-        "lapse":{
-            "Mult": 1.0,
-            "Table": "LAPSE01",
+        "lapse": {
             "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01",
             "PAD": 0.2
         },
-        "expense":{
-            "Mult": 1.0,
-            "Table": "EXP01",
-            "Table Type": "Policy Year",
-            "PAD": 0.1
-        },
-        "disc_rate":{
-            "Mult": 1.0,
-            "Table": "DISCRT01",
+        "disc_rate": {
             "Table Type": "Projection Year",
+            "Mult": 1,
+            "Table": "DISCRT01",
             "Table Column": "valn_int_rate",
-            "PAD": 0.0
+            "PAD": 0
         },
-        "prem_tax":{
-            "Mult": 1.0,
-            "Table": "PREMTAX01",
-            "Table Type": "Scalar"
+        "prem_tax": {
+            "Table Type": "Scalar",
+            "Mult": 1,
+            "Table": "PREMTAX01"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01",
+            "PAD": 0.1
         }
     },
     "Capital Requirement": {
-        "mortality":{
+        "mortality": {
+            "Table Type": "Attained Age",
             "Mult": 0.8,
             "Table": "MORT01",
-            "Table Type": "Attained Age",
             "PAD": 0.15
         },
-        "lapse":{
-            "Mult": 1.0,
-            "Table": "LAPSE01",
+        "lapse": {
             "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01",
             "PAD": 0.5
         },
-        "expense":{
-            "Mult": 1.0,
-            "Table": "EXP01",
-            "Table Type": "Policy Year",
-            "PAD": 0.2
-        },
-        "disc_rate":{
-            "Mult": 1.0,
-            "Table": "DISCRT01",
+        "disc_rate": {
             "Table Type": "Projection Year",
+            "Mult": 1,
+            "Table": "DISCRT01",
             "Table Column": "valn_int_rate",
-            "PAD": 0.0
+            "PAD": 0
         },
-        "prem_tax":{
-            "Mult": 1.0,
-            "Table": "PREMTAX01",
-            "Table Type": "Scalar"
+        "prem_tax": {
+            "Table Type": "Scalar",
+            "Mult": 1,
+            "Table": "PREMTAX01"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01",
+            "PAD": 0.2
         }
     }
 }
