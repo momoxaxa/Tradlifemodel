@@ -20,7 +20,7 @@ valn_date = Date(general_settings_dict["Valuation Date"])
 
 # General Settings - Projection Years
 
-proj_yrs = general_settings_dict["Projection Year"]
+proj_yrs = 120 # no longer reading from general_settings_dict["Projection Year"]
 proj_len = proj_yrs * 12
 
 # General Settings - Capital Requirement Gross Up Factor

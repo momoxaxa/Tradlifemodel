@@ -36,7 +36,6 @@ end
 function form_to_settings(params::Dict)::Dict
     Dict(
         "Valuation Date"                        => string(get(params, :valuation_date, "2025-12")),
-        "Projection Year"                       => tryparse(Int,     get(params, :projection_year, "")),
         "Capital Requirement Gross Up Factor"   => tryparse(Float64, get(params, :capreq_grossup, "")),
         "Multithreading"                        => string(get(params, :multithreading, "Yes")),
         "Products to run"                       => string.(get(params, Symbol("products_to_run[]"), []))
@@ -84,9 +83,11 @@ function render_page(settings::Dict, products::Vector{String};
     <div class="tlm-sidenav-label">Navigation</div>
     <a href="/table-setup">Table Setup</a>
     <a href="/product-setup">Product Setup</a>
+    <a href="/model-point">Model Point</a>
     <a href="/run-settings">Run Settings</a>
     <a href="/general-settings" class="active">General Settings</a>
     <a href="/run-monitor">Run Monitor</a>
+    <a href="/run-result">Run Result</a>
   </nav>
 
   <main class="tlm-page-main">
@@ -99,13 +100,6 @@ function render_page(settings::Dict, products::Vector{String};
           <input type="month" id="valuation_date" name="valuation_date"
                  value="$(he(get(settings, "Valuation Date", "2025-12")))"
                  class="tlm-input" required>
-        </div>
-
-        <div class="tlm-field">
-          <label class="tlm-label" for="projection_year">Projection Year</label>
-          <input type="number" id="projection_year" name="projection_year"
-                 value="$(he(get(settings, "Projection Year", 100)))"
-                 min="1" max="120" step="1" class="tlm-input tlm-input--short">
         </div>
 
         <div class="tlm-field">

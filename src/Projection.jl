@@ -2,9 +2,9 @@
 project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator, product_features_set)
 project_per_policy_with_assumptions!(ppt::PerPolicyCFTable, asmpt:: AssumptionsTable)
 
-project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, dur_at_valn_date)
+project_survivorship!(svt::SurvivorshipTable, asmpt:: AssumptionsTable, pol_term, dur_at_valn_date)
 
-project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
+project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivorshipTable)
 project_present_value_bef_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth)
 
 project_present_value_outgo_net_income!(pvcft::PVCFTable)
@@ -14,7 +14,7 @@ project_per_policy_reserve!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_
 
 project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable, input_tables_dict::Dict, mp::ModelPoint, capreq_asmpset::AssumptionSet, s::Integer, prod_code::String, runset::RunSet, capreq_method::String="Risk Based Capital")
 
-project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::AssumptionsTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
+project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::AssumptionsTable, ppt::PerPolicyCFTable, svt::SurvivorshipTable)
 project_present_value_inc_resv_capreq!(pvcft::PVCFTable, ift::InForceCFTable, disc_rate_mth)
 
 inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, s::Integer, prod_code::String, inner_proj_loop::String, runset::RunSet)
@@ -59,11 +59,11 @@ function project_per_policy_with_assumptions!(ppt::PerPolicyCFTable, asmpt:: Ass
 
 end
 
-function project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable, pol_term, dur_valdate)
+function project_survivorship!(svt::SurvivorshipTable, asmpt:: AssumptionsTable, pol_term, dur_valdate, pol_proj_len)
 
-    # Survivalship
+    # Survivorship
 
-    for t in 0:proj_len
+    for t in 0:pol_proj_len
         if t == 0
             svt.pol_if[t] = 1
         elseif t <= pol_term*12 - dur_valdate
@@ -78,15 +78,15 @@ function project_survivalship!(svt::SurvivalshipTable, asmpt:: AssumptionsTable,
 
 end
 
-function project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
+function project_in_force_bef_resv_capreq!(ift::InForceCFTable, ppt::PerPolicyCFTable, svt::SurvivorshipTable)
 
     # In Force Cashflow
 
-    ift.premium_if = ppt.premium_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
-    ift.prem_tax_if = ppt.prem_tax_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
-    ift.comm_if = ppt.comm_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
-    ift.acq_exp_if = ppt.acq_exp_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
-    ift.maint_exp_if = ppt.maint_exp_pp .* ZerobasedIndex!([0; svt.pol_if[0:end-1]])
+    ift.premium_if = ppt.premium_pp .* ZerobasedIndex([0; svt.pol_if[0:end-1]])
+    ift.prem_tax_if = ppt.prem_tax_pp .* ZerobasedIndex([0; svt.pol_if[0:end-1]])
+    ift.comm_if = ppt.comm_pp .* ZerobasedIndex([0; svt.pol_if[0:end-1]])
+    ift.acq_exp_if = ppt.acq_exp_pp .* ZerobasedIndex([0; svt.pol_if[0:end-1]])
+    ift.maint_exp_if = ppt.maint_exp_pp .* ZerobasedIndex([0; svt.pol_if[0:end-1]])
     ift.death_ben_if = ppt.death_ben_pp .* svt.pol_death
     ift.surr_ben_if = ppt.surr_ben_pp .* svt.pol_lapse
 
@@ -149,7 +149,7 @@ function project_per_policy_capreq!(ppt::PerPolicyCFTable, polt::PolicyInfoTable
 
 end
 
-function project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::AssumptionsTable, ppt::PerPolicyCFTable, svt::SurvivalshipTable)
+function project_in_force_inc_resv_capreq!(ift::InForceCFTable, asmpt::AssumptionsTable, ppt::PerPolicyCFTable, svt::SurvivorshipTable)
 
     # In Force Cashflow
 
@@ -213,20 +213,20 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
     curr_run = runset.RunNumber
     
     ppt_inner = deepcopy(ppt)
-    asmpt_inner = AssumptionsTable()
-    svt_inner = SurvivalshipTable()
-    ift_inner = InForceCFTable()
-    pvcft_inner = PVCFTable()
+    asmpt_inner = AssumptionsTable(mp.pol_proj_len)
+    svt_inner = SurvivorshipTable(mp.pol_proj_len)
+    ift_inner = InForceCFTable(mp.pol_proj_len)
+    pvcft_inner = PVCFTable(mp.pol_proj_len)
 
     read_mortality!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset, runset)
     read_lapse!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset, runset)
-    read_expense!(asmpt_inner, input_tables_dict, polt, curr_asmpset, runset)
-    read_disc_rate!(asmpt_inner, input_tables_dict, polt, curr_asmpset, runset)
-    read_invt_return!(asmpt_inner, input_tables_dict, polt, curr_asmpset, runset)
-    read_prem_tax!(asmpt_inner, input_tables_dict, polt, curr_asmpset)
+    read_expense!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset, runset)
+    read_disc_rate!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset, runset)
+    read_invt_return!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset, runset)
+    read_prem_tax!(asmpt_inner, input_tables_dict, mp, polt, curr_asmpset)
 
     project_per_policy_with_assumptions!(ppt_inner, asmpt_inner)
-    project_survivalship!(svt_inner, asmpt_inner, mp.pol_term, mp.dur_valdate)
+    project_survivorship!(svt_inner, asmpt_inner, mp.pol_term, mp.dur_valdate, mp.pol_proj_len)
     project_in_force_bef_resv_capreq!(ift_inner, ppt_inner, svt_inner)
     project_present_value_bef_resv_capreq!(pvcft_inner, ift_inner, asmpt_inner.disc_rate_mth)
     project_present_value_outgo_net_income!(pvcft_inner)
@@ -237,7 +237,7 @@ function inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::Per
         CSV.write(joinpath(output_file_path, "$curr_run", "firstmpresult_innerproj_$(inner_proj_loop)_$prod_code.csv"), firstmpresult)
     end
 
-    result = zeros(Float64, proj_len+1) |> ZerobasedIndex!
+    result = zeros(Float64, mp.pol_proj_len+1) |> ZerobasedIndex
     result[0:mp.pol_proj_len] = pvcft_inner.pv_cf[0:mp.pol_proj_len] ./ svt_inner.pol_if[0:mp.pol_proj_len]
     return result
 end
@@ -263,10 +263,14 @@ function run_product(prod_code::String, runset::RunSet)
     valn_asmpset = AssumptionSet(assumption_set_df, "Valuation", prod_code)
     capreq_asmpset = AssumptionSet(assumption_set_df, "Capital Requirement", prod_code)
     
-    # initialize for printing results
+    # preallocate dataframe for printing results
 
-    firstmpresult = DataFrame()
-    resultbyproduct = DataFrame()
+    resultbyproduct = DataFrame(date = [valn_date + Dates.Month(t) for t in 0:proj_len])
+    for row in eachrow(print_agg_df)
+        resultbyproduct[:, row.Variable] = zeros(Float64, proj_len + 1)
+    end
+
+
 
     # Display current product and size of the model points
     
@@ -279,25 +283,25 @@ function run_product(prod_code::String, runset::RunSet)
         mp = ModelPoint(model_point_df, s)
         
         # Initiatize and Load Policy Information Table
-        polt = PolicyInfoTable(mp.dur_valdate, mp.issue_age, mp.prem_mode)
+        polt = PolicyInfoTable(mp.dur_valdate, mp.issue_age, mp.prem_mode, mp.pol_proj_len)
         
-        # Initialize Assumptions, Per Policy, Survivalship, In Force, Present Value Tables
+        # Initialize Assumptions, Per Policy, Survivorship, In Force, Present Value Tables
         
-        asmpt = AssumptionsTable()
-        ppt = PerPolicyCFTable()
-        svt = SurvivalshipTable()
-        ift = InForceCFTable()
-        pvcft = PVCFTable()
+        asmpt = AssumptionsTable(mp.pol_proj_len)
+        ppt = PerPolicyCFTable(mp.pol_proj_len)
+        svt = SurvivorshipTable(mp.pol_proj_len)
+        ift = InForceCFTable(mp.pol_proj_len)
+        pvcft = PVCFTable(mp.pol_proj_len)
 
         # Read Assumptions for Base Projection into Assumption Table
 
         read_mortality!(asmpt, input_tables_dict, mp, polt, base_asmpset, runset)
         read_lapse!(asmpt, input_tables_dict, mp, polt, base_asmpset, runset)
-        read_expense!(asmpt, input_tables_dict, polt, base_asmpset, runset)
-        read_disc_rate!(asmpt, input_tables_dict, polt, base_asmpset, runset)
-        read_invt_return!(asmpt, input_tables_dict, polt, base_asmpset, runset)
-        read_prem_tax!(asmpt, input_tables_dict, polt, base_asmpset)
-        read_tax!(asmpt, input_tables_dict, polt, base_asmpset)
+        read_expense!(asmpt, input_tables_dict, mp,polt, base_asmpset, runset)
+        read_disc_rate!(asmpt, input_tables_dict, mp, polt, base_asmpset, runset)
+        read_invt_return!(asmpt, input_tables_dict, mp, polt, base_asmpset, runset)
+        read_prem_tax!(asmpt, input_tables_dict, mp, polt, base_asmpset)
+        read_tax!(asmpt, input_tables_dict, mp, polt, base_asmpset)
              
         # Read Product Features into Per Policy Table
 
@@ -307,11 +311,11 @@ function run_product(prod_code::String, runset::RunSet)
 
         project_per_policy_with_assumptions!(ppt, asmpt)
 
-        # Calculate decrement using assumptions and store in Survivalship Table
+        # Calculate decrement using assumptions and store in Survivorship Table
 
-        project_survivalship!(svt, asmpt, mp.pol_term, mp.dur_valdate)
+        project_survivorship!(svt, asmpt, mp.pol_term, mp.dur_valdate, mp.pol_proj_len)
         
-        # Apply decrement from Survivalship Table to Per Policy Table and store in In Force Table
+        # Apply decrement from Survivorship Table to Per Policy Table and store in In Force Table
 
         project_in_force_bef_resv_capreq!(ift, ppt, svt)
 
@@ -337,11 +341,8 @@ function run_product(prod_code::String, runset::RunSet)
         if s == 1
             firstmpresult = print_single_mp(polt, asmpt, ppt, svt, ift, pvcft)
             CSV.write(joinpath(output_file_path, "$curr_run", "firstmpresult_$prod_code.csv"), firstmpresult)
-            resultbyproduct = print_aggregate_result(polt.date, ppt, svt, ift, pvcft)
-        else
-            agg_result = print_aggregate_result(polt.date, ppt, svt, ift, pvcft)
-            resultbyproduct[:, Not(:date)] .+= copy(agg_result[:, Not(:date)])
         end
+        accumulate_aggregate_result!(resultbyproduct, ppt, svt, ift, pvcft)
 
     end
     

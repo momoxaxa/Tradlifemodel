@@ -1,10 +1,10 @@
 #=
-ZerobasedIndex!(array::Array)
-read_table_ind(table_data::DataFrame, datatype::String, table_header::String="Value")  
-read_table_PY(table_data::DataFrame, table_header::String, pol_year::Array, duration::Array, distributionoption::String="None")
-read_table_PRJY_CY(table_data::DataFrame, table_header::String, year::Array)
-read_table_AA(table_data::DataFrame, table_header::String, att_age::Array)
-read_table_EA(table_data::DataFrame, table_header::String, issue_age::Integer)
+ZerobasedIndex(array::Array)
+read_table_ind(table_data::DataFrame, rowlabel::Union{String, Nothing}=nothing, columnheader::String="Value")   
+read_table_PY(table_data::DataFrame, columnheader::String, pol_year, duration, pol_proj_len, distributionoption::String="None")
+read_table_PRJY_CY(table_data::DataFrame, table_header::String, year, pol_proj_len)
+read_table_AA(table_data::DataFrame, table_header::String, att_age, pol_proj_len)
+read_table_EA(table_data::DataFrame, table_header::String, issue_age::Integer, pol_proj_len::Integer)
 rev_cumsum_disc(cf, disc_rate, cf_timing="EOP")
 eval_udf_node(node, var_dict::Dict{Symbol, Any})
 eval_udf(expr::Expr, var_dict::Dict{Symbol, Any})
@@ -14,8 +14,8 @@ using OffsetArrays, DataFrames
 using OffsetArrays: Origin
 
 # Convert Array from 1-based index to 0-based index
-function ZerobasedIndex!(array)
-    return OffsetArray(array, 0:proj_len)
+function ZerobasedIndex(array)
+    return OffsetArray(array, Origin(0))
 end
 
 # Read assumptions from table - Indicators
@@ -23,16 +23,16 @@ function read_table_ind(table_data::DataFrame, rowlabel::Union{String, Nothing}=
     if rowlabel === nothing
         table_data[1, columnheader][1]
     else
-        filter(row -> row[1] == rowlabel, table_data)[1, columnheader] |> ZerobasedIndex!
+        filter(row -> row[1] == rowlabel, table_data)[1, columnheader] |> ZerobasedIndex
     end
 end
 
 # Read assumptions from table - Policy Year
-function read_table_PY(table_data::DataFrame, columnheader::String, pol_year, duration, distributionoption::String="None")
+function read_table_PY(table_data::DataFrame, columnheader::String, pol_year, duration, pol_proj_len, distributionoption::String="None")
     assumptions_array = OffsetArray([],Origin(0))
     index = 1
     if distributionoption in ("None", "EvenlySpreadOut")
-        for t in 0:proj_len
+        for t in 0:pol_proj_len
             index = findfirst(table_data[:, 1] .== pol_year[t])
             if index !== nothing
                 append!(assumptions_array, table_data[index, columnheader])
@@ -44,7 +44,7 @@ function read_table_PY(table_data::DataFrame, columnheader::String, pol_year, du
             assumptions_array = assumptions_array / 12
         end
     elseif distributionoption == "BOP"
-        for t in 0:proj_len
+        for t in 0:pol_proj_len
             if mod(duration[t], 12) == 1
                 index = findfirst(table_data[:, 1] .== pol_year[t])
                 if index !== nothing
@@ -57,13 +57,13 @@ function read_table_PY(table_data::DataFrame, columnheader::String, pol_year, du
             end
         end
     end
-    return ZerobasedIndex!(assumptions_array)
+    return ZerobasedIndex(assumptions_array)
 end
 
 # Read assumptions from table - Projection Year and Calendar Year
-function read_table_PRJY_CY(table_data::DataFrame, table_header::String, year)
+function read_table_PRJY_CY(table_data::DataFrame, table_header::String, year, pol_proj_len)
     assumptions_array = OffsetArray([], Origin(0))
-    for t in 0:proj_len
+    for t in 0:pol_proj_len
         index = findfirst(table_data[:, 1] .== year[t])
         if index !== nothing
             append!(assumptions_array, table_data[index, table_header])
@@ -71,14 +71,14 @@ function read_table_PRJY_CY(table_data::DataFrame, table_header::String, year)
             append!(assumptions_array, 0.0) 
         end  
     end
-    return ZerobasedIndex!(assumptions_array)
+    return ZerobasedIndex(assumptions_array)
 end
 
 # Read assumptions from table - Attained Age
-function read_table_AA(table_data::DataFrame, table_header::String, att_age)
+function read_table_AA(table_data::DataFrame, table_header::String, att_age, pol_proj_len)
     assumptions_array = OffsetArray([], Origin(0))
     index = 1
-    for t in 0:proj_len
+    for t in 0:pol_proj_len
         index = findfirst(table_data[:, 1] .== att_age[t])   ####
         if index !== nothing
             append!(assumptions_array, table_data[index, table_header])
@@ -86,14 +86,14 @@ function read_table_AA(table_data::DataFrame, table_header::String, att_age)
             append!(assumptions_array, 0.0)
         end  
     end
-    return ZerobasedIndex!(assumptions_array)
+    return ZerobasedIndex(assumptions_array)
 end
 
 # Read assumptions from table - Entry Age
-function read_table_EA(table_data::DataFrame, table_header::String, issue_age::Integer)
+function read_table_EA(table_data::DataFrame, table_header::String, issue_age::Integer, pol_proj_len::Integer)
     index = findfirst(table_data[:, 1] .== issue_age)
     if index !== nothing
-        return table_data[index, table_header] .* ZerobasedIndex!(ones(Float64, proj_len+1))
+        return table_data[index, table_header] .* ZerobasedIndex(ones(Float64, pol_proj_len+1))
     end
 end
 

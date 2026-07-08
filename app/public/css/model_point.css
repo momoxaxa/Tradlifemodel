@@ -1,0 +1,128 @@
+/* ── Model Point page ─────────────────────────────────────────────────────────
+   Requires base.css for tokens and shared controls.
+   Data grid is rendered by jspreadsheet (see /css/jspreadsheet.min.css).
+────────────────────────────────────────────────────────────────────────────── */
+
+/* ── File list (inside tlm-sidenav) ───────────────────────────────────────── */
+.mp-nav-group { margin-bottom: 0.5rem; }
+
+.mp-nav-group-label {
+    font-family: var(--tlm-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--tlm-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 1rem 0.2rem;
+}
+
+.mp-nav-list { list-style: none; margin: 0; padding: 0; }
+.mp-nav-item { margin: 0; }
+
+.mp-nav-link {
+    display: block;
+    font-family: var(--tlm-mono);
+    font-size: 0.8rem;
+    color: var(--tlm-muted);
+    text-decoration: none;
+    padding: 0.35rem 1rem 0.35rem 1.25rem;
+    border-left: 2px solid transparent;
+    transition: color 0.1s, background 0.1s;
+    word-break: break-all;
+}
+.mp-nav-link:hover { color: var(--tlm-text); background: #ededf0; }
+
+.mp-nav-item--active .mp-nav-link {
+    color: var(--tlm-accent);
+    background: #eef0fd;
+    border-left-color: var(--tlm-accent);
+    font-weight: 600;
+}
+
+.mp-nav-empty {
+    display: block;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    color: var(--tlm-muted);
+    font-style: italic;
+    padding: 0.35rem 1rem 0.35rem 1.25rem;
+}
+
+/* ── Main panel ───────────────────────────────────────────────────────────── */
+.mp-panel-header { margin-bottom: 0.75rem; }
+
+.mp-panel-title {
+    font-family: var(--tlm-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--tlm-text);
+    margin: 0;
+}
+
+.mp-meta {
+    font-family: var(--tlm-mono);
+    font-size: 0.72rem;
+    color: var(--tlm-muted);
+    margin-top: 0.25rem;
+}
+
+.mp-placeholder {
+    font-family: var(--tlm-mono);
+    font-size: 0.82rem;
+    color: var(--tlm-muted);
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 1px dashed var(--tlm-border);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.mp-truncated {
+    font-family: var(--tlm-mono);
+    font-size: 0.72rem;
+    color: var(--tlm-yellow);
+    margin-bottom: 0.5rem;
+}
+
+/* Read-only data table */
+.mp-table-wrap {
+    max-height: 70vh;
+    overflow: auto;
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    background: #ffffff;
+}
+
+.mp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--tlm-mono);
+    font-size: 0.76rem;
+}
+
+.mp-th {
+    background: var(--tlm-surface);
+    color: var(--tlm-muted);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+    border-bottom: 2px solid var(--tlm-border);
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.mp-th--idx { width: 48px; }
+
+.mp-tr { border-bottom: 1px solid var(--tlm-border); }
+.mp-tr:hover { background: #f5f5ff; }
+
+.mp-td {
+    padding: 0.25rem 0.75rem;
+    color: var(--tlm-text);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.mp-td--idx { color: var(--tlm-muted); font-size: 0.68rem; }

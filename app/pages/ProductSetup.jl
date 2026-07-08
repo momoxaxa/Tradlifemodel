@@ -9,7 +9,7 @@ using JSON3
 # ============================================================
 
 const INPUT_PATH    = joinpath(dirname(dirname(dirname(@__FILE__))), "Input")
-const PRODUCTS_DIR  = joinpath(INPUT_PATH, "products")
+const PRODUCTS_DIR  = joinpath(INPUT_PATH, "Products")
 const LISTINGS_PATH = joinpath(INPUT_PATH, "table_listings.json")
 
 # Each section (e.g. Product Feature): (json_key, display_label, rows)
@@ -305,9 +305,11 @@ $(notice_html)
     <div class="tlm-sidenav-label">Navigation</div>
     <a href="/table-setup">Table Setup</a>
     <a href="/product-setup" class="active">Product Setup</a>
+    <a href="/model-point">Model Point</a>
     <a href="/run-settings">Run Settings</a>
     <a href="/general-settings">General Settings</a>
     <a href="/run-monitor">Run Monitor</a>
+    <a href="/run-result">Run Result</a>
     <hr style="border:none;border-top:1px solid var(--tlm-border);margin:0.5rem 0">
     <div class="tlm-sidenav-label">Products</div>
     <button class='ps-add-btn' onclick='newProduct()'>+ Add New</button>

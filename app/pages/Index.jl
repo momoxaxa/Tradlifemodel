@@ -34,18 +34,28 @@ function render_page()
       </li>
       <li>
         <span class="index-step-num">3</span>
+        <div><a href="/model-point">Model Point</a>
+          <span>— view model point files for each product</span></div>
+      </li>
+      <li>
+        <span class="index-step-num">4</span>
         <div><a href="/run-settings">Run Settings</a>
           <span>— define runs and assumption multipliers</span></div>
       </li>
       <li>
-        <span class="index-step-num">4</span>
+        <span class="index-step-num">5</span>
         <div><a href="/general-settings">General Settings</a>
-          <span>— set valuation date, projection year, workers, etc</span></div>
+          <span>— set valuation date, projection year, multithreading, etc</span></div>
       </li>
       <li>
-        <span class="index-step-num">5</span>
+        <span class="index-step-num">6</span>
         <div><a href="/run-monitor">Run Monitor</a>
           <span>— start the model and monitor progress</span></div>
+      </li>
+      <li>
+        <span class="index-step-num">7</span>
+        <div><a href="/run-result">Run Result</a>
+          <span>— view result files for each run</span></div>
       </li>
     </ol>
     <a href="/table-setup" class="btn-primary" style="display:inline-block;text-decoration:none">

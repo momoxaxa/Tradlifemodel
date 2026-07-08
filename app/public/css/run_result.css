@@ -1,0 +1,166 @@
+/* ── Run Result page ─────────────────────────────────────────────────────────
+   Requires base.css for tokens and shared controls.
+   Data grid is rendered by jspreadsheet (see /css/jspreadsheet.min.css);
+   the file list below is a plain HTML table.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* ── Run list (inside tlm-sidenav) ────────────────────────────────────────── */
+.rr-nav-group { margin-bottom: 0.5rem; }
+
+.rr-nav-group-label {
+    font-family: var(--tlm-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--tlm-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 1rem 0.2rem;
+}
+
+.rr-nav-list { list-style: none; margin: 0; padding: 0; }
+.rr-nav-item { margin: 0; }
+
+.rr-nav-link {
+    display: block;
+    font-family: var(--tlm-mono);
+    font-size: 0.8rem;
+    color: var(--tlm-muted);
+    text-decoration: none;
+    padding: 0.35rem 1rem 0.35rem 1.25rem;
+    border-left: 2px solid transparent;
+    transition: color 0.1s, background 0.1s;
+    word-break: break-all;
+}
+.rr-nav-link:hover { color: var(--tlm-text); background: #ededf0; }
+
+.rr-nav-item--active .rr-nav-link {
+    color: var(--tlm-accent);
+    background: #eef0fd;
+    border-left-color: var(--tlm-accent);
+    font-weight: 600;
+}
+
+.rr-nav-empty {
+    display: block;
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    color: var(--tlm-muted);
+    font-style: italic;
+    padding: 0.35rem 1rem 0.35rem 1.25rem;
+}
+
+/* ── Main panel ───────────────────────────────────────────────────────────── */
+.rr-panel-header { margin-bottom: 0.75rem; }
+
+.rr-panel-title {
+    font-family: var(--tlm-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--tlm-text);
+    margin: 0;
+}
+
+.rr-meta {
+    font-family: var(--tlm-mono);
+    font-size: 0.72rem;
+    color: var(--tlm-muted);
+    margin-bottom: 0.5rem;
+}
+
+.rr-placeholder {
+    font-family: var(--tlm-mono);
+    font-size: 0.82rem;
+    color: var(--tlm-muted);
+    padding: 3rem 2rem;
+    text-align: center;
+    border: 1px dashed var(--tlm-border);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.rr-truncated {
+    font-family: var(--tlm-mono);
+    font-size: 0.72rem;
+    color: var(--tlm-yellow);
+    margin-bottom: 0.5rem;
+}
+
+.rr-backlink {
+    margin-bottom: 0.5rem;
+}
+.rr-backlink a {
+    font-family: var(--tlm-mono);
+    font-size: 0.78rem;
+    color: var(--tlm-accent);
+    text-decoration: none;
+}
+.rr-backlink a:hover { text-decoration: underline; }
+
+/* ── File list table ──────────────────────────────────────────────────────── */
+.rr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--tlm-mono);
+    font-size: 0.8rem;
+}
+
+.rr-th {
+    background: var(--tlm-surface);
+    color: var(--tlm-muted);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+    border-bottom: 2px solid var(--tlm-border);
+}
+
+.rr-trow { border-bottom: 1px solid var(--tlm-border); }
+.rr-trow:hover { background: #f5f5ff; }
+
+.rr-tcell { padding: 0.3rem 0.75rem; color: var(--tlm-muted); vertical-align: middle; }
+.rr-tcell--name { font-weight: 700; color: var(--tlm-text); }
+
+.rr-tlink { color: var(--tlm-accent); text-decoration: none; }
+.rr-tlink:hover { text-decoration: underline; }
+
+/* Read-only data table */
+.rr-table-wrap {
+    max-height: 70vh;
+    overflow: auto;
+    border: 1px solid var(--tlm-border);
+    border-radius: 3px;
+    background: #ffffff;
+}
+
+.rr-dtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--tlm-mono);
+    font-size: 0.76rem;
+}
+
+.rr-dth {
+    background: var(--tlm-surface);
+    color: var(--tlm-muted);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+    border-bottom: 2px solid var(--tlm-border);
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.rr-dth--idx { width: 48px; }
+
+.rr-dtr { border-bottom: 1px solid var(--tlm-border); }
+.rr-dtr:hover { background: #f5f5ff; }
+
+.rr-dtd {
+    padding: 0.25rem 0.75rem;
+    color: var(--tlm-text);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.rr-dtd--idx { color: var(--tlm-muted); font-size: 0.68rem; }

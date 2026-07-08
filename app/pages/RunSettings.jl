@@ -115,9 +115,11 @@ function render_page(; notice::String="", notice_type::String="success")
     <div class="tlm-sidenav-label">Navigation</div>
     <a href="/table-setup">Table Setup</a>
     <a href="/product-setup">Product Setup</a>
+    <a href="/model-point">Model Point</a>
     <a href="/run-settings" class="active">Run Settings</a>
     <a href="/general-settings">General Settings</a>
     <a href="/run-monitor">Run Monitor</a>
+    <a href="/run-result">Run Result</a>
   </nav>
 
   <main class="tlm-page-main">

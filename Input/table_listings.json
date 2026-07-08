@@ -1,152 +1,152 @@
 {
-    "PREM01": {
-        "Table Category": "premium",
-        "Table Filename": "PREM01.csv",
-        "Table Details": "Premium Rate Table by Issue Age",
-        "Table Type": "Rate per 1000 SA by Age/Pol Term"
-    },
-    "PREM02": {
-        "Table Category": "premium",
-        "Table Filename": "PREM02.csv",
-        "Table Details": "Premium Mult to MP Premium",
-        "Table Type": "Mult to MP Premium by Duration"   
-    },
-    "DB01": {
-        "Table Category": "death_ben",
-        "Table Filename": "DB01.csv",
-        "Table Details": "Multiple to MP Sum Assured",
-        "Table Type": "Mult to MP SA by Duration"
-    },
-    "DB02UDT": {
-        "Table Category": "death_ben",
-        "Table Filename": "DB02UDT.csv",
-        "Table Details": "Death Benefit UDT",
-        "Table Type": "User Defined Table"
-    },
-    "SV01": {
-        "Table Category": "surr_ben",
-        "Table Filename": "SV01.csv",
-        "Table Details": "Surrender Value Rate Table by Policy Year/Issue Age",
-        "Table Type": "Rate per 1000 SA by Year/Age"
-    },
-    "SV02UDT": {
-        "Table Category": "surr_ben",
-        "Table Filename": "SV02UDT.csv",
-        "Table Details": "Surrender Value UDT",
-        "Table Type": "User Defined Table"
-    },
-    "COMM01": {
-        "Table Category": "commission",
-        "Table Filename": "COMM01.csv",
-        "Table Details": "Commission % by Policy Year/Policy Term",
-        "Table Type": "Perc by Pol Year/Pol Term"
-    },
-    "COMM02UDT": {
-        "Table Category": "commission",
-        "Table Filename": "COMM02UDT.csv",
-        "Table Details": "Commission % UDT",
-        "Table Type": "User Defined Table"
-    },
     "MORT01": {
-        "Table Category": "mortality",
         "Table Filename": "MORT01.csv",
-        "Table Details": "Attained Age Unisex Mortality Table",
-        "Table Type": "Attained Age"
+        "Table Type": "Attained Age",
+        "Table Category": "mortality",
+        "Table Details": "Attained Age Unisex Mortality Table"
     },
     "MORT02": {
-        "Table Category": "mortality",
         "Table Filename": "MORT02.csv",
-        "Table Details": "Attained Age Sex Distinct Mortality Table",
-        "Table Type": "Attained Age Sex Distinct"
-    },
-    "MORT03": {
+        "Table Type": "Attained Age Sex Distinct",
         "Table Category": "mortality",
-        "Table Filename": "MORT03.csv",
-        "Table Details": "Attained Age Sex Smoker Distinct Mortality Table",
-        "Table Type": "Attained Age Sex Smoker Distinct"
-    },
-    "MORT04": {
-        "Table Category": "mortality",
-        "Table Filename": "MORT04.csv",
-        "Table Details": "Select and Ultimate Table - Unisex",
-        "Table Type": "Select and Ultimate"
-    },
-    "MORT05": {
-        "Table Category": "mortality",
-        "Table Filename": "MORT05.csv",
-        "Table Details": "Select and Ultimate Table - Sex Distinct ",
-        "Table Type": "Select and Ultimate - Sex Distinct"
-    },
-    "MORT06": {
-        "Table Category": "mortality",
-        "Table Filename": "MORT06.csv",
-        "Table Details": "Select and Ultimate Table - Sex Smoker Distinct ",
-        "Table Type": "Select and Ultimate - Sex Smoker Distinct"
-    },
-    "MORT07": {
-        "Table Category": "mortality",
-        "Table Filename": "MORT07.csv",
-        "Table Details": "2001 CSO Select and Ultimate - Male & Female",
-        "Table Type": "Select and Ultimate - Sex Distinct - SOA Table ID"
-    },
-    "MORT08": {
-        "Table Category": "mortality",
-        "Table Filename": "MORT08.csv",
-        "Table Details": "2001 CSO Select and Ultimate - MN, FN, MS, FS",
-        "Table Type": "Select and Ultimate - Sex Smoker Distinct - SOA Table ID"
+        "Table Details": "Attained Age Sex Distinct Mortality Table"
     },
     "LAPSE01": {
-        "Table Category": "lapse",
         "Table Filename": "LAPSE01.csv",
-        "Table Details": "Lapse Table",
-        "Table Type": "Pol Year/Pol Term"
-    },
-    "EXP01": {
-        "Table Category": "expense",
-        "Table Filename": "EXP01.csv",
-        "Table Details": "Expense Table",
-        "Table Type": "Policy Year"
-    },
-    "DISCRT01": {
-        "Table Category": "disc_rate",
-        "Table Filename": "DISCRT01.csv",
-        "Table Details": "Policy Year Discount Rate Table",
-        "Table Type": "Projection Year"
-    },
-    "DISCRT02": {
-        "Table Category": "disc_rate",
-        "Table Filename": "DISCRT02.csv",
-        "Table Details": "Calendar Year Discount Rate Table",
-        "Table Type": "Calendar Year"
-    },
-    "DISCRT03": {
-        "Table Category": "disc_rate",
-        "Table Filename": "DISCRT03.csv",
-        "Table Details": "CY: Invt Return and Disc Rate, PRJ_Y: Val Int Rate",
-        "Table Type": "Mix of Prj Year and Cal Year"
-    },
-    "PREMTAX01": {
-        "Table Category": "prem_tax",
-        "Table Filename": "PREMTAX01.csv",
-        "Table Details": "Premium Tax Rate",
-        "Table Type": "Scalar"
-    },
-    "PREMTAX02": {
-        "Table Category": "prem_tax",
-        "Table Filename": "PREMTAX02.csv",
-        "Table Details": "Premium Tax Rate Table",
-        "Table Type": "Policy Year"
+        "Table Type": "Pol Year/Pol Term",
+        "Table Category": "lapse",
+        "Table Details": "Lapse Table"
     },
     "TAX01": {
-        "Table Category": "tax",
         "Table Filename": "TAX01.csv",
-        "Table Details": "Tax Rate",
-        "Table Type": "Scalar"
+        "Table Type": "Scalar",
+        "Table Category": "tax",
+        "Table Details": "Tax Rate"
+    },
+    "DB02UDT": {
+        "Table Filename": "DB02UDT.csv",
+        "Table Type": "User Defined Table",
+        "Table Category": "death_ben",
+        "Table Details": "Death Benefit UDT"
+    },
+    "SV01": {
+        "Table Filename": "SV01.csv",
+        "Table Type": "Rate per 1000 SA by Year/Age",
+        "Table Category": "surr_ben",
+        "Table Details": "Surrender Value Rate Table by Policy Year/Issue Age"
+    },
+    "MORT05": {
+        "Table Filename": "MORT05.csv",
+        "Table Type": "Select and Ultimate - Sex Distinct",
+        "Table Category": "mortality",
+        "Table Details": "Select and Ultimate Table - Sex Distinct "
+    },
+    "MORT06": {
+        "Table Filename": "MORT06.csv",
+        "Table Type": "Select and Ultimate - Sex Smoker Distinct",
+        "Table Category": "mortality",
+        "Table Details": "Select and Ultimate Table - Sex Smoker Distinct "
+    },
+    "PREMTAX02": {
+        "Table Filename": "PREMTAX02.csv",
+        "Table Type": "Policy Year",
+        "Table Category": "prem_tax",
+        "Table Details": "Premium Tax Rate Table"
+    },
+    "MORT07": {
+        "Table Filename": "MORT07.csv",
+        "Table Type": "Select and Ultimate - Sex Distinct - SOA Table ID",
+        "Table Category": "mortality",
+        "Table Details": "2001 CSO Select and Ultimate - Male & Female"
     },
     "TAX02": {
-        "Table Category": "tax",
         "Table Filename": "TAX02.csv",
-        "Table Details": "Tax Rate Table",
-        "Table Type": "Policy Year"
+        "Table Type": "Policy Year",
+        "Table Category": "tax",
+        "Table Details": "Tax Rate Table"
+    },
+    "DB01": {
+        "Table Filename": "DB01.csv",
+        "Table Type": "Mult to MP SA by Duration",
+        "Table Category": "death_ben",
+        "Table Details": "Multiple to MP Sum Assured"
+    },
+    "SV02UDT": {
+        "Table Filename": "SV02UDT.csv",
+        "Table Type": "User Defined Table",
+        "Table Category": "surr_ben",
+        "Table Details": "Surrender Value UDT"
+    },
+    "COMM02UDT": {
+        "Table Filename": "COMM02UDT.csv",
+        "Table Type": "User Defined Table",
+        "Table Category": "commission",
+        "Table Details": "Commission % UDT"
+    },
+    "PREM02": {
+        "Table Filename": "PREM02.csv",
+        "Table Type": "Mult to MP Premium by Duration",
+        "Table Category": "premium",
+        "Table Details": "Premium Mult to MP Premium"
+    },
+    "DISCRT01": {
+        "Table Filename": "DISCRT01.csv",
+        "Table Type": "Projection Year",
+        "Table Category": "disc_rate",
+        "Table Details": "Policy Year Discount Rate Table"
+    },
+    "MORT04": {
+        "Table Filename": "MORT04.csv",
+        "Table Type": "Select and Ultimate",
+        "Table Category": "mortality",
+        "Table Details": "Select and Ultimate Table - Unisex"
+    },
+    "PREM01": {
+        "Table Filename": "PREM01.csv",
+        "Table Type": "Rate per 1000 SA by Age/Pol Term",
+        "Table Category": "premium",
+        "Table Details": "Premium Rate Table by Issue Age"
+    },
+    "PREMTAX01": {
+        "Table Filename": "PREMTAX01.csv",
+        "Table Type": "Scalar",
+        "Table Category": "prem_tax",
+        "Table Details": "Premium Tax Rate"
+    },
+    "MORT03": {
+        "Table Filename": "MORT03.csv",
+        "Table Type": "Attained Age Sex Smoker Distinct",
+        "Table Category": "mortality",
+        "Table Details": "Attained Age Sex Smoker Distinct Mortality Table"
+    },
+    "MORT08": {
+        "Table Filename": "MORT08.csv",
+        "Table Type": "Select and Ultimate - Sex Smoker Distinct - SOA Table ID",
+        "Table Category": "mortality",
+        "Table Details": "2001 CSO Select and Ultimate - MN, FN, MS, FS"
+    },
+    "DISCRT02": {
+        "Table Filename": "DISCRT02.csv",
+        "Table Type": "Calendar Year",
+        "Table Category": "disc_rate",
+        "Table Details": "Calendar Year Discount Rate Table"
+    },
+    "COMM01": {
+        "Table Filename": "COMM01.csv",
+        "Table Type": "Perc by Pol Year/Pol Term",
+        "Table Category": "commission",
+        "Table Details": "Commission % by Policy Year/Policy Term"
+    },
+    "DISCRT03": {
+        "Table Filename": "DISCRT03.csv",
+        "Table Type": "Mix of Prj Year and Cal Year",
+        "Table Category": "disc_rate",
+        "Table Details": "CY: Invt Return and Disc Rate, PRJ_Y: Val Int Rate"
+    },
+    "EXP01": {
+        "Table Filename": "EXP01.csv",
+        "Table Type": "Policy Year",
+        "Table Category": "expense",
+        "Table Details": "Expense Table"
     }
 }

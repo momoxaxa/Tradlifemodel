@@ -3,6 +3,19 @@ if_months(iss_date::Date, valn_date::Date=valn_date)::Integer
 get_prem_freq(prem_mode::String)
 get_formula_variables(formula::Expr, formula_variable)
 validate_formula_variables(product_features_set::ProductFeatureSet; update_prodfeatset::Bool=false, failed_prodfeatures::Union{Array, Nothing}=nothing)
+
+ModelPoint
+InputFields - used by ProductFeatureSet and AssumptionSet
+ProductFeatureSet
+AssumptionSet
+RunSet
+abstract type Projection end
+PolicyInfoTable - Projection
+AssumptionsTable - Projection
+PerPolicyCFTable - Projection
+SurvivorshipTable - Projection
+InForceCFTable - Projection
+PVCFTable - Projection
 =#
 
 using Dates
@@ -317,10 +330,10 @@ mutable struct PolicyInfoTable <: Projection
     att_age::OffsetArray{}
     modal_cf_indicator::OffsetArray{}
     
-    function PolicyInfoTable(dur_valdate::Integer, issue_age::Integer, prem_mode::String)
-        date = ZerobasedIndex!([valn_date + Dates.Month(t) for t in 0:proj_len])
-        duration =  ZerobasedIndex!(collect(dur_valdate:proj_len+dur_valdate))
-        proj_year = ZerobasedIndex!([0; repeat(collect(1:proj_yrs),inner=12)])
+    function PolicyInfoTable(dur_valdate::Integer, issue_age::Integer, prem_mode::String, pol_proj_len::Integer)
+        date = ZerobasedIndex([valn_date + Dates.Month(t) for t in 0:pol_proj_len])
+        duration =  ZerobasedIndex(collect(dur_valdate:pol_proj_len+dur_valdate))
+        proj_year = ZerobasedIndex([0; repeat(collect(1:proj_yrs), inner=12)][1:pol_proj_len+1])
         pol_year = ceil.(duration/12)
         att_age = issue_age .+ pol_year .- 1
         prem_freq = get_prem_freq(prem_mode)
@@ -353,22 +366,22 @@ mutable struct AssumptionsTable <: Projection
     prem_tax_rate::OffsetArray{}
     tax_rate::OffsetArray{}
 
-    function AssumptionsTable()
+    function AssumptionsTable(pol_proj_len::Integer)
         new(
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # mort_rate_ann
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # mort_rate_mth
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # lapse_rate_ann
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # lapse_rate_mth
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_per_pol
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_perc_prem
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_per_pol
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_perc_prem
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # disc_rate_ann
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # disc_rate_mth
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_ret_ann
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_ret_mth
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prem_tax_rate
-            ZerobasedIndex!(zeros(Float64, proj_len+1))  # tax_rate
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # mort_rate_ann
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # mort_rate_mth
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # lapse_rate_ann
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # lapse_rate_mth
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # acq_exp_per_pol
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # acq_exp_perc_prem
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # maint_exp_per_pol
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # maint_exp_perc_prem
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # disc_rate_ann
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # disc_rate_mth
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # invt_ret_ann
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # invt_ret_mth
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # prem_tax_rate
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1))  # tax_rate
         )
     end
 end
@@ -384,33 +397,33 @@ mutable struct PerPolicyCFTable <: Projection
     resv_pp::OffsetArray{Float64}
     capreq_pp::OffsetArray{Float64}
 
-    function PerPolicyCFTable()
+    function PerPolicyCFTable(pol_proj_len::Integer)
         new(
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # premium_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # comm_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prem_tax_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # death_ben_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # surr_ben_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # resv_pp
-            ZerobasedIndex!(zeros(Float64, proj_len+1))  # capreq_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # premium_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # comm_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # prem_tax_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # death_ben_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # surr_ben_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # acq_exp_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # maint_exp_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # resv_pp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1))  # capreq_pp
         )
     end
 end
 
-mutable struct SurvivalshipTable <: Projection  
+mutable struct SurvivorshipTable <: Projection  
     pol_if::OffsetArray{Float64}
     pol_death::OffsetArray{Float64}
     pol_lapse::OffsetArray{Float64}
     pol_maturity::OffsetArray{Float64}
 
-    function SurvivalshipTable()
+    function SurvivorshipTable(pol_proj_len::Integer)
         new(
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pol_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pol_death
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pol_lapse
-            ZerobasedIndex!(zeros(Float64, proj_len+1))  # pol_maturity
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pol_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pol_death
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pol_lapse
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1))  # pol_maturity
         )
     end
 end
@@ -435,26 +448,26 @@ mutable struct InForceCFTable <: Projection
     tax_on_invt_return_on_capreq_if::OffsetArray{Float64}
     prof_aft_tax_capreq_if::OffsetArray{Float64}
 
-    function InForceCFTable()
+    function InForceCFTable(pol_proj_len::Integer)
         new(
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # premium_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prem_tax_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # comm_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # acq_exp_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # maint_exp_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # death_ben_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # surr_ben_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # resv_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # inc_resv_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_return_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prof_bef_tax_capreq_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # tax_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # prof_aft_tax_bef_capreq_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # capreq_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # inc_capreq_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # invt_return_on_capreq_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # tax_on_invt_return_on_capreq_if
-            ZerobasedIndex!(zeros(Float64, proj_len+1))  # prof_aft_tax_capreq_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # premium_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # prem_tax_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # comm_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # acq_exp_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # maint_exp_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # death_ben_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # surr_ben_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # resv_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # inc_resv_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # invt_return_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # prof_bef_tax_capreq_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # tax_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # prof_aft_tax_bef_capreq_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # capreq_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # inc_capreq_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # invt_return_on_capreq_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # tax_on_invt_return_on_capreq_if
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1))  # prof_aft_tax_capreq_if
 
         )
     end
@@ -479,25 +492,25 @@ mutable struct PVCFTable <: Projection
     pv_tax_on_invt_return_on_capreq::OffsetArray{Float64}
     pv_prof_aft_tax_capreq::OffsetArray{Float64}
 
-    function PVCFTable()
+    function PVCFTable(pol_proj_len::Integer)
         new(
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_premium
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_prem_tax
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_comm
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_acq_exp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_maint_exp
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_death_ben
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_surr_ben
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_cf
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_inc_resv
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_invt_return
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_prof_bef_tax_capreq
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_tax
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_prof_aft_tax_bef_capreq
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_inc_capreq
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_invt_return_on_capreq
-            ZerobasedIndex!(zeros(Float64, proj_len+1)),  # pv_tax_on_invt_return_on_capreq
-            ZerobasedIndex!(zeros(Float64, proj_len+1))  # pv_prof_aft_tax_capreq
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_premium
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_prem_tax
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_comm
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_acq_exp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_maint_exp
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_death_ben
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_surr_ben
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_cf
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_inc_resv
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_invt_return
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_prof_bef_tax_capreq
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_tax
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_prof_aft_tax_bef_capreq
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_inc_capreq
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_invt_return_on_capreq
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1)),  # pv_tax_on_invt_return_on_capreq
+            ZerobasedIndex(zeros(Float64, pol_proj_len+1))  # pv_prof_aft_tax_capreq
         )
     end
 end

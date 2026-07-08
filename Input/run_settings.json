@@ -1,6 +1,6 @@
 [
     {
-        "Run Number": "Run 01",
+        "Run Number": "Run01",
         "Run Indicator": "Yes",
         "Run Description": "Base",
         "Base Projection - Mortality": 1,
@@ -18,7 +18,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 02",
+        "Run Number": "Run02",
         "Run Indicator": "Yes",
         "Run Description": "+10% Sensitivity on Base Mortality only",
         "Base Projection - Mortality": 1.1,
@@ -36,7 +36,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 03",
+        "Run Number": "Run03",
         "Run Indicator": "Yes",
         "Run Description": "-10% Sensitivity on Lapse",
         "Base Projection - Mortality": 1,
@@ -54,7 +54,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 04",
+        "Run Number": "Run04",
         "Run Indicator": "Yes",
         "Run Description": "+10% Sensitivity on Expense",
         "Base Projection - Mortality": 1,
@@ -72,7 +72,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 05",
+        "Run Number": "Run05",
         "Run Indicator": "Yes",
         "Run Description": "-100bps Sensitivity on RDR, Inv Return and VIR",
         "Base Projection - Mortality": 1,
@@ -90,7 +90,7 @@
         "Capital Requirement - Discount Rate": -0.01
     },
     {
-        "Run Number": "Run 06",
+        "Run Number": "Run06",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -108,7 +108,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 07",
+        "Run Number": "Run07",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -126,7 +126,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 08",
+        "Run Number": "Run08",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -144,7 +144,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 09",
+        "Run Number": "Run09",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -162,7 +162,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 10",
+        "Run Number": "Run10",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -180,7 +180,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 11",
+        "Run Number": "Run11",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -198,7 +198,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 12",
+        "Run Number": "Run12",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -216,7 +216,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 13",
+        "Run Number": "Run13",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -234,7 +234,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 14",
+        "Run Number": "Run14",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -252,7 +252,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 15",
+        "Run Number": "Run15",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -270,7 +270,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 16",
+        "Run Number": "Run16",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -288,7 +288,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 17",
+        "Run Number": "Run17",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -306,7 +306,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 18",
+        "Run Number": "Run18",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -324,7 +324,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 19",
+        "Run Number": "Run19",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,
@@ -342,7 +342,7 @@
         "Capital Requirement - Discount Rate": 0
     },
     {
-        "Run Number": "Run 20",
+        "Run Number": "Run20",
         "Run Indicator": "No",
         "Run Description": "",
         "Base Projection - Mortality": 1,

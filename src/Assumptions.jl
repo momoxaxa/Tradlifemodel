@@ -1,11 +1,14 @@
 #=
+read_sel_ult_mort(mort_table, mp::ModelPoint, polt::PolicyInfoTable)
+create_sel_ult_table(df)
 
-read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet, runset::RunSet)
-read_other_assumptions!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, sex::String, att_age::Array, curr_asmpset::AssumptionSet)
+read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
+read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
+read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
+read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
+read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
+read_prem_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
+read_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
 
 =#
 
@@ -15,10 +18,10 @@ function read_sel_ult_mort(mort_table, mp::ModelPoint, polt::PolicyInfoTable)
     sel_ult_vector = OffsetArray(sel_ult_vector, Origin(1))
     sel_ult_vector = repeat(sel_ult_vector, inner=12)[polt.duration[1]:end] ##
     sel_ult_vector = OffsetArray([0;sel_ult_vector], Origin(0))
-    if length(sel_ult_vector) < proj_len+1
-        annual_rate = append!(sel_ult_vector, zeros(Float64, proj_len + 1 - length(sel_ult_vector)))
+    if length(sel_ult_vector) < mp.pol_proj_len+1
+        annual_rate = append!(sel_ult_vector, zeros(Float64, mp.pol_proj_len + 1 - length(sel_ult_vector)))
     else
-        annual_rate = sel_ult_vector[0:proj_len]
+        annual_rate = sel_ult_vector[0:mp.pol_proj_len]
     end
     return annual_rate
 end
@@ -45,7 +48,7 @@ end
 
 function read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.mortality.table]
-    annual_rate = zeros(proj_len)
+    annual_rate = zeros(mp.pol_proj_len)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjMort
@@ -58,13 +61,13 @@ function read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
     mult = curr_asmpset.mortality.mult * adj
     
     if curr_asmpset.mortality.table_type == "Attained Age"
-        annual_rate = read_table_AA(df, "Unisex", polt.att_age) * mult
+        annual_rate = read_table_AA(df, "Unisex", polt.att_age, mp.pol_proj_len) * mult
 
     elseif curr_asmpset.mortality.table_type == "Attained Age Sex Distinct"
-        annual_rate = read_table_AA(df, mp.sex, polt.att_age) * mult
+        annual_rate = read_table_AA(df, mp.sex, polt.att_age, mp.pol_proj_len) * mult
 
     elseif curr_asmpset.mortality.table_type == "Attained Age Sex Smoker Distinct"
-        annual_rate = read_table_AA(df, string(mp.sex, " ", mp.smoker), polt.att_age) * mult
+        annual_rate = read_table_AA(df, string(mp.sex, " ", mp.smoker), polt.att_age, mp.pol_proj_len) * mult
 
     elseif curr_asmpset.mortality.table_type == "Select and Ultimate"
         mort_table = create_sel_ult_table(df)
@@ -98,7 +101,7 @@ function read_mortality!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
         annual_rate = (1+PAD) * annual_rate
     end
     
-    annual_rate = min.(annual_rate, 1) |> ZerobasedIndex!
+    annual_rate = min.(annual_rate, 1) |> ZerobasedIndex
     assumptions_array = 1 .- (1 .- annual_rate).^(1/12)
     setfield!(curr_asmpt, :mort_rate_ann, annual_rate)
     setfield!(curr_asmpt, :mort_rate_mth, assumptions_array)
@@ -120,7 +123,7 @@ function read_lapse!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::
 
     mult = curr_asmpset.lapse.mult * adj
     if curr_asmpset.lapse.table_type == "Pol Year/Pol Term"
-        annual_rate = read_table_PY(df, string(mp.pol_term), polt.pol_year, polt.duration) * mult
+        annual_rate = read_table_PY(df, string(mp.pol_term), polt.pol_year, polt.duration, mp.pol_proj_len) * mult
     end
     
     PAD = curr_asmpset.lapse.PAD 
@@ -138,9 +141,9 @@ end
 
 # Read expense assumptions
 
-function read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
+function read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)
 
-    assumptions_array = zeros(Float64, proj_len)
+    assumptions_array = zeros(Float64, mp.pol_proj_len)
     df = input_tables_dict[curr_asmpset.expense.table]
 
     for assumption in ["acq_exp_per_pol", "acq_exp_perc_prem", "maint_exp_per_pol", "maint_exp_perc_prem"]    
@@ -155,11 +158,11 @@ function read_expense!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, po
             
         mult = curr_asmpset.expense.mult * adj
         if assumption == "acq_exp_perc_prem" || assumption == "maint_exp_perc_prem"
-            assumptions_array = read_table_PY(df, assumption, polt.pol_year, polt.duration) * mult
+            assumptions_array = read_table_PY(df, assumption, polt.pol_year, polt.duration, mp.pol_proj_len) * mult
         elseif assumption == "acq_exp_per_pol"
-            assumptions_array = read_table_PY(df, assumption, polt.pol_year, polt.duration, "BOP") * mult
+            assumptions_array = read_table_PY(df, assumption, polt.pol_year, polt.duration, mp.pol_proj_len, "BOP") * mult
         elseif assumption == "maint_exp_per_pol"
-            assumptions_array = read_table_PY(df, assumption, polt.pol_year, polt.duration, "EvenlySpreadOut") * mult
+            assumptions_array = read_table_PY(df, assumption, polt.pol_year, polt.duration, mp.pol_proj_len, "EvenlySpreadOut") * mult
         end
 
         PAD = curr_asmpset.expense.PAD            
@@ -174,9 +177,9 @@ end
 
 # Read discount rate assumptions
 
-function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
+function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.disc_rate.table]
-    annual_rate = zeros(proj_len+1)
+    annual_rate = zeros(mp.pol_proj_len+1)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjDiscRate
@@ -189,9 +192,9 @@ function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
     mult = curr_asmpset.disc_rate.mult
 
     if curr_asmpset.disc_rate.table_type == "Projection Year"
-        annual_rate = read_table_PRJY_CY(df, curr_asmpset.disc_rate.table_column, polt.proj_year) * mult .+ adj
+        annual_rate = read_table_PRJY_CY(df, curr_asmpset.disc_rate.table_column, polt.proj_year, mp.pol_proj_len) * mult .+ adj
     elseif curr_asmpset.disc_rate.table_type == "Calendar Year"
-        annual_rate = read_table_PRJY_CY(df, curr_asmpset.disc_rate.table_column, year.(polt.date)) * mult .+ adj
+        annual_rate = read_table_PRJY_CY(df, curr_asmpset.disc_rate.table_column, year.(polt.date), mp.pol_proj_len) * mult .+ adj
     elseif curr_asmpset.disc_rate.table_type == "Mix of Prj Year and Cal Year"
         int_table_name = filter(row -> row."Class" == curr_asmpset.disc_rate.table_column, df)[1, "Interest Rate Table Name"]
         int_table_df = input_tables_dict[int_table_name]
@@ -203,7 +206,7 @@ function read_disc_rate!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, 
                             polt.proj_year
                         end
 
-        annual_rate = read_table_PRJY_CY(int_table_df, curr_asmpset.disc_rate.table_column, year_index) * mult .+ adj
+        annual_rate = read_table_PRJY_CY(int_table_df, curr_asmpset.disc_rate.table_column, year_index, mp.pol_proj_len) * mult .+ adj
     end
     
     PAD = curr_asmpset.disc_rate.PAD 
@@ -219,9 +222,9 @@ end
 
 # Read investment return assumptions
 
-function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
+function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet, runset::RunSet)         
     df = input_tables_dict[curr_asmpset.disc_rate.table]
-    annual_rate = zeros(proj_len+1)
+    annual_rate = zeros(mp.pol_proj_len+1)
 
     if curr_asmpset.projtype == "Base Projection"
         adj = runset.BaseProjInvtRet
@@ -229,9 +232,9 @@ function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict
         mult = curr_asmpset.invt_return.mult
         
         if curr_asmpset.invt_return.table_type == "Projection Year"
-            annual_rate = read_table_PRJY_CY(df, curr_asmpset.invt_return.table_column, polt.proj_year) * mult .+ adj
+            annual_rate = read_table_PRJY_CY(df, curr_asmpset.invt_return.table_column, polt.proj_year, mp.pol_proj_len) * mult .+ adj
         elseif curr_asmpset.invt_return.table_type == "Calendar Year"
-            annual_rate = read_table_PRJY_CY(df, curr_asmpset.invt_return.table_column, year.(polt.date)) * mult .+ adj
+            annual_rate = read_table_PRJY_CY(df, curr_asmpset.invt_return.table_column, year.(polt.date), mp.pol_proj_len) * mult .+ adj
         elseif curr_asmpset.disc_rate.table_type == "Mix of Prj Year and Cal Year"
             int_table_name = filter(row ->row."Class" == curr_asmpset.invt_return.table_column, df)[1, "Interest Rate Table Name"]
             int_table_df = input_tables_dict[int_table_name]
@@ -243,7 +246,7 @@ function read_invt_return!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict
                                 polt.proj_year
                             end
 
-            annual_rate = read_table_PRJY_CY(int_table_df, curr_asmpset.invt_return.table_column, year.(polt.date)) * mult .+ adj
+            annual_rate = read_table_PRJY_CY(int_table_df, curr_asmpset.invt_return.table_column, year.(polt.date), mp.pol_proj_len) * mult .+ adj
         end
     
         assumptions_array = (1 .+ annual_rate).^(1/12) .- 1
@@ -254,15 +257,15 @@ end
 
 # Read premium tax assumptions
 
-function read_prem_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
+function read_prem_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
     
     df = input_tables_dict[curr_asmpset.prem_tax.table]
     mult = curr_asmpset.prem_tax.mult
 
     if curr_asmpset.prem_tax.table_type == "Scalar"
-        assumptions_array = read_table_ind(df) * ones(proj_len+1) * mult |> ZerobasedIndex!
+        assumptions_array = read_table_ind(df) * ones(mp.pol_proj_len+1) * mult |> ZerobasedIndex
     elseif curr_asmpset.prem_tax.table_type == "Policy Year"
-        assumptions_array = read_table_PY(df, "Value", polt.pol_year, polt.duration) * mult
+        assumptions_array = read_table_PY(df, "Value", polt.pol_year, polt.duration, mp.pol_proj_len) * mult
     end
     setfield!(curr_asmpt, :prem_tax_rate, assumptions_array)
 
@@ -270,15 +273,15 @@ end
 
 # Read tax assumptions
 
-function read_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
+function read_tax!(curr_asmpt::AssumptionsTable, input_tables_dict::Dict, mp::ModelPoint, polt::PolicyInfoTable, curr_asmpset::AssumptionSet)
 
     df = input_tables_dict[curr_asmpset.tax.table]
     mult = curr_asmpset.tax.mult
 
     if curr_asmpset.tax.table_type == "Scalar"
-        assumptions_array = read_table_ind(df) * ones(proj_len+1) * mult |> ZerobasedIndex!
+        assumptions_array = read_table_ind(df) * ones(mp.pol_proj_len+1) * mult |> ZerobasedIndex
     elseif curr_asmpset.tax.table_type == "Policy Year"
-        assumptions_array = read_table_PY(df, "Value", polt.pol_year, polt.duration) * mult
+        assumptions_array = read_table_PY(df, "Value", polt.pol_year, polt.duration, mp.pol_proj_len) * mult
     end
     setfield!(curr_asmpt, :tax_rate, assumptions_array)
 
