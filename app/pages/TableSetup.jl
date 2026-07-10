@@ -12,8 +12,11 @@ using MortalityTables
 
 const INPUT_PATH           = joinpath(dirname(dirname(dirname(@__FILE__))), "Input")
 const TABLES_DIR           = joinpath(INPUT_PATH, "Tables")
-const LISTINGS_PATH        = joinpath(INPUT_PATH, "table_listings.json")
 const TABLE_TYPE_DEFN_PATH = joinpath(INPUT_PATH, "table_type_defn.json")
+
+# Table metadata lives inside each CSV (leading '#Key: Value' lines); the
+# Tables folder is the registry. Shared reader/writer helpers:
+include(joinpath(dirname(dirname(dirname(@__FILE__))), "src", "TableMeta.jl"))
 
 const SECTIONS = [
     ("Product Features", [
@@ -35,6 +38,12 @@ const SECTIONS = [
 # ============================================================
 # Helpers — JSON, HTML escaping, lookups, CSV I/O
 # ============================================================
+
+# Scan the Tables folder, excluding CSVs whose metadata doesn't match the
+# table type definitions (see scan_table_listings in TableMeta.jl)
+function load_listings()::Dict{String,Any}
+    scan_table_listings(TABLES_DIR; valid_defn=load_json(TABLE_TYPE_DEFN_PATH))
+end
 
 # Load json file into Dict
 function load_json(path::String)::Dict{String,Any}
@@ -81,17 +90,7 @@ si(v, d=NaN) = (ismissing(v) || v === nothing) ? d :
 function load_table_csv(filename::String)::Union{DataFrame,Nothing}
     path = joinpath(TABLES_DIR, filename)
     isfile(path) || return nothing
-    CSV.read(path, DataFrame; missingstring="")
-end
-
-# Save table string data to a csv file
-function save_table_to_csv(filename::String, csvdata::String)
-    path = joinpath(TABLES_DIR, filename)
-    tmp  = path * ".tmp"
-    open(tmp, "w") do io
-        write(io, csvdata)
-    end
-    mv(tmp, path, force=true)
+    CSV.read(path, DataFrame; missingstring="", comment="#")
 end
 
 # Look up SOA Table Name by ID
@@ -101,33 +100,6 @@ function lookup_soa_table_name(id::Integer)::Union{String,Nothing}
     catch
         nothing
     end
-end
-
-# Update table_listings.json with a new (or existing) table entry
-function upsert_table_to_listing(tname::String, cat::String, ttype::String, filename::String)
-    listings = load_json(LISTINGS_PATH)
-    listings[tname] = Dict{String,Any}(
-        "Table Category" => cat,
-        "Table Filename" => filename,
-        "Table Type"     => ttype,
-        "Table Details"  => "",
-    )
-    tmp = LISTINGS_PATH * ".tmp"
-    open(tmp, "w") do io
-        JSON3.pretty(io, listings)
-    end
-    mv(tmp, LISTINGS_PATH, force=true)
-end
-
-# Delete a table entry from table_listings.json
-function delete_table_from_listing(tname::String)
-    listings = load_json(LISTINGS_PATH)
-    delete!(listings, tname)
-    tmp = LISTINGS_PATH * ".tmp"
-    open(tmp, "w") do io
-        JSON3.pretty(io, listings)
-    end
-    mv(tmp, LISTINGS_PATH, force=true)
 end
 
 # Convert a vector to a JS array string (e.g. ['a','b','c'])
@@ -966,7 +938,7 @@ function section_panel(;
         join([begin
             lst    = get_table_info(listings, t)
             ttype  = he(get(lst, "Table Type", ""))
-            tfile  = he(get(lst, "Table Filename", ""))
+            tfile  = he(t * ".csv")
             active = t == sel_table ? " ts-trow--active" : ""
             """<tr class='ts-trow$(active)'>
               <td class='ts-tcell ts-tcell--name'>
@@ -1287,16 +1259,15 @@ end
 function register_routes()
 
     route("/table-setup", method=GET) do
-        render_page(; listings=load_json(LISTINGS_PATH))
+        render_page(; listings=load_listings())
     end
 
     route("/table-setup", method=POST) do
         params    = Genie.Router.params()
-        listings  = load_json(LISTINGS_PATH)
+        listings  = load_listings()
         action    = string(get(params, :tlm_action, ""))
         cat       = string(get(params, :cat, ""))
         cat_label = string(get(params, :cat_label, ""))
-        @info "POST /table-setup" action=action cat=cat
 
         if action == "select_cat"
             return render_page(; cat, cat_label, active_tab="list", listings)
@@ -1305,7 +1276,7 @@ function register_routes()
             tname = string(get(params, :tname, ""))
             lst   = get_table_info(listings, tname)
             ttype = string(get(lst, "Table Type", ""))
-            fname = string(get(lst, "Table Filename", tname * ".csv"))
+            fname = tname * ".csv"
             grid  = isempty(ttype) ? "" :
                     grid_for_type(ttype, fname, cat; sel_table=tname, listings)
             return render_page(; cat, cat_label, active_tab="editor",
@@ -1345,23 +1316,26 @@ function register_routes()
                 notice="No data received — please try again.", notice_type="error")
 
             lst      = get_table_info(listings, tname)
-            filename = isempty(lst) ? tname * ".csv" :
-                       string(get(lst, "Table Filename", tname * ".csv"))
+            filename = tname * ".csv"
 
             try
-                save_table_to_csv(filename, csvdata)
-                upsert_table_to_listing(tname, cat, ttype, filename)
+                # Preserve existing Table Details on re-save; new tables start blank
+                path = joinpath(TABLES_DIR, filename)
+                old_meta = isfile(path) ? read_table_meta(path) : Dict{String,Any}()
+                meta = Dict{String,Any}(
+                    "Table Type"     => ttype,
+                    "Table Category" => cat,
+                    "Table Details"  => get(old_meta, "Table Details", ""),
+                )
+                write_table_csv(path, meta, csvdata)
             catch err
                 return render_page(; cat, cat_label, active_tab="editor",
                     sel_table=tname, sel_type=ttype, listings,
                     notice="Save failed: $err", notice_type="error")
             end
 
-            listings = load_json(LISTINGS_PATH)
-            lst2     = get_table_info(listings, tname)
-            fname    = isempty(lst2) ? filename :
-                       string(get(lst2, "Table Filename", filename))
-            grid     = grid_for_type(ttype, fname, cat;
+            listings = load_listings()
+            grid     = grid_for_type(ttype, filename, cat;
                            max_issue_age, select_duration, sel_table=tname, listings)
             return render_page(; cat, cat_label, active_tab="editor",
                 sel_table=tname, sel_type=ttype, grid_html=grid, listings,
@@ -1370,13 +1344,10 @@ function register_routes()
 
         elseif action == "delete"
             tname = string(get(params, :tname, ""))
-            lst   = get_table_info(listings, tname)
-            fname = string(get(lst, "Table Filename", tname * ".csv"))
-            path  = joinpath(TABLES_DIR, fname)
-            isfile(path) && rm(path)
-            delete_table_from_listing(tname)
+            path  = joinpath(TABLES_DIR, tname * ".csv")
+            isfile(path) && rm(path)   # the file IS the registry entry
             return render_page(; cat, cat_label, active_tab="list",
-                listings=load_json(LISTINGS_PATH),
+                listings=load_listings(),
                 notice="Deleted $tname", notice_type="success")
         end
 

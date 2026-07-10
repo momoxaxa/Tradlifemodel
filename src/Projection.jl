@@ -21,6 +21,7 @@ inner_proj(curr_asmpset::AssumptionSet, polt::PolicyInfoTable, ppt::PerPolicyCFT
 
 run_product(prod_code::String, runset::RunSet)
 
+missing_tables_for_product(prod_code::String)::Vector{String}
 =#
 
 function project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict, mp::ModelPoint, pol_year, duration, modal_cf_indicator, product_features_set)
@@ -350,4 +351,34 @@ function run_product(prod_code::String, runset::RunSet)
     CSV.write(joinpath(output_file_path, "$curr_run", "result_$prod_code.csv"), resultbyproduct)
     println("$curr_run $prod_code completed at $(now())")
 
+end
+
+function missing_tables_for_product(prod_code::String)::Vector{String}
+
+    # Check every table referenced by the product's configuration against the
+    # table listing. Returns human-readable messages for each missing table
+    # (empty vector = product is runnable).
+
+    msgs = String[]
+    sets = [
+        ("Product Feature",     ProductFeatureSet(assumption_set_df, "Product Feature", prod_code)),
+        ("Base Projection",     AssumptionSet(assumption_set_df, "Base Projection", prod_code)),
+        ("Valuation",           AssumptionSet(assumption_set_df, "Valuation", prod_code)),
+        ("Capital Requirement", AssumptionSet(assumption_set_df, "Capital Requirement", prod_code)),
+    ]
+    for (setname, set) in sets
+        for f in fieldnames(typeof(set))
+            fld = getfield(set, f)
+            fld isa InputFields || continue
+            t = coalesce(fld.table, "")
+            isempty(t) && continue
+            if !haskey(input_tables_dict, t)
+                hint = isfile(table_filepath(tables_file_path, t)) ?
+                    "file exists but has no metadata header" :
+                    "no such file in Input/Tables"
+                push!(msgs, "$setname / $f: table '$t' ($hint)")
+            end
+        end
+    end
+    return msgs
 end

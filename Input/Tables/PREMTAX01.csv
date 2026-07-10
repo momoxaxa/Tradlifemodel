@@ -1,2 +1,5 @@
+#Table Type: Scalar
+#Table Category: prem_tax
+#Table Details: Premium Tax Rate
 Label,Value
 prem_tax_rate,0.035

@@ -1,3 +1,6 @@
+#Table Type: User Defined Table
+#Table Category: commission
+#Table Details: Commission % UDT
 Pol Year,comm_rate,multiple,amount
 1,1,1,0
 2,0.5,1,0

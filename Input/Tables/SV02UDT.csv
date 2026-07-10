@@ -1,3 +1,6 @@
+#Table Type: User Defined Table
+#Table Category: surr_ben
+#Table Details: Surrender Value UDT
 Year,surr_val_rate,multiple,amount
 1,1,1,0
 2,1,1,0

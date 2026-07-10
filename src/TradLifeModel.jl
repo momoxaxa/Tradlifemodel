@@ -13,6 +13,19 @@ start = now()
 
 println("Julia started with $(Threads.nthreads()) thread(s). Multithreading setting: $(use_threads ? "Yes" : "No").")
 
+# Validate product table configuration; exclude products with missing tables
+
+valid_products = String[]
+for prod_code in selected_products
+    msgs = missing_tables_for_product(prod_code)
+    if isempty(msgs)
+        push!(valid_products, prod_code)
+    else
+        @warn "Product $prod_code EXCLUDED from this run — missing tables:\n  " * join(msgs, "\n  ")
+    end
+end
+isempty(valid_products) && @warn "No runnable products — all selected products were excluded (missing tables). Run completed with no results."
+
 if use_threads
 
     # One task per (run, product) pair, dynamically scheduled across threads
@@ -22,7 +35,7 @@ if use_threads
         mkpath("$output_file_path$curr_run")
         runset = RunSet(run_settings_df, curr_run)
 
-        for prod_code in selected_products
+        for prod_code in valid_products
             Threads.@spawn begin
                 print("[thread $(Threads.threadid()) of $(Threads.nthreads())] starting $(runset.RunNumber) $prod_code\n")
                 run_product(prod_code, runset)
@@ -40,7 +53,7 @@ else
         mkpath("$output_file_path$curr_run")
         runset = RunSet(run_settings_df, curr_run)
 
-        for prod_code in selected_products
+        for prod_code in valid_products
             run_product(prod_code, runset)
         end
 
@@ -55,7 +68,7 @@ for curr_run in selected_runs
 
     resultallproducts = DataFrame()
 
-    for (i, prod_code) in enumerate(selected_products)
+    for (i, prod_code) in enumerate(valid_products)
         if i == 1
             resultallproducts = CSV.read(joinpath(output_file_path, "$curr_run", "result_$prod_code.csv"), DataFrame)
         else

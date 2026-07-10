@@ -58,16 +58,21 @@ prod_setup_arr = [
 
 assumption_set_df = DataFrame(prod_setup_arr)
 
-# Input file for Table Listings
+# Table Listings (Scan from tables folder, with validation against table_type_defn.json)
 
-table_listing_file = joinpath(dirname(@__DIR__),"Input/table_listings.json")
-table_listing_dict = JSON3.read(table_listing_file, Dict)
+include("TableMeta.jl")
 
-# Input Tables
+table_type_defn_file = joinpath(dirname(@__DIR__), "Input/table_type_defn.json")
+table_type_defn = JSON3.read(table_type_defn_file, Dict{String,Any})
+
+tables_file_path = joinpath(dirname(@__DIR__), "Input/Tables/")
+table_listing_dict = scan_table_listings(tables_file_path; valid_defn=table_type_defn)
+
+# Input Tables (comment="#" skips the metadata header lines)
 
 input_tables_dict = Dict()
-for (table_name, fields) in table_listing_dict
-    input_tables_dict[table_name] = CSV.read(joinpath(dirname(@__DIR__),"Input/Tables/", fields["Table Filename"]), DataFrame)
+for table_name in keys(table_listing_dict)
+    input_tables_dict[table_name] = CSV.read(table_filepath(tables_file_path, table_name), DataFrame; comment="#")
 end
 
 # Print Options

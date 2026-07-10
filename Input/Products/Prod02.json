@@ -13,9 +13,9 @@
             "UDF": ""
         },
         "premium": {
-            "Table Type": "Rate per 1000 SA by Age/Pol Term",
+            "Table Type": "Mult to MP Premium by Duration",
             "Mult": 1,
-            "Table": "PREM01",
+            "Table": "PREM88",
             "UDF": ""
         },
         "death_ben": {

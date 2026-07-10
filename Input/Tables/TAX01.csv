@@ -1,2 +1,5 @@
+#Table Type: Scalar
+#Table Category: tax
+#Table Details: Tax Rate
 Label,Value
 tax_rate,0.25

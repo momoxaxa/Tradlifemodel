@@ -1,3 +1,6 @@
+#Table Type: Attained Age Sex Smoker Distinct
+#Table Category: mortality
+#Table Details: Attained Age Sex Smoker Distinct Mortality Table
 Age,Male Non-Smoker,Male Smoker,Female Non-Smoker,Female Smoker
 0, 0.003239 , 0.003959 , 0.002354 , 0.002877 
 1, 0.000558 , 0.000682 , 0.000495 , 0.000605 

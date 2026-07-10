@@ -1,0 +1,11 @@
+┌ Warning: Table CSV is missing #Table Type or #Table Category metadata; EXCLUDED from table listing.
+│   file = "PREM88.csv"
+└ @ Main C:\GH\TradLifeModel\src\TableMeta.jl:84
+┌ Warning: Product PROD02 EXCLUDED from this run — missing tables:
+│   Product Feature / premium: table 'PREM88' (file exists but has no metadata header)
+└ @ Main C:\GH\TradLifeModel\src\TradLifeModel.jl:24
+Julia started with 16 thread(s). Multithreading setting: No.
+PROD01: (5, 11)
+Run01 PROD01 completed at 2026-07-10T18:25:29.785
+Run01 completed at 2026-07-10T18:25:29.785
+All runs completed in 14.626 seconds

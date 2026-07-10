@@ -1,3 +1,6 @@
+#Table Type: Mix of Prj Year and Cal Year
+#Table Category: disc_rate
+#Table Details: CY: Invt Return and Disc Rate, PRJ_Y: Val Int Rate
 Class,Interest Rate Table Name,Prj Year/Cal Year
 investment_return,DISCRT02,Calendar Year
 disc_rate,DISCRT02,Calendar Year

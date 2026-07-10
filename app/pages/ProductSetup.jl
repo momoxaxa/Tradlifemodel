@@ -10,7 +10,11 @@ using JSON3
 
 const INPUT_PATH    = joinpath(dirname(dirname(dirname(@__FILE__))), "Input")
 const PRODUCTS_DIR  = joinpath(INPUT_PATH, "Products")
-const LISTINGS_PATH = joinpath(INPUT_PATH, "table_listings.json")
+const TABLES_DIR    = joinpath(INPUT_PATH, "Tables")
+const TABLE_TYPE_DEFN_PATH = joinpath(INPUT_PATH, "table_type_defn.json")
+
+# Table metadata lives inside each CSV; the Tables folder is the registry.
+include(joinpath(dirname(dirname(dirname(@__FILE__))), "src", "TableMeta.jl"))
 
 # Each section (e.g. Product Feature): (json_key, display_label, rows)
 # Each row (e.g. premium): (field_key, display_label, has_pad, has_table_col, has_udf)
@@ -73,9 +77,10 @@ end
 # Escape HTML special characters to prevent XSS
 he(s) = escapehtml(string(s))
 
-# Load listing of all existing tables
+# Load listing of all existing tables (scanned from CSV metadata headers;
+# tables whose metadata doesn't match the type definitions are excluded)
 function load_listings()::Dict{String,Any}
-    load_json(LISTINGS_PATH)
+    scan_table_listings(TABLES_DIR; valid_defn=load_json(TABLE_TYPE_DEFN_PATH))
 end
 
 # List all tables for a category
