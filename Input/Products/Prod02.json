@@ -13,7 +13,7 @@
             "UDF": ""
         },
         "premium": {
-            "Table Type": "Mult to MP Premium by Duration",
+            "Table Type": "Rate per 1000 SA by Age/Pol Term",
             "Mult": 1,
             "Table": "PREM88",
             "UDF": ""

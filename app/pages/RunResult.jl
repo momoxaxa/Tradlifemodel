@@ -1,6 +1,7 @@
 module RunResult
 
 using Genie, Genie.Router, Genie.Renderer.Html
+using Genie.Requests: postpayload
 using HTTP: escapehtml
 using CSV, DataFrames
 using Dates
@@ -20,15 +21,23 @@ const MAX_DISPLAY_ROWS = 1000
 # Escape HTML special characters to prevent XSS
 he(s) = escapehtml(string(s))
 
-# List all run folders in Output directory
-function list_runs()::Vector{String}
+# List all invocation folders in Output, newest first.
+# (Timestamped names yyyy-mm-dd_HHMMSS sort lexically = chronologically)
+function list_invocations()::Vector{String}
     isdir(OUTPUT_DIR) || return String[]
-    sort([d for d in readdir(OUTPUT_DIR) if isdir(joinpath(OUTPUT_DIR, d))])
+    sort([d for d in readdir(OUTPUT_DIR) if isdir(joinpath(OUTPUT_DIR, d))], rev=true)
 end
 
-# List all result csv files for a given run
-function list_run_files(run::String)::Vector{String}
-    dir = joinpath(OUTPUT_DIR, run)
+# List run folders inside an invocation
+function list_runs(inv::String)::Vector{String}
+    dir = joinpath(OUTPUT_DIR, inv)
+    isdir(dir) || return String[]
+    sort([d for d in readdir(dir) if isdir(joinpath(dir, d))])
+end
+
+# List all result csv files for a given invocation/run
+function list_run_files(inv::String, run::String)::Vector{String}
+    dir = joinpath(OUTPUT_DIR, inv, run)
     isdir(dir) || return String[]
     sort([f for f in readdir(dir) if endswith(lowercase(f), ".csv")])
 end
@@ -48,18 +57,61 @@ end
 # HTML Builders — right panel and full page
 # ============================================================
 
-# File list for a run (no file selected yet)
-function file_list_html(run::String)::String
-    files = list_run_files(run)
-    isempty(files) &&
-        return "<div class='rr-placeholder'>No result files found in this run folder.</div>"
+# Run log content for an invocation (if present)
+function run_log_html(inv::String)::String
+    path = joinpath(OUTPUT_DIR, inv, "run_log.txt")
+    isfile(path) || return ""
+    """<div class='rr-meta'>run_log.txt</div>
+<pre class='rr-log'>$(he(read(path, String)))</pre>"""
+end
+
+# Overview of one invocation: run log + run folders (or legacy direct files)
+function invocation_view_html(inv::String)::String
+    runs  = list_runs(inv)
+    log   = run_log_html(inv)
+
+    delete_html = """<div class='rr-actions' style='margin-bottom:0.75rem'>
+  <form method='POST' action='/run-result' style='display:inline'
+        onsubmit="return confirm('Permanently delete $(he(inv)) and all its results? This cannot be undone.');">
+    <input type='hidden' name='action' value='delete'>
+    <input type='hidden' name='inv' value='$(he(inv))'>
+    <button type='submit' class='btn-danger'>Delete this model run</button>
+  </form>
+</div>"""
+
+    if isempty(runs)
+        return delete_html * log * "<div class='rr-placeholder'>No run folders found.</div>"
+    end
 
     rows = join([begin
-        path = joinpath(OUTPUT_DIR, run, f)
+        """<tr class='rr-trow'>
+          <td class='rr-tcell rr-tcell--name'>
+            <a href='/run-result?inv=$(he(inv))&run=$(he(r))' class='rr-tlink'>$(he(r))</a>
+          </td>
+          <td class='rr-tcell'>$(length(list_run_files(inv, r))) file(s)</td>
+        </tr>"""
+    end for r in runs], "\n")
+
+    delete_html * log * """<table class='rr-table'>
+  <thead><tr>
+    <th class='rr-th'>Run</th>
+    <th class='rr-th'>Results</th>
+  </tr></thead>
+  <tbody>$(rows)</tbody>
+</table>"""
+end
+
+# File table for one run folder
+function file_table_html(inv::String, run::String, files::Vector{String})::String
+    isempty(files) &&
+        return "<div class='rr-placeholder'>No result files found in this folder.</div>"
+
+    rows = join([begin
+        path = joinpath(OUTPUT_DIR, inv, run, f)
         modified = Dates.format(Dates.unix2datetime(mtime(path)), "yyyy-mm-dd HH:MM")
         """<tr class='rr-trow'>
           <td class='rr-tcell rr-tcell--name'>
-            <a href='/run-result?run=$(he(run))&file=$(he(f))' class='rr-tlink'>$(he(f))</a>
+            <a href='/run-result?inv=$(he(inv))&run=$(he(run))&file=$(he(f))' class='rr-tlink'>$(he(f))</a>
           </td>
           <td class='rr-tcell'>$(modified) UTC</td>
         </tr>"""
@@ -75,8 +127,8 @@ function file_list_html(run::String)::String
 end
 
 # Data table view for a selected file
-function file_view_html(run::String, file::String)::String
-    path = joinpath(OUTPUT_DIR, run, file)
+function file_view_html(inv::String, run::String, file::String)::String
+    path = joinpath(OUTPUT_DIR, inv, run, file)
 
     df, total_rows, err = try
         (load_result_preview(path), count_data_rows(path), "")
@@ -92,8 +144,9 @@ function file_view_html(run::String, file::String)::String
 
     meta = "$(total_rows) row$(total_rows == 1 ? "" : "s") &times; $(ncol(df)) columns &middot; read-only"
 
+    backq = "&run=$(he(run))"
     truncated_html = truncated ?
-        "<div class='rr-truncated'>Showing first $(shown_rows) of $(total_rows) rows &mdash; the full file is in Output/$(he(run))/$(he(file)).</div>" : ""
+        "<div class='rr-truncated'>Showing first $(shown_rows) of $(total_rows) rows &mdash; the full file is in Output/$(he(inv))/$(he(run))/$(he(file)).</div>" : ""
 
     header_cells = join(["<th class='rr-dth'>$(he(c))</th>" for c in names(df)], "")
 
@@ -106,7 +159,7 @@ function file_view_html(run::String, file::String)::String
     end for r in 1:shown_rows], "\n")
 
     """<div class='rr-backlink'>
-  <a href='/run-result?run=$(he(run))'>&larr; Back to file list</a>
+  <a href='/run-result?inv=$(he(inv))$(backq)'>&larr; Back to file list</a>
 </div>
 <div class='rr-meta'>$(meta)</div>
 $(truncated_html)
@@ -118,22 +171,35 @@ $(truncated_html)
 </div>"""
 end
 
-function rr_panel(sel_run::String, sel_file::String)::String
-    isempty(sel_run) &&
-        return "<div class='rr-placeholder'>Select a run from the left to view its result files. Files are viewed up to the first $(MAX_DISPLAY_ROWS) rows.</div>"
+function rr_panel(sel_inv::String, sel_run::String, sel_file::String)::String
+    isempty(sel_inv) &&
+        return "<div class='rr-placeholder'>Select a model run from the left (newest first) to view its results. Files are viewed up to the first $(MAX_DISPLAY_ROWS) rows.</div>"
 
     # Validate against actual folder/file listings (prevents path traversal)
-    sel_run in list_runs() ||
+    sel_inv in list_invocations() ||
+        return "<div class='rr-placeholder'>Folder not found: $(he(sel_inv))</div>"
+
+    if !isempty(sel_run) && !(sel_run in list_runs(sel_inv))
         return "<div class='rr-placeholder'>Run not found: $(he(sel_run))</div>"
+    end
 
-    title = isempty(sel_file) ? sel_run : "$(sel_run) &mdash; $(he(sel_file))"
+    # A file can only be reached through a run folder
+    if !isempty(sel_file) && isempty(sel_run)
+        return "<div class='rr-placeholder'>File not found: $(he(sel_file))</div>"
+    end
 
-    content = if isempty(sel_file)
-        file_list_html(sel_run)
-    elseif sel_file in list_run_files(sel_run)
-        file_view_html(sel_run, sel_file)
+    title = he(sel_inv) *
+            (isempty(sel_run)  ? "" : " &mdash; $(he(sel_run))") *
+            (isempty(sel_file) ? "" : " &mdash; $(he(sel_file))")
+
+    content = if isempty(sel_run) && isempty(sel_file)
+        invocation_view_html(sel_inv)
+    elseif isempty(sel_file)
+        file_table_html(sel_inv, sel_run, list_run_files(sel_inv, sel_run))
     else
-        "<div class='rr-placeholder'>File not found: $(he(sel_file))</div>"
+        sel_file in list_run_files(sel_inv, sel_run) ?
+            file_view_html(sel_inv, sel_run, sel_file) :
+            "<div class='rr-placeholder'>File not found: $(he(sel_file))</div>"
     end
 
     """<div class='rr-panel-header'>
@@ -142,19 +208,23 @@ function rr_panel(sel_run::String, sel_file::String)::String
 $(content)"""
 end
 
-function render_page(; sel_run::String = "", sel_file::String = "")
+function render_page(; sel_inv::String = "", sel_run::String = "", sel_file::String = "",
+                       notice::String = "", notice_type::String = "success")
 
-    runs = list_runs()
+    invs = list_invocations()
 
-    run_items = isempty(runs) ?
+    notice_html = isempty(notice) ? "" :
+        "<div class='tlm-notice tlm-notice--$(notice_type)'>$(he(notice))</div>"
+
+    inv_items = isempty(invs) ?
         "<li class='rr-nav-item'><span class='rr-nav-empty'>No runs in Output/</span></li>" :
         join([begin
-            active = r == sel_run ? " rr-nav-item--active" : ""
+            active = i == sel_inv ? " rr-nav-item--active" : ""
             "<li class='rr-nav-item$(active)'>" *
-            "<a href='/run-result?run=$(he(r))' class='rr-nav-link'>$(he(r))</a></li>"
-        end for r in runs], "\n")
+            "<a href='/run-result?inv=$(he(i))' class='rr-nav-link'>$(he(i))</a></li>"
+        end for i in invs], "\n")
 
-    panel = rr_panel(sel_run, sel_file)
+    panel = rr_panel(sel_inv, sel_run, sel_file)
 
     page = """<!DOCTYPE html>
 <html lang="en">
@@ -185,12 +255,13 @@ function render_page(; sel_run::String = "", sel_file::String = "")
     <a href="/run-result" class="active">Run Result</a>
     <hr style="border:none;border-top:1px solid var(--tlm-border);margin:0.5rem 0">
     <div class="rr-nav-group">
-      <div class="rr-nav-group-label">Runs</div>
-      <ul class="rr-nav-list">$(run_items)</ul>
+      <div class="rr-nav-group-label">Model runs (newest first)</div>
+      <ul class="rr-nav-list">$(inv_items)</ul>
     </div>
   </nav>
 
   <main class="tlm-page-main">
+    $(notice_html)
     $(panel)
   </main>
 
@@ -210,9 +281,34 @@ function register_routes()
 
     route("/run-result", method=GET) do
         params   = Genie.Router.params()
+        sel_inv  = string(get(params, :inv,  ""))
         sel_run  = string(get(params, :run,  ""))
         sel_file = string(get(params, :file, ""))
-        render_page(; sel_run, sel_file)
+        render_page(; sel_inv, sel_run, sel_file)
+    end
+
+    route("/run-result", method=POST) do
+        action = string(postpayload(:action, ""))
+        inv    = string(postpayload(:inv, ""))
+
+        if action == "delete"
+            # Validate against the actual folder listing (prevents path traversal),
+            # then delete the whole invocation folder.
+            if inv in list_invocations()
+                try
+                    rm(joinpath(OUTPUT_DIR, inv); recursive=true)
+                    return render_page(; notice="Deleted $(inv).")
+                catch e
+                    return render_page(; sel_inv=inv,
+                        notice="Could not delete $(inv): $(sprint(showerror, e))",
+                        notice_type="error")
+                end
+            else
+                return render_page(; notice="Folder not found: $(inv)", notice_type="error")
+            end
+        end
+
+        render_page()
     end
 
 end

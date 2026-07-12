@@ -19,7 +19,7 @@
     },
     {
         "Run Number": "Run02",
-        "Run Indicator": "No",
+        "Run Indicator": "Yes",
         "Run Description": "+10% Sensitivity on Base Mortality only",
         "Base Projection - Mortality": 1.1,
         "Base Projection - Lapse": 1,
@@ -37,7 +37,7 @@
     },
     {
         "Run Number": "Run03",
-        "Run Indicator": "No",
+        "Run Indicator": "Yes",
         "Run Description": "-10% Sensitivity on Lapse",
         "Base Projection - Mortality": 1,
         "Base Projection - Lapse": 0.9,

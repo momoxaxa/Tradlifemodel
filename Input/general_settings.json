@@ -1,6 +1,6 @@
 {
     "Valuation Date": "2023-12-31",
-    "Multithreading": "No",
+    "Multithreading": "Yes",
     "Capital Requirement Gross Up Factor": 0.3,
     "Products to run": [
         "PROD01",

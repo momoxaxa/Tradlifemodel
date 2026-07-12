@@ -13,32 +13,72 @@ start = now()
 
 println("Julia started with $(Threads.nthreads()) thread(s). Multithreading setting: $(use_threads ? "Yes" : "No").")
 
+# Each model execution (invocation) writes into its own timestamped folder
+
+invocation_id = Dates.format(now(), "yyyy-mm-dd_HHMMSS")
+const invocation_path = joinpath(output_root, invocation_id)
+mkpath(invocation_path)
+println("Output folder: $invocation_path")
+
 # Validate product table configuration; exclude products with missing tables
 
 valid_products = String[]
+exclusion_msgs = String[]
 for prod_code in selected_products
     msgs = missing_tables_for_product(prod_code)
     if isempty(msgs)
         push!(valid_products, prod_code)
     else
-        @warn "Product $prod_code EXCLUDED from this run — missing tables:\n  " * join(msgs, "\n  ")
+        msg = "Product $prod_code EXCLUDED from the run(s) — missing tables:\n  " * join(msgs, "\n  ")
+        push!(exclusion_msgs, msg)
+        @warn msg
     end
 end
-isempty(valid_products) && @warn "No runnable products — all selected products were excluded (missing tables). Run completed with no results."
+isempty(valid_products) && @warn "No runnable products — all selected products were excluded (missing tables)."
 
-if use_threads
+# Every selected run gets its output folder; one run_log.txt at the invocation
+# root records validation, per-product completions, and total time.
+
+for curr_run in selected_runs
+    mkpath(joinpath(invocation_path, curr_run))
+end
+
+log_lines = String[
+    "$(now())  Runs $(join(selected_runs, ", ")): $(length(valid_products)) of $(length(selected_products)) selected product(s) runnable.",
+]
+append!(log_lines, exclusion_msgs)
+run_log_path = joinpath(invocation_path, "run_log.txt")
+write(run_log_path, join(log_lines, "\n") * "\n")
+
+# Append a line to the run log. Tasks call this concurrently, so appends are
+# serialized behind a lock.
+const run_log_lock = ReentrantLock()
+function log_line(msg::AbstractString)
+    println(msg)                      # console / RunMonitor sees it live
+    lock(run_log_lock) do
+        open(run_log_path, "a") do io
+            println(io, msg)
+        end
+    end
+end
+
+if isempty(valid_products)
+
+    # Nothing to do — folders and logs above already record why.
+
+elseif use_threads
 
     # One task per (run, product) pair, dynamically scheduled across threads
 
     @sync for curr_run in selected_runs
 
-        mkpath("$output_file_path$curr_run")
         runset = RunSet(run_settings_df, curr_run)
 
         for prod_code in valid_products
             Threads.@spawn begin
                 print("[thread $(Threads.threadid()) of $(Threads.nthreads())] starting $(runset.RunNumber) $prod_code\n")
                 run_product(prod_code, runset)
+                log_line("$(runset.RunNumber) $prod_code completed at $(now())")
             end
         end
 
@@ -50,11 +90,11 @@ else
 
     for curr_run in selected_runs
 
-        mkpath("$output_file_path$curr_run")
         runset = RunSet(run_settings_df, curr_run)
 
         for prod_code in valid_products
             run_product(prod_code, runset)
+            log_line("$(runset.RunNumber) $prod_code completed at $(now())")
         end
 
         println("$curr_run completed at $(now())")
@@ -64,21 +104,23 @@ else
 end
 
 # Combine and save results for all products to CSV file
-for curr_run in selected_runs
+if !isempty(valid_products)
+    for curr_run in selected_runs
 
-    resultallproducts = DataFrame()
+        resultallproducts = DataFrame()
 
-    for (i, prod_code) in enumerate(valid_products)
-        if i == 1
-            resultallproducts = CSV.read(joinpath(output_file_path, "$curr_run", "result_$prod_code.csv"), DataFrame)
-        else
-            resultallproducts[:, Not(:date)] .+= CSV.read(joinpath(output_file_path, "$curr_run", "result_$prod_code.csv"), DataFrame)[:, Not(:date)]
+        for (i, prod_code) in enumerate(valid_products)
+            if i == 1
+                resultallproducts = CSV.read(joinpath(invocation_path, "$curr_run", "result_$prod_code.csv"), DataFrame)
+            else
+                resultallproducts[:, Not(:date)] .+= CSV.read(joinpath(invocation_path, "$curr_run", "result_$prod_code.csv"), DataFrame)[:, Not(:date)]
+            end
         end
+
+        CSV.write(joinpath(invocation_path, "$curr_run", "result_allproducts.csv"), resultallproducts)
+
     end
-
-    CSV.write(joinpath(output_file_path, "$curr_run", "result_allproducts.csv"), resultallproducts)
-
 end
 
 elapsed = Dates.value(now() - start) / 1000
-println("All runs completed in $(elapsed) seconds")
+log_line("All runs completed in $(elapsed) seconds")

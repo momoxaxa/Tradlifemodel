@@ -3,7 +3,10 @@ using JSON3, DataFrames, CSV, Dates
 # Model Points and Output file paths
 
 modelpoints_file_path = joinpath(dirname(@__DIR__),"MP/")
-output_file_path = joinpath(dirname(@__DIR__),"Output/")
+
+# Root of all model output. Each execution writes into its own timestamped
+# invocation folder underneath (const invocation_path, set in TradLifeModel.jl).
+const output_root = joinpath(dirname(@__DIR__), "Output")
 
 # General Settings
 
