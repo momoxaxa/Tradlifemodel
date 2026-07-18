@@ -2,7 +2,6 @@
 
 ## 0. Installing Julia
 
-## 1. Running the Genie web UI to update settings and set up products
 - Download and install Julia from the official website:
 ```
   https://julialang.org/downloads/
@@ -21,11 +20,19 @@
 
 - From the project root, navigate to the `app` folder:
 ```bash
-@ -18,14 +33,14 @@
+   cd app
+```
+
+- Start the web server:
+```julia
+   julia --project=.. app.jl
+```
+
+- Once running, open browser and go to:
+```
    http://localhost:8888
 ```
 
-## 2. Running the actuarial calculation
 ## 3. Alternatively, running the actuarial model at terminal
 
 - From the project root, navigate to the `src` folder:
@@ -33,7 +40,6 @@
    cd src
 ```
 
-- Run the actuarial calculation:
 - Run the actuarial model:
 ```julia
    julia --project=.. tradlifemodel.jl
