@@ -62,6 +62,25 @@ function log_line(msg::AbstractString)
     end
 end
 
+# Tracks which (run, product) pairs failed during run_product, so they can be
+# logged and excluded from the combined results, without failing the whole
+# invocation. Guarded by the same lock since tasks mutate it concurrently.
+failed_products = Dict{String, Set{String}}(curr_run => Set{String}() for curr_run in selected_runs)
+
+function run_product_safe(prod_code::String, runset::RunSet)
+    try
+        run_product(prod_code, runset)
+        log_line("$(runset.RunNumber) $prod_code completed at $(now())")
+    catch err
+        io = IOBuffer()
+        showerror(io, err, catch_backtrace())
+        lock(run_log_lock) do
+            push!(failed_products[runset.RunNumber], prod_code)
+        end
+        log_line("$(runset.RunNumber) $prod_code FAILED at $(now()) — excluded from results:\n$(String(take!(io)))")
+    end
+end
+
 if isempty(valid_products)
 
     # Nothing to do — folders and logs above already record why.
@@ -77,8 +96,7 @@ elseif use_threads
         for prod_code in valid_products
             Threads.@spawn begin
                 print("[thread $(Threads.threadid()) of $(Threads.nthreads())] starting $(runset.RunNumber) $prod_code\n")
-                run_product(prod_code, runset)
-                log_line("$(runset.RunNumber) $prod_code completed at $(now())")
+                run_product_safe(prod_code, runset)
             end
         end
 
@@ -93,8 +111,7 @@ else
         runset = RunSet(run_settings_df, curr_run)
 
         for prod_code in valid_products
-            run_product(prod_code, runset)
-            log_line("$(runset.RunNumber) $prod_code completed at $(now())")
+            run_product_safe(prod_code, runset)
         end
 
         println("$curr_run completed at $(now())")
@@ -103,13 +120,21 @@ else
 
 end
 
-# Combine and save results for all products to CSV file
+# Combine and save results for all products to CSV file. Products that failed
+# (per run_product_safe above) are excluded from the combined result.
 if !isempty(valid_products)
     for curr_run in selected_runs
 
+        run_valid_products = filter(p -> !(p in failed_products[curr_run]), valid_products)
+
+        if isempty(run_valid_products)
+            log_line("$curr_run: no successful products — result_allproducts.csv skipped")
+            continue
+        end
+
         resultallproducts = DataFrame()
 
-        for (i, prod_code) in enumerate(valid_products)
+        for (i, prod_code) in enumerate(run_valid_products)
             if i == 1
                 resultallproducts = CSV.read(joinpath(invocation_path, "$curr_run", "result_$prod_code.csv"), DataFrame)
             else

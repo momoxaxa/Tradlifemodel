@@ -1,18 +1,68 @@
 ┌ Warning: Table CSV is missing #Table Type or #Table Category metadata; EXCLUDED from table listing.
 │   file = "PREM88.csv"
-└ @ Main C:\GH\TradLifeModel\src\TableMeta.jl:84
-┌ Warning: Product PROD02 EXCLUDED from the run(s) — missing tables:
-│   Product Feature / premium: table 'PREM88' (file exists but has no metadata header)
-└ @ Main C:\GH\TradLifeModel\src\TradLifeModel.jl:34
+└ @ Main C:\gh\tradlifemodel\src\TableMeta.jl:84
 Julia started with 16 thread(s). Multithreading setting: Yes.
-Output folder: C:\GH\TradLifeModel\Output\2026-07-12_221707
-[thread 17 of 16] starting Run02 PROD01
-[thread 7 of 16] starting Run03 PROD01
+Output folder: C:\gh\tradlifemodel\Output\2026-07-18_091848
+[thread 16 of 16] starting Run03 PROD01
 [thread 2 of 16] starting Run01 PROD01
+[thread 3 of 16] starting Run02 PROD01
+[thread 11 of 16] starting Run02 PROD02
+[thread 13 of 16] starting Run01 PROD02
+[thread 15 of 16] starting Run03 PROD02
+PROD02: (100, 11)
 PROD01: (5, 11)
 PROD01: (5, 11)
+PROD02: (100, 11)
 PROD01: (5, 11)
-Run02 PROD01 completed at 2026-07-12T22:17:20
-Run03 PROD01 completed at 2026-07-12T22:17:20.006
-Run01 PROD01 completed at 2026-07-12T22:17:20.006
-All runs completed in 13.655 seconds
+PROD02: (100, 11)
+Run03 PROD02 FAILED at 2026-07-18T09:18:58.539 — excluded from results:
+UDF: unsupported expression head tuple
+Stacktrace:
+ [1] error(s::String)
+   @ Base .\error.jl:44
+ [2] eval_udf(expr::Expr, var_dict::Dict{Symbol, Any})
+   @ Main C:\gh\tradlifemodel\src\Utils.jl:151
+ [3] surr_benefit(input_tables_dict::Dict{Any, Any}, mp::ModelPoint, pol_year::OffsetVector{Float64, Vector{Float64}}, duration::OffsetVector{Int64, Vector{Int64}}, product_features_set::ProductFeatureSet)
+   @ Main C:\gh\tradlifemodel\src\ProductFeatures.jl:56
+ [4] project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict{Any, Any}, mp::ModelPoint, pol_year::OffsetVector{Float64, Vector{Float64}}, duration::OffsetVector{Int64, Vector{Int64}}, modal_cf_indicator::OffsetVector{Int64, Vector{Int64}}, product_features_set::ProductFeatureSet)
+   @ Main C:\gh\tradlifemodel\src\Projection.jl:39
+ [5] run_product(prod_code::String, runset::RunSet)
+   @ Main C:\gh\tradlifemodel\src\Projection.jl:309
+ [6] run_product_safe(prod_code::String, runset::RunSet)
+   @ Main C:\gh\tradlifemodel\src\TradLifeModel.jl:72
+ [7] (::var"#63#64"{RunSet, String})()
+   @ Main C:\gh\tradlifemodel\src\TradLifeModel.jl:99
+Run02 PROD02 FAILED at 2026-07-18T09:18:58.539 — excluded from results:
+UDF: unsupported expression head tuple
+Stacktrace:
+ [1] eval_udf(expr::Expr, var_dict::Dict{Symbol, Any})
+   @ Main C:\gh\tradlifemodel\src\Utils.jl:151
+ [2] surr_benefit(input_tables_dict::Dict{Any, Any}, mp::ModelPoint, pol_year::OffsetVector{Float64, Vector{Float64}}, duration::OffsetVector{Int64, Vector{Int64}}, product_features_set::ProductFeatureSet)
+   @ Main C:\gh\tradlifemodel\src\ProductFeatures.jl:56
+ [3] project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict{Any, Any}, mp::ModelPoint, pol_year::OffsetVector{Float64, Vector{Float64}}, duration::OffsetVector{Int64, Vector{Int64}}, modal_cf_indicator::OffsetVector{Int64, Vector{Int64}}, product_features_set::ProductFeatureSet)
+   @ Main C:\gh\tradlifemodel\src\Projection.jl:39
+ [4] run_product(prod_code::String, runset::RunSet)
+   @ Main C:\gh\tradlifemodel\src\Projection.jl:309
+ [5] run_product_safe(prod_code::String, runset::RunSet)
+   @ Main C:\gh\tradlifemodel\src\TradLifeModel.jl:72
+ [6] (::var"#63#64"{RunSet, String})()
+   @ Main C:\gh\tradlifemodel\src\TradLifeModel.jl:99
+Run01 PROD02 FAILED at 2026-07-18T09:18:58.539 — excluded from results:
+UDF: unsupported expression head tuple
+Stacktrace:
+ [1] eval_udf(expr::Expr, var_dict::Dict{Symbol, Any})
+   @ Main C:\gh\tradlifemodel\src\Utils.jl:151
+ [2] surr_benefit(input_tables_dict::Dict{Any, Any}, mp::ModelPoint, pol_year::OffsetVector{Float64, Vector{Float64}}, duration::OffsetVector{Int64, Vector{Int64}}, product_features_set::ProductFeatureSet)
+   @ Main C:\gh\tradlifemodel\src\ProductFeatures.jl:56
+ [3] project_per_policy_with_product_features!(ppt::PerPolicyCFTable, input_tables_dict::Dict{Any, Any}, mp::ModelPoint, pol_year::OffsetVector{Float64, Vector{Float64}}, duration::OffsetVector{Int64, Vector{Int64}}, modal_cf_indicator::OffsetVector{Int64, Vector{Int64}}, product_features_set::ProductFeatureSet)
+   @ Main C:\gh\tradlifemodel\src\Projection.jl:39
+ [4] run_product(prod_code::String, runset::RunSet)
+   @ Main C:\gh\tradlifemodel\src\Projection.jl:309
+ [5] run_product_safe(prod_code::String, runset::RunSet)
+   @ Main C:\gh\tradlifemodel\src\TradLifeModel.jl:72
+ [6] (::var"#63#64"{RunSet, String})()
+   @ Main C:\gh\tradlifemodel\src\TradLifeModel.jl:99
+Run01 PROD01 completed at 2026-07-18T09:19:02.420
+Run02 PROD01 completed at 2026-07-18T09:19:02.420
+Run03 PROD01 completed at 2026-07-18T09:19:02.421
+All runs completed in 14.645 seconds

@@ -1,9 +1,9 @@
 {
     "Product Feature": {
         "surr_ben": {
-            "Table Type": "Rate per 1000 SA by Year/Age",
+            "Table Type": "User Defined Table",
             "Mult": 1,
-            "Table": "SV01",
+            "Table": "SV02UDT",
             "UDF": ""
         },
         "commission": {
@@ -15,7 +15,7 @@
         "premium": {
             "Table Type": "Rate per 1000 SA by Age/Pol Term",
             "Mult": 1,
-            "Table": "PREM88",
+            "Table": "PREM01",
             "UDF": ""
         },
         "death_ben": {
