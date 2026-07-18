@@ -40,40 +40,60 @@ Configuration (tables, products, runs, general settings) is done through the UI 
 editing JSON files under `Input/`.
 
 
-## Repository layout
-
-```
-TradLifeModel/
-├── Input/
-│   ├── Products/PROD*.json       Per-product feature and assumption config
-│   ├── Tables/*.csv              Product feature / assumption tables (with metadata headers)
-│   ├── general_settings.json     Global run parameters
-│   ├── print_option.json         Selects which result columns are written
-│   ├── run_settings.json         Named runs with assumption adjustments
-│   └── table_type_defn.json      Table type schema
-├── MP/mp_<PROD>.csv              Model point files (one per product)
-├── Output/<timestamp>/           Timestamped run outputs (one folder per invocation)
-├── app/                          Genie web UI
-│   ├── app.jl                    Server entry (port 8888)
-│   ├── pages/*.jl                One module per page
-│   └── public/{css,js}/          Static assets
-└── src/                          Julia model source
-    ├── Assumptions.jl            Reads mortality, lapse, expense, rates, taxes
-    ├── DataStruct.jl             Projection struct types
-    ├── Print.jl                  Output CSV writer
-    ├── ProductFeatures.jl        Premium, death benefit, surrender benefit, commission
-    ├── Projection.jl             Per-policy projection + reserve/capreq inner projections
-    ├── Settings.jl               Loads JSON configs and CSV tables
-    ├── TableMeta.jl              CSV metadata headers and table discovery
-    ├── TradLifeModel.jl          Runs × products loop (entry point)
-    └── Utils.jl                  Table readers, PV utility, UDF evaluator
-```
-
-
 ## Architecture
 
 
-### File map
+### app/ file map
+
+The web UI walks users through a seven-step workflow. Each page in `pages/` corresponds
+to one step, and the `Index.jl` landing page lists them as clickable links:
+
+1. **Table Setup** — load feature and assumption tables
+2. **Product Setup** — configure per-product tables, PADs, and UDFs
+3. **Model Point** — review model point CSVs
+4. **Run Settings** — define sensitivity runs
+5. **General Settings** — valuation date, multithreading, product selection
+6. **Run Monitor** — execute the model and stream the live log
+7. **Run Result** — browse output CSVs
+
+```mermaid
+flowchart TD
+    A["<b>app.jl</b><br/>Genie server on :8888<br/>includes + registers each page"]
+
+    IX["<b>Index.jl</b><br/>welcome + workflow"]
+    TS["<b>TableSetup.jl</b><br/>manage feature &<br/>assumption tables"]
+    PS["<b>ProductSetup.jl</b><br/>per-product config<br/>(tables, PADs, UDFs)"]
+    MP["<b>ModelPoint.jl</b><br/>view MP CSVs"]
+    RS["<b>RunSettings.jl</b><br/>define sensitivity runs"]
+    GS["<b>GeneralSettings.jl</b><br/>valn date, gross-up,<br/>product selection"]
+    RM["<b>RunMonitor.jl</b><br/>execute model,<br/>stream live log"]
+    RR["<b>RunResult.jl</b><br/>browse Output/,<br/>preview CSVs"]
+
+    ASSETS["<b>public/</b><br/>css/ — base.css + per-page<br/>js/ — jspreadsheet, jsuites"]
+    SRC[("<i>src/TradLifeModel.jl</i><br/>Julia subprocess")]
+
+    A --> IX
+    A --> TS
+    A --> PS
+    A --> MP
+    A --> RS
+    A --> GS
+    A --> RM
+    A --> RR
+
+    IX -.-> ASSETS
+    TS -.-> ASSETS
+    PS -.-> ASSETS
+    MP -.-> ASSETS
+    RS -.-> ASSETS
+    GS -.-> ASSETS
+    RM -.-> ASSETS
+    RR -.-> ASSETS
+
+    RM -->|spawn julia| SRC
+```
+
+### src/ file map
 
 ```mermaid
 flowchart TD
