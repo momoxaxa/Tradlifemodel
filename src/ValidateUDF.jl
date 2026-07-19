@@ -7,7 +7,7 @@ println("This script checks if the user defined tables contains all the variable
 
 # Dictionary to store failed product feature fields for each product
 
-failed_products_dict = Dict()  
+const failed_products_dict = Dict()
 
 for prod_code in selected_products
 

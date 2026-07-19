@@ -1,0 +1,131 @@
+{
+    "Product Feature": {
+        "surr_ben": {
+            "Table Type": "Rate per 1000 SA by Year/Age",
+            "Mult": 1,
+            "Table": "SV01",
+            "UDF": ""
+        },
+        "commission": {
+            "Table Type": "Perc by Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "COMM01",
+            "UDF": ""
+        },
+        "premium": {
+            "Table Type": "Rate per 1000 SA by Age/Pol Term",
+            "Mult": 1,
+            "Table": "PREM01",
+            "UDF": ""
+        },
+        "death_ben": {
+            "Table Type": "User Defined Table",
+            "Mult": 1,
+            "Table": "DB02UDT",
+            "UDF": "min(multiple * amount * (1 + inflator) ^ (Year - 1), 200000)"
+        }
+    },
+    "Base Projection": {
+        "mortality": {
+            "Table Type": "Select and Ultimate - Sex Distinct",
+            "Mult": 1,
+            "Table": "MORT05"
+        },
+        "lapse": {
+            "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01"
+        },
+        "invt_return": {
+            "Table Type": "Mix of Prj Year and Cal Year",
+            "Mult": 1,
+            "Table": "DISCRT03",
+            "Table Column": "investment_return"
+        },
+        "tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "TAX02"
+        },
+        "disc_rate": {
+            "Table Type": "Mix of Prj Year and Cal Year",
+            "Mult": 1,
+            "Table": "DISCRT03",
+            "Table Column": "disc_rate"
+        },
+        "prem_tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "PREMTAX02"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01"
+        }
+    },
+    "Valuation": {
+        "mortality": {
+            "Table Type": "Select and Ultimate - Sex Distinct",
+            "Mult": 1,
+            "Table": "MORT05",
+            "PAD": 0.1
+        },
+        "lapse": {
+            "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01",
+            "PAD": 0.2
+        },
+        "disc_rate": {
+            "Table Type": "Mix of Prj Year and Cal Year",
+            "Mult": 1,
+            "Table": "DISCRT03",
+            "Table Column": "valn_int_rate",
+            "PAD": 0
+        },
+        "prem_tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "PREMTAX02"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01",
+            "PAD": 0.1
+        }
+    },
+    "Capital Requirement": {
+        "mortality": {
+            "Table Type": "Select and Ultimate - Sex Distinct",
+            "Mult": 1,
+            "Table": "MORT05",
+            "PAD": 0.15
+        },
+        "lapse": {
+            "Table Type": "Pol Year/Pol Term",
+            "Mult": 1,
+            "Table": "LAPSE01",
+            "PAD": 0.5
+        },
+        "disc_rate": {
+            "Table Type": "Mix of Prj Year and Cal Year",
+            "Mult": 1,
+            "Table": "DISCRT03",
+            "Table Column": "valn_int_rate",
+            "PAD": 0
+        },
+        "prem_tax": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "PREMTAX02"
+        },
+        "expense": {
+            "Table Type": "Policy Year",
+            "Mult": 1,
+            "Table": "EXP01",
+            "PAD": 0.2
+        }
+    }
+}

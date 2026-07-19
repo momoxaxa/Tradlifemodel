@@ -106,14 +106,18 @@ function file_table_html(inv::String, run::String, files::Vector{String})::Strin
     isempty(files) &&
         return "<div class='rr-placeholder'>No result files found in this folder.</div>"
 
+    # mtime is a UNIX timestamp; unix2datetime gives UTC. Add the local offset
+    # so the displayed time matches the user's clock.
+    local_offset = Dates.now() - Dates.now(UTC)
+
     rows = join([begin
         path = joinpath(OUTPUT_DIR, inv, run, f)
-        modified = Dates.format(Dates.unix2datetime(mtime(path)), "yyyy-mm-dd HH:MM")
+        modified = Dates.format(Dates.unix2datetime(mtime(path)) + local_offset, "yyyy-mm-dd HH:MM")
         """<tr class='rr-trow'>
           <td class='rr-tcell rr-tcell--name'>
             <a href='/run-result?inv=$(he(inv))&run=$(he(run))&file=$(he(f))' class='rr-tlink'>$(he(f))</a>
           </td>
-          <td class='rr-tcell'>$(modified) UTC</td>
+          <td class='rr-tcell'>$(modified)</td>
         </tr>"""
     end for f in files], "\n")
 
