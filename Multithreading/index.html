@@ -1,0 +1,21 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/Tradlifemodel/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/Tradlifemodel/css/franklin.css"> <link rel=stylesheet  href="/Tradlifemodel/css/pure.css"> <link rel=stylesheet  href="/Tradlifemodel/css/side-menu.css"> <style> .franklin-content{padding-left:10%;} @media (min-width: 940px) { .franklin-content {width: 80%; max-width: 1100px; margin-left: 0px; padding-left: 80px;} .header {width: 85%; max-width: 1160px;} .blog-name {width: 80%; max-width: 1100px; margin-left: 0px; padding-left: 80px;} } </style> <title>Multithreading</title> <div id=layout > <a href="#menu" id=menuLink  class=menu-link ><span></span></a> <div id=menu > <div class=pure-menu > <a class=pure-menu-heading  href="#">TradLifeModel</a> <ul class=pure-menu-list > <li class="pure-menu-item "><a href="/Tradlifemodel/" class=pure-menu-link >Home</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Projection/" class=pure-menu-link >Projection</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Tables - General/" class=pure-menu-link >Tables - General</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Table Type - Product Features/" class=pure-menu-link >Table Type - Product Features</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Table Type - Assumptions/" class=pure-menu-link >Table Type - Assumptions</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Product Setup/" class=pure-menu-link >Product Setup</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Model Points/" class=pure-menu-link >Model Points</a> <li class="pure-menu-item "><a href="/Tradlifemodel/General Settings/" class=pure-menu-link >General Settings</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Run Settings/" class=pure-menu-link >Run Settings</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Runs/" class=pure-menu-link >Runs</a> <li class="pure-menu-item "><a href="/Tradlifemodel/Outputs and Print Option/" class=pure-menu-link >Outputs and Print Option</a> <li class="pure-menu-item pure-menu-selected"><a href="/Tradlifemodel/Multithreading/" class=pure-menu-link >Multithreading</a> </ul> </div> </div> <div id=main > <div class=blog-name ><a href="https://github.com/momoxaxa/TradLifeModel">GitHub</a></div> <div class=header > <h1>Multithreading</h1> </div> <div class=franklin-content > <p>Multithreading lets <code>&#40;run, product&#41;</code> pairs execute in parallel, rather than one at a time.</p> <h2 id=enabling_it ><a href="#enabling_it" class=header-anchor >Enabling it</a></h2> <p><strong>General Settings</strong> allows the multithreading to be turned on and off. </p> <p>To enable Multithreading, Julia needs to be started with more than one thread:</p> <pre><code class="julia hljs">julia --threads auto --project=.. TradLifeModel.jl</code></pre>
+<h2 id=how_it_works ><a href="#how_it_works" class=header-anchor >How it works</a></h2>
+<ul>
+<li><p><strong>Multithreading on</strong>: every selected <code>&#40;run, product&#41;</code> pair becomes its own task, and all of them — across every run, not just within one — are dynamically scheduled across the available threads at once. Runs don&#39;t wait for each other to finish; a task from a later run can complete before an earlier run&#39;s tasks do.</p>
+
+<li><p><strong>Multithreading off</strong>: runs and products execute strictly sequentially, in a fixed, deterministic order — useful for debugging.</p>
+
+<li><p>Log writes are serialised through a lock, so concurrent tasks don&#39;t interleave or corrupt <code>run_log.txt</code>.</p>
+
+</ul>
+<div class=page-foot >
+    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+</div>
+</div>
+      </div> 
+  </div> 
+  <script src="/Tradlifemodel/libs/pure/ui.min.js"></script>
+  
+  
+      <script src="/Tradlifemodel/libs/highlight/highlight.min.js"></script>
+<script>hljs.highlightAll();hljs.configure({tabReplace: '    '});</script>

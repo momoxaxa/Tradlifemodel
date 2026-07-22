@@ -2,26 +2,74 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/projection/index.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Projection/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/index.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Run%20Settings/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/webui/index.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Table%20Type%20-%20Assumptions/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/overview/index.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Product%20Setup/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Outputs%20and%20Print%20Option/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Table%20Type%20-%20Product%20Features/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Multithreading/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Runs/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Tables%20-%20General/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/General%20Settings/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://momoxaxa.github.io/Tradlifemodel/Model%20Points/index.html</loc>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
