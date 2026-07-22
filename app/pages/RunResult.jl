@@ -5,6 +5,7 @@ using Genie.Requests: postpayload
 using HTTP: escapehtml
 using CSV, DataFrames
 using Dates
+using Printf
 
 # ============================================================
 # Constants
@@ -154,10 +155,12 @@ function file_view_html(inv::String, run::String, file::String)::String
 
     header_cells = join(["<th class='rr-dth'>$(he(c))</th>" for c in names(df)], "")
 
+    # Format floats as fixed decimal, not scientific notation
     body_rows = join([begin
         cells = join([begin
             v = df[r, c]
-            "<td class='rr-dtd'>$(ismissing(v) ? "" : he(v))</td>"
+            text = ismissing(v) ? "" : (v isa AbstractFloat ? @sprintf("%.6f", v) : string(v))
+            "<td class='rr-dtd'>$(he(text))</td>"
         end for c in 1:ncol(df)], "")
         "<tr class='rr-dtr'><td class='rr-dtd rr-dtd--idx'>$(r)</td>$(cells)</tr>"
     end for r in 1:shown_rows], "\n")

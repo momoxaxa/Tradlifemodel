@@ -142,7 +142,7 @@ if !isempty(valid_products)
             end
         end
 
-        CSV.write(joinpath(invocation_path, "$curr_run", "result_allproducts.csv"), resultallproducts)
+        write_rounded_csv(joinpath(invocation_path, "$curr_run", "result_allproducts.csv"), resultallproducts)
 
     end
 end

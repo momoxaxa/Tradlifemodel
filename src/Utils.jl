@@ -10,7 +10,7 @@ eval_udf_node(node, var_dict::Dict{Symbol, Any})
 eval_udf(expr::Expr, var_dict::Dict{Symbol, Any})
 =#
 
-using OffsetArrays, DataFrames
+using OffsetArrays, DataFrames, Printf
 using OffsetArrays: Origin
 
 # Convert Array from 1-based index to 0-based index
@@ -95,6 +95,15 @@ function read_table_EA(table_data::DataFrame, table_header::String, issue_age::I
     if index !== nothing
         return table_data[index, table_header] .* ZerobasedIndex(ones(Float64, pol_proj_len+1))
     end
+end
+
+# Write a DataFrame to CSV with Float64 columns formatted to 6 fixed decimal
+# places. Using `transform` (vs. pre-rounding the DataFrame) also avoids CSV.jl
+# falling back to scientific notation for small magnitudes (e.g. 7.3e-5) -
+# rounding alone fixes the value but not how it gets printed. Non-float columns
+# (Date, Int, etc.) pass through unchanged; re-reads back to Float64 fine.
+function write_rounded_csv(path, df::DataFrame)
+    CSV.write(path, df; transform = (col, val) -> val isa AbstractFloat ? @sprintf("%.6f", val) : val)
 end
 
 # Create cf array with reverse cumulative sum of cf with discounting
