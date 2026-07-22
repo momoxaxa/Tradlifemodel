@@ -29,7 +29,7 @@ end
 
 # Read assumptions from table - Policy Year
 function read_table_PY(table_data::DataFrame, columnheader::String, pol_year, duration, pol_proj_len, distributionoption::String="None")
-    assumptions_array = OffsetArray([],Origin(0))
+    assumptions_array = OffsetArray(Float64[],Origin(0))
     index = 1
     if distributionoption in ("None", "EvenlySpreadOut")
         for t in 0:pol_proj_len
@@ -62,7 +62,7 @@ end
 
 # Read assumptions from table - Projection Year and Calendar Year
 function read_table_PRJY_CY(table_data::DataFrame, table_header::String, year, pol_proj_len)
-    assumptions_array = OffsetArray([], Origin(0))
+    assumptions_array = OffsetArray(Float64[], Origin(0))
     for t in 0:pol_proj_len
         index = findfirst(table_data[:, 1] .== year[t])
         if index !== nothing
@@ -76,7 +76,7 @@ end
 
 # Read assumptions from table - Attained Age
 function read_table_AA(table_data::DataFrame, table_header::String, att_age, pol_proj_len)
-    assumptions_array = OffsetArray([], Origin(0))
+    assumptions_array = OffsetArray(Float64[], Origin(0))
     index = 1
     for t in 0:pol_proj_len
         index = findfirst(table_data[:, 1] .== att_age[t])   ####
