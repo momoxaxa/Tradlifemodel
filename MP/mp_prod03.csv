@@ -1,0 +1,6 @@
+﻿pol_id,prod_id,issue_date,issue_age,sex,smoker,pol_term,prem_term,sum_assured,premium,premium_mode
+100001,prod01,1/1/2022,0,Male,Non-Smoker,120,55,100000,2000,A
+100002,prod01,30/6/2021,25,Female,Non-Smoker,25,25,100000,1000,S
+100003,prod01,1/1/2022,35,Male,Smoker,55,55,100000,2000,A
+100004,prod01,30/6/2021,25,Female,Smoker,25,25,100000,1000,S
+100005,prod01,1/1/2022,35,Male,Non-Smoker,55,55,100000,2000,A

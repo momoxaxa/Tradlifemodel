@@ -1,0 +1,9 @@
+┌ Warning: Table CSV is missing #Table Type or #Table Category metadata; EXCLUDED from table listing.
+│   file = "PREM88.csv"
+└ @ Main C:\GH\TradLifeModel\src\TableMeta.jl:84
+Julia started with 16 thread(s). Multithreading setting: No.
+Output folder: C:\GH\TradLifeModel\Output\2026-07-24_110143
+PROD03: (5, 11)
+Run01 PROD03 completed at 2026-07-24T11:01:56.668
+Run01 completed at 2026-07-24T11:01:56.669
+All runs completed in 14.464 seconds

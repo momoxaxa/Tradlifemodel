@@ -66,9 +66,9 @@
     },
     "Valuation": {
         "mortality": {
-            "Table Type": "Select and Ultimate - Sex Distinct",
+            "Table Type": "Attained Age",
             "Mult": 1,
-            "Table": "MORT05",
+            "Table": "MORT01",
             "PAD": 0.1
         },
         "lapse": {
